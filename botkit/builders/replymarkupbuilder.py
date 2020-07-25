@@ -1,0 +1,2 @@
+class ReplyMarkupBuilder:
+    pass

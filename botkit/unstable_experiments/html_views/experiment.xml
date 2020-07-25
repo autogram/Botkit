@@ -1,0 +1,18 @@
+view xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <message name="welcome">
+        <prop type="str" default="Sir">address</prop>
+
+        <body>
+            Welcome, kind {{address}}!
+
+            How to do foreach??
+        </body>
+
+        <keyboard>
+            <row>
+                <button action="show-user-kick-view">Kick a user</button>
+                <button url="https://t.me/{{some_channel}}">Visit my channel!</button>
+            </row>
+        </keyboard>
+    </message>
+</view>
