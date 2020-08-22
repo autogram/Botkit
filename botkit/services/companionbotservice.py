@@ -3,8 +3,6 @@ from asyncio import Event
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
-from app.clients.botclient import BotClient
-from app.clients.userclient import UserClient
 from haps import INSTANCE_SCOPE, inject
 from logzero import logger as log
 from pyrogram import (
@@ -25,13 +23,19 @@ from typing import Union, Optional, AsyncIterator
 
 from botkit.botkit_services.services import service
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
-from botkit.views.base import RenderedMessage, InlineResultViewBase
+from botkit.types.client import IClient
+from botkit.views.base import (
+    RenderedMediaMessage,
+    RenderedMessage,
+    InlineResultViewBase,
+    RenderedMessageBase,
+    RenderedTextMessage,
+)
 
 
 @service(scope=INSTANCE_SCOPE)
 class CompanionBotService:
-    @inject
-    def __init__(self, user_client: UserClient, bot_client: BotClient):
+    def __init__(self, user_client: IClient, bot_client: IClient):
         self.user_client = user_client
         self.bot_client = bot_client
 
@@ -48,7 +52,7 @@ class CompanionBotService:
 
         query_text = "henlo"
 
-        async def answer_inline_query(client: BotClient, query: InlineQuery):
+        async def answer_inline_query(client: IClient, query: InlineQuery):
             rendered: RenderedMessage = view.render()
 
             result = InlineQueryResultArticle(
@@ -65,9 +69,7 @@ class CompanionBotService:
                 thumb_url=None,
             )
 
-            await self.bot_client.answer_inline_query(
-                query.id, results=[result], cache_time=0
-            )
+            await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=0)
 
         inline_id_filter = create(lambda _, ilq: ilq.query == query_text, "QueryFilter")
 
@@ -85,9 +87,7 @@ class CompanionBotService:
                 bot_username, query_text
             )
             if not bot_results:
-                raise RuntimeError(
-                    "Could not fetch any inline query results from companionbot."
-                )
+                raise RuntimeError("Could not fetch any inline query results from companionbot.")
 
             # Send result as user
             return await self.user_client.send_inline_bot_result(
@@ -103,10 +103,10 @@ class CompanionBotService:
         finally:
             self.bot_client.remove_handler(handler, group)
 
-    async def send_view_via(
+    async def send_rendered_message(
         self,
         chat_id: Union[int, str],
-        view: InlineResultViewBase,
+        rendered: RenderedMessageBase,
         reply_to=None,
         silent: bool = False,
         hide_via: bool = False,
@@ -115,10 +115,10 @@ class CompanionBotService:
 
         query_text = str(uuid4())
 
-        async def answer_inline_query(client: BotClient, query: InlineQuery):
-            rendered: RenderedMessage = view.render()
+        async def answer_inline_query(client: IClient, query: InlineQuery):
 
-            if rendered.media:
+            # TODO: implement the other types
+            if isinstance(rendered, RenderedMediaMessage):
                 result = InlineQueryResultPhoto(
                     photo_url=rendered.media,
                     thumb_url=rendered.thumb_url,
@@ -130,7 +130,7 @@ class CompanionBotService:
                     reply_markup=rendered.inline_keyboard_markup,
                     input_message_content=None,
                 )
-            else:
+            elif isinstance(rendered, RenderedTextMessage):
                 result = InlineQueryResultArticle(
                     title="sent via userbot",
                     input_message_content=InputTextMessageContent(
@@ -144,11 +144,11 @@ class CompanionBotService:
                     description=None,
                     thumb_url=None,
                 )
+            else:
+                raise NotImplementedError(f"Sending {rendered} is not yet possible.")
 
             # noinspection PyTypeChecker
-            await self.bot_client.answer_inline_query(
-                query.id, results=[result], cache_time=1
-            )
+            await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=1)
 
         inline_id_filter = create(lambda _, ilq: ilq.query == query_text, "QueryFilter")
 
@@ -185,6 +185,19 @@ class CompanionBotService:
                 )
             except (AttributeError, TimeoutError):
                 log.error("Bot did not respond.")
+
+    async def send_view_via(
+        self,
+        chat_id: Union[int, str],
+        view: InlineResultViewBase,
+        reply_to=None,
+        silent: bool = False,
+        hide_via: bool = False,
+    ) -> Message:
+        rendered: RenderedMessage = view.render()
+        return await self.send_rendered_message(
+            chat_id=chat_id, view=view, reply_to=reply_to, silent=silent, hide_via=hide_via
+        )
 
     @asynccontextmanager
     async def add_handler(self, handler: Handler) -> AsyncIterator[None]:
@@ -236,9 +249,7 @@ class CompanionBotService:
             await message.delete()
 
         async with self.add_handler(
-            MessageHandler(
-                record_message, filters=Filters.photo & Filters.chat(user_id)
-            )
+            MessageHandler(record_message, filters=Filters.photo & Filters.chat(user_id))
         ):
             await self.user_client.send_photo(bot_id, photo=photo)
             await recorded_msg.wait()

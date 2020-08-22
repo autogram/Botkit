@@ -5,7 +5,8 @@ from typing import (
 )
 from uuid import UUID
 
-from ._base import CallbackActionContext, generate_id
+from ._base import generate_id
+from ._base import CallbackActionContext
 
 __callbacks: Dict[str, Dict] = dict()
 

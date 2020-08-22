@@ -1,8 +1,22 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import (Any, Generic, List, Literal, Optional, TYPE_CHECKING, Tuple, TypeVar, Union, overload)
+from enum import Enum, IntEnum, auto
+from itertools import takewhile
+from typing import (
+    Any,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    TYPE_CHECKING,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
-from pyrogram import (ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove)
+from more_itertools import take
+from pyrogram import ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from pyrogram.api.types import ReplyKeyboardMarkup
 
 from botkit.builders.inlinemenubuilder import InlineMenuBuilder
@@ -23,8 +37,12 @@ class IRegisterable(ABC):
 KeyboardTypes = Union[InlineKeyboardButton, Tuple]
 
 
+class RenderedMessageBase:
+    pass
+
+
 @dataclass
-class RenderedMessageMarkup:
+class RenderedMessageMarkup(RenderedMessageBase):
     reply_markup: Union[ReplyKeyboardMarkup, ForceReply, ReplyKeyboardRemove] = None
     inline_buttons: Optional[List[List[KeyboardTypes]]] = None
 
@@ -40,18 +58,27 @@ class RenderedMessageMarkup:
 class RenderedMessage(RenderedMessageMarkup):
     title: Optional[str] = None
     description: Optional[str] = None
-    # TextView
-    text: Optional[str] = None
-    # StickerView
-    sticker: Optional[str] = None
-    # MediaView
-    media: Optional[Any] = None
-    caption: Optional[str] = None
 
     parse_mode: str = "html"
     disable_web_page_preview: bool = True
 
     thumb_url: str = None  # TODO: implement
+
+
+@dataclass
+class RenderedStickerMessage(RenderedMessage):
+    sticker: Optional[str] = None
+
+
+@dataclass
+class RenderedMediaMessage(RenderedMessage):
+    media: Optional[Any] = None
+    caption: Optional[str] = None
+
+
+@dataclass
+class RenderedTextMessage(RenderedMessage):
+    text: Optional[str] = None
 
 
 @dataclass
@@ -64,15 +91,15 @@ class RenderedPollMessage(RenderedMessageMarkup):
     correct_option_id: int = None
 
 
-TModel = TypeVar("TModel")
+TState = TypeVar("TState")
 
 
-class ModelViewBase(Generic[TModel], ABC):
-    def __init__(self, state: TModel):
+class ModelViewBase(Generic[TState], ABC):
+    def __init__(self, state: TState):
         self.state = state
 
 
-class InlineResultViewBase(ModelViewBase, IRegisterable, Generic[TModel], ABC):
+class InlineResultViewBase(ModelViewBase, IRegisterable, Generic[TState], ABC):
     def assemble_metadata(self, meta: MetaBuilder):
         pass
 
@@ -93,5 +120,3 @@ class RenderMarkupBase:  # not an interface as the methods need to exist
 
     def render_markup(self, *args):
         pass
-
-

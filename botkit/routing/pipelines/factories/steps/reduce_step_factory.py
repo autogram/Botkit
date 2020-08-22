@@ -1,14 +1,11 @@
-from typing import Awaitable, Callable, Optional, Union
-
-from botkit.routing.pipelines.factory_types import ICallbackStepFactory
+from botkit.routing.pipelines.factories.factory_types import ICallbackStepFactory
+from botkit.routing.pipelines.factories.steps._base import StepError
 from botkit.routing.pipelines.reducer import ReducerSignature
-from botkit.routing.types import TState
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import BotkitContext
 
-class ReduceStepError(Exception):
-    def __init__(self, reducer: TypedCallable[ReducerSignature]):
-        self.reducer = reducer
+
+class ReduceStepError(StepError[ReducerSignature]):
+    pass
 
 
 # noinspection PyMissingTypeHints
@@ -30,7 +27,7 @@ class ReduceStepFactory(ICallbackStepFactory[ReducerSignature]):
                 except Exception as e:
                     raise ReduceStepError(reducer) from e
 
-                # XXX: If we check for type(choices) aswell, you can't change the choices in a reducer
+                # XXX: If we check for type(choices) aswell, you can't change the choices in a handler
                 return new_state if new_state is not None else previous_state
 
             return mutate_previous_state_async, is_coroutine
@@ -44,7 +41,7 @@ class ReduceStepFactory(ICallbackStepFactory[ReducerSignature]):
                 except Exception as e:
                     raise ReduceStepError(reducer) from e
 
-                # XXX: If we check for type(choices) aswell, you can't change the choices in a reducer
+                # XXX: If we check for type(choices) aswell, you can't change the choices in a handler
                 return new_state if new_state is not None else previous_state
 
             return mutate_previous_state, is_coroutine

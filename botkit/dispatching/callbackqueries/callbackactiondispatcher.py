@@ -7,7 +7,7 @@ from logzero import logger as log
 from pyrogram import CallbackQuery, CallbackQueryHandler, Update
 from pyrogram.client.filters.filters import create
 
-from botkit.dispatching.callbackqueries.callback_manager import CallbackActionContext, ICallbackManager
+from botkit.persistence.callback_manager import CallbackActionContext, ICallbackManager
 from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.triggers import ActionIdTypes
 from botkit.settings import botkit_settings
@@ -47,7 +47,7 @@ class CallbackActionDispatcher:
         route = self._action_routes[cb_ctx.action]
 
         botkit_context: BotkitContext = BotkitContext(
-            client=client, update=callback_query, state=cb_ctx.state, _action=cb_ctx.action, _payload=cb_ctx.payload
+            client=client, update=callback_query, state=cb_ctx.state, action=cb_ctx.action, payload=cb_ctx.payload
         )
 
         try:

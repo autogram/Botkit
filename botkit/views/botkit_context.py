@@ -11,8 +11,8 @@ TPayload = TypeVar("TPayload")
 
 @dataclass
 class BotkitContext(Generic[TState, TPayload], UpdateFieldExtractor):
-    client: Union[IViewSender, Any]
     state: TState
 
-    _action: Optional[CallbackActionType] = None
-    _payload: Optional[TPayload] = None
+    client: Union[IViewSender, Any]
+    action: Optional[CallbackActionType] = None
+    payload: Optional[TPayload] = None

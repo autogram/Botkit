@@ -8,12 +8,13 @@ from .view_models import ModuleInfo, ModuleInfosCollectionModel
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.services.companionbotservice import CompanionBotService
 from botkit.views.renderer_client_mixin import PyroRendererClientMixin
+from ...types.client import IClient
 
 
 class ModuleManagerModule(Module):
     module_loader: ModuleLoader = Inject()
 
-    def __init__(self, user_client: PyroRendererClientMixin, bot_client: PyroRendererClientMixin):
+    def __init__(self, user_client: IClient, bot_client: IClient):
         self.user_client = user_client
         self.bot_client = bot_client
         self.companion = CompanionBotService(user_client=user_client, bot_client=bot_client)

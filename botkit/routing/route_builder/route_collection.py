@@ -1,15 +1,13 @@
 from typing import Dict, List
 
-from pyrogram import Client
-
 from botkit.routing.route import RouteDefinition
-from botkit.routing.update_types.updatetype import UpdateType
+from botkit.types.client import IClient
 
 
 class RouteCollection:
-    def __init__(self, current_client: Client = None):
+    def __init__(self, current_client: IClient = None):
         self.current_client = current_client
-        self.routes_by_client: Dict[Client, List[RouteDefinition]] = dict()
+        self.routes_by_client: Dict[IClient, List[RouteDefinition]] = dict()
 
     def add_for_current_client(self, route: RouteDefinition):
         if self.current_client is None:

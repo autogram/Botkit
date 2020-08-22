@@ -8,14 +8,17 @@ class BaseTextBuilder:
     def raw(self, text: Any, end=""):
         return self._append_with_end(text, end)
 
+    @property
     def spc(self):
         self.parts.append(" ")
         return self
 
+    @property
     def br(self):
         self.parts.append("\n")
         return self
 
+    @property
     def para(self):
         self.parts.append("\n\n")
         return self

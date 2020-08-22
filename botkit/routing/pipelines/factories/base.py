@@ -5,19 +5,25 @@ from typing import cast
 from pyrogram import Update
 from unsync import Unfuture, unsync
 
-from botkit.routing.pipelines.callbacks import CallbackSignature
+from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.triggers import RouteTriggers
+from botkit.routing.update_types.updatetype import UpdateType
 
 
-class PipelineFactory(ABC):
+class UpdatePipelineFactory(ABC):
     def __init__(self, triggers: RouteTriggers, plan: ExecutionPlan):
         self.triggers = triggers
         self.plan = plan
 
+    @property
     @abstractmethod
-    def create_callback(self) -> CallbackSignature:
+    def update_type(self) -> UpdateType:
+        ...
+
+    @abstractmethod
+    def create_callback(self) -> HandlerSignature:
         ...
 
     def get_description(self) -> str:
@@ -32,7 +38,11 @@ class PipelineFactory(ABC):
                 # TODO: nice string from the view parameters
                 parts += view.command.title()
                 parts += " "
-                parts += view.view.__class__.__name__ if inspect.isclass(view.view) else view.view.__name__
+                parts += (
+                    view.view.__class__.__name__
+                    if inspect.isclass(view.view)
+                    else view.view.__name__
+                )
                 parts += str(view.send_target)
 
             if self.plan._reducer:

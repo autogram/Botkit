@@ -1,20 +1,22 @@
-from pydantic import BaseModel
-from pydantic.fields import Field
 from uuid import UUID, uuid4
-from typing import Union, Optional, TypeVar, Generic, Any
-from abc import ABCMeta, abstractmethod
+from typing import Union, Optional
+from abc import abstractmethod
 from haps import base
-from datetime import datetime
 from abc import ABC
+
+from datetime import datetime
+from typing import Any, Generic, Optional, TypeVar
+
+from pydantic import BaseModel, Field
 
 from botkit.dispatching.callbackqueries.types import CallbackActionType
 
-TModel = TypeVar("TModel")
+TState = TypeVar("TState")
 
 
-class CallbackActionContext(BaseModel, Generic[TModel]):
+class CallbackActionContext(BaseModel, Generic[TState]):
     action: CallbackActionType
-    state: TModel
+    state: TState
     created: datetime = Field(default_factory=datetime.utcnow)
     notification: Optional[str]
     show_alert: bool = False

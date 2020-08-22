@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 else:
     RouteExpression = None
 
-from botkit.routing.pipelines.callbacks import CallbackSignature
+from botkit.routing.pipelines.callbacks import HandlerSignature
 
 if TYPE_CHECKING:
     from botkit.routing.route_builder.route_collection import RouteCollection
@@ -21,7 +21,7 @@ class IExpressionWithCallMethod(Protocol):
     _triggers: RouteTriggers
     _route_collection: "RouteCollection"
 
-    def call(self, handler: CallbackSignature) -> RouteExpression:
+    def call(self, handler: HandlerSignature) -> RouteExpression:
         pass
 
 

@@ -1,72 +1,77 @@
-from paraminjector import call_with_args
+import inspect
 from typing import (
     Any,
     Callable,
+    Optional,
     TypeVar,
-    overload,
 )
-from typing_extensions import Protocol
 
-from botkit.builders.htmlbuilder import HtmlBuilder
-from botkit.builders.inlinemenubuilder import InlineMenuBuilder
-from botkit.builders.metabuilder import MetaBuilder
-from botkit.builders.replymarkupbuilder import ReplyMarkupBuilder
+from decorators import FuncDecorator
+
+from botkit.builders import ViewBuilder
 from botkit.views.base import RenderedMessage
 
 T = TypeVar("T")
 
 
+def quacks_like_view_render_func(obj: Any) -> bool:
+    if inspect.isclass(obj):
+        return False
+    if not callable(obj):
+        return False
+    if len(inspect.signature(obj).parameters) < 2:
+        return False
+    return True
+
+
 def render_functional_view(view_func: Callable, state: Any) -> RenderedMessage:
     if state is None:
-        raise ValueError("No choices was specified, cannot render.")
+        raise ValueError("No state was specified, cannot render.")
 
-    builder = HtmlBuilder()
-    menu = InlineMenuBuilder(state)
-    meta = MetaBuilder()
+    # # TODO: (see paraminjector/TODO.md)
+    # # TODO: Handle reply keyboards
+    # # TODO: add a MediaBuilder
+    # # TODO: allow only certain combinations of parameters
+    # call_with_args(
+    #     view_func, {type(builder): builder, type(menu): menu, type(meta): meta,},
+    # )
 
-    # TODO: (see paraminjector/TODO.md)
-    # TODO: Handle reply keyboards
-    # TODO: add a MediaBuilder
-    # TODO: allow only certain combinations of parameters
-    call_with_args(
-        view_func, {type(builder): builder, type(menu): menu, type(meta): meta,},
-    )
+    builder = ViewBuilder(state)
+    view_func(state, builder)
 
-    rendered = RenderedMessage(
-        text=builder.render(), inline_buttons=menu.render(), title=meta.title, description=meta.description,
-    )
-
-    return rendered
+    return builder.render()
 
 
-TModel = TypeVar("TModel", bound=type)
+TState = TypeVar("TState", bound=type)
 
-X = TypeVar("X", contravariant=True)
-
-
-class ViewFuncSignature(Protocol[X]):
-    @overload
-    def __call__(self, state: X, builder: HtmlBuilder):
-        pass
-
-    @overload
-    def __call__(self, state: X, builder: HtmlBuilder, menu: InlineMenuBuilder):
-        pass
-
-    @overload
-    def __call__(self, state: X, menu: InlineMenuBuilder):
-        pass
-
-    @overload
-    def __call__(self, state: X, builder: HtmlBuilder, markup: ReplyMarkupBuilder):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        pass
+# X = TypeVar("X", contravariant=True)
+# class ViewFuncSignature(Protocol[X]):
+# @overload
+# def __call__(self, state: X, builder: HtmlBuilder):
+#     pass
+#
+# @overload
+# def __call__(self, state: X, builder: HtmlBuilder, menu: InlineMenuBuilder):
+#     pass
+#
+# @overload
+# def __call__(self, state: X, menu: InlineMenuBuilder):
+#     pass
+#
+# @overload
+# def __call__(self, state: X, builder: HtmlBuilder, markup: ReplyMarkupBuilder):
+#     pass
+#
+# def __call__(self, *args, **kwargs):
+#     pass
 
 
-def view(state: TModel) -> Callable[[ViewFuncSignature[TModel]], ViewFuncSignature[TModel]]:
-    def wrap(func: ViewFuncSignature):
-        return func
+ViewRenderFuncSignature = Callable[[TState, ViewBuilder], Optional[Any]]
 
-    return wrap
+
+class _ViewDecorator(FuncDecorator):
+    def decorate_func(self, *args, **kwargs):
+        return super().decorate_func(*args, **kwargs)
+
+
+view = _ViewDecorator

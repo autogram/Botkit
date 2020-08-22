@@ -3,7 +3,7 @@ from typing import Iterable, Any, Type, Union, Optional
 from botkit.utils.sentinel import NotSet, Sentinel
 from pydantic import BaseModel
 
-from botkit.core.components import BaseComponent
+from botkit.core.components import Component
 from botkit.routing.route_builder.builder import RouteBuilder
 
 
@@ -24,7 +24,7 @@ class Slot(object):
         pass
 
 
-class QuestionnaireComponent(BaseComponent):
+class QuestionnaireComponent(Component):
     def __init__(self, name: str, slots: Iterable[Slot]):
         self.name = name
         self._slots = slots

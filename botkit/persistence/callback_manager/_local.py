@@ -1,14 +1,18 @@
 from typing import Optional, Union
 from uuid import UUID
 
-from ._base import CallbackActionContext, ICallbackManager
+from haps import egg
+
+from ._base import ICallbackManager
+from ._base import CallbackActionContext
 from ._simple import (
     create_callback,
     lookup_callback,
 )
 
 
-class LocalDictCallbackManager(ICallbackManager):
+@egg(qualifier="memory")
+class MemoryDictCallbackManager(ICallbackManager):
     def create_callback(self, context: CallbackActionContext) -> str:
         return create_callback(context)
 

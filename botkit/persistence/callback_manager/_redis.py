@@ -6,10 +6,10 @@ from redis import Redis
 from redis_collections import Dict as RedisDict
 
 from ._base import (
-    CallbackActionContext,
     ICallbackManager,
     generate_id,
 )
+from ._base import CallbackActionContext
 
 from logzero import logger as log
 

@@ -1,6 +1,6 @@
 import logging
 from logging import Logger
-from typing import Generic, TypeVar, Optional
+from typing import Generic, TYPE_CHECKING, TypeVar, Optional
 
 from abc import abstractmethod, ABCMeta, ABC
 
@@ -8,9 +8,13 @@ from logzero import setup_logger
 
 from botkit.builders.quizbuilder import QuizBuilder
 from botkit.routing.types import TState
+from botkit.views.botkit_context import BotkitContext
 from botkit.views.views import PollBuilder
 
-from botkit.routing.route_builder.builder import RouteBuilder
+if TYPE_CHECKING:
+    from botkit.routing.route_builder.builder import RouteBuilder
+else:
+    RouteBuilder = TypeVar("RouteBuilder")
 
 from botkit.views.functional_views import view
 
@@ -19,7 +23,7 @@ from botkit.views.functional_views import view
 # TODO: components can only have parameterless constructor..???
 
 
-class BaseComponent(Generic[TState], ABC):
+class Component(Generic[TState], ABC):
     _logger: Optional[Logger]
 
     @abstractmethod
@@ -27,7 +31,7 @@ class BaseComponent(Generic[TState], ABC):
         ...
 
     @abstractmethod
-    async def invoke(self, state: TState):
+    async def invoke(self, context: BotkitContext):
         ...
 
     @property

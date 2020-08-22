@@ -1,23 +1,23 @@
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Union, Any
+from typing import Any, Union
 
 from botkit.builders.htmlbuilder import HtmlBuilder
 from botkit.builders.inlinemenubuilder import InlineMenuBuilder
 from botkit.builders.quizbuilder import QuizBuilder
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import (
-    RenderedMessageMarkup,
-    RenderedMessage,
     IRegisterable,
-    RenderMarkupBase,
-    RenderedPollMessage,
-    TModel,
-    ModelViewBase,
     InlineResultViewBase,
+    ModelViewBase,
+    RenderMarkupBase,
+    RenderedMessage,
+    RenderedMessageMarkup,
+    RenderedPollMessage,
+    TState,
 )
 
 
-class MessageViewBase(InlineResultViewBase[TModel], RenderMarkupBase):
+class MessageViewBase(InlineResultViewBase[TState], RenderMarkupBase):
     def render(self) -> RenderedMessage:
         rendered = super(MessageViewBase, self).render()
 
@@ -28,7 +28,7 @@ class MessageViewBase(InlineResultViewBase[TModel], RenderMarkupBase):
         return rendered
 
 
-class TextView(MessageViewBase[TModel], RenderMarkupBase):
+class TextView(MessageViewBase[TState], RenderMarkupBase):
     @abstractmethod
     def render_body(self, builder: HtmlBuilder) -> None:
         pass
@@ -43,8 +43,8 @@ class TextView(MessageViewBase[TModel], RenderMarkupBase):
         return rendered
 
 
-class MediaView(MessageViewBase[TModel]):
-    def __init__(self, state: TModel):
+class MediaView(MessageViewBase[TState]):
+    def __init__(self, state: TState):
         super().__init__(state)
 
     @abstractmethod
@@ -66,7 +66,7 @@ class MediaView(MessageViewBase[TModel]):
         return rendered
 
 
-class StickerView(MessageViewBase[TModel]):
+class StickerView(MessageViewBase[TState]):
     @abstractmethod
     def get_sticker(self) -> str:
         pass
@@ -81,8 +81,8 @@ class PollBuilder:
     pass
 
 
-class PollView(ModelViewBase[TModel], IRegisterable, RenderMarkupBase):
-    def __init__(self, state: TModel):
+class PollView(ModelViewBase[TState], IRegisterable, RenderMarkupBase):
+    def __init__(self, state: TState):
         raise NotImplementedError("Only QuizView is implemented so far")
         super().__init__(state)
 
@@ -99,7 +99,9 @@ class PollView(ModelViewBase[TModel], IRegisterable, RenderMarkupBase):
         self.render_poll(builder)
 
         return RenderedPollMessage(
-            reply_markup=markup.reply_markup, inline_buttons=markup.inline_buttons, **builder.render(),
+            reply_markup=markup.reply_markup,
+            inline_buttons=markup.inline_buttons,
+            **builder.render(),
         )
 
 
@@ -115,7 +117,9 @@ class QuizView(ModelViewBase, IRegisterable, RenderMarkupBase):
         self.render_quiz(builder)
 
         return RenderedPollMessage(
-            reply_markup=markup.reply_markup, inline_buttons=markup.inline_buttons, **builder.render(),
+            reply_markup=markup.reply_markup,
+            inline_buttons=markup.inline_buttons,
+            **builder.render(),
         )
 
 
@@ -140,5 +144,3 @@ def _render_message_markup(obj: Union[ModelViewBase, RenderMarkupBase]) -> Rende
         rendered.reply_markup = obj.render_markup()
 
     return rendered
-
-

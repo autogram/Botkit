@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from typing import *
 
@@ -24,6 +25,11 @@ class UpdateFieldExtractor:  # TODO: implement properly
         return MessageDescriptor.from_update(self.update)
 
     @property
+    def message_text(self) -> Optional[str]:
+        if hasattr(self.update, "text"):
+            return self.update.text
+
+    @property
     def command_name(self) -> Optional[str]:
         if hasattr(self.update, "command"):  # Pyrogram
             return self.update.command[0]
@@ -42,3 +48,8 @@ class UpdateFieldExtractor:  # TODO: implement properly
         # TODO: turn into protocols
         if isinstance(self.update, pyrogram.Message):
             return self.update.reply_to_message
+
+    @property
+    def matches(self) -> Optional[List[re.Match]]:
+        if hasattr(self.update, "matches"):
+            return self.update.matches

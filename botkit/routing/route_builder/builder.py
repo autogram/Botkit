@@ -16,7 +16,7 @@ from typing import (
 )
 from uuid import UUID, uuid4
 
-from pyrogram import CallbackQuery, Client
+from pyrogram import CallbackQuery
 from pyrogram.client.filters.filter import Filter
 from pyrogram.client.filters.filters import create
 from pyrogram.client.handlers.handler import Handler
@@ -31,12 +31,13 @@ from botkit.routing.route_builder.types import IExpressionWithCallMethod, TView
 from botkit.routing.route_builder.webhook_action_expression import WebhookActionExpressionMixin
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.types import TState
-from botkit.routing.pipelines.callbacks import CallbackSignature
+from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.update_types.updatetype import UpdateType
+from botkit.types.client import IClient
 from botkit.views.base import InlineResultViewBase
 
 if TYPE_CHECKING:
-    from botkit.core.components import BaseComponent
+    from botkit.core.components import Component
 else:
     Component = TypeVar("Component")
 
@@ -70,8 +71,14 @@ class StateGenerationExpression(Generic[M]):
         self._triggers = triggers
         self._plan = plan
 
-    def then_call(self, handler: CallbackSignature) -> RouteExpression:
+    def then_call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
+        route = RouteDefinition(self._triggers, self._plan)
+        self._route_collection.add_for_current_client(route)
+        return RouteExpression(self._route_collection, route)
+
+    def then_invoke(self, component: "Component") -> RouteExpression:
+        self._plan.set_handling_component(component)
         route = RouteDefinition(self._triggers, self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -82,8 +89,14 @@ class StateGenerationExpression(Generic[M]):
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def then_send(self, view_or_view_type):
-        self._plan.set_view(view_or_view_type, "send")
+    def then_send(self, view_or_view_type, via: IClient = None):
+        if via and not self._route_collection.current_client.is_user:
+            raise ValueError(
+                "Can only send a view `via` another bot when the client that this route belongs to is a "
+                "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
+                self._route_collection.current_client,
+            )
+        self._plan.set_view(view_or_view_type, "send", send_via=via)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -105,7 +118,7 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
 
         self._plan = ExecutionPlan().add_update_type(UpdateType.callback_query)
 
-    def call(self, handler: CallbackSignature) -> RouteExpression:
+    def call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
         route = RouteDefinition(plan=self._plan, triggers=self._triggers)
         self._route_collection.add_for_current_client(route)
@@ -117,7 +130,9 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def mutate(self: "ActionExpression", reducer: ReducerSignature) -> StateGenerationExpression[M]:
+    def mutate(
+        self: "ActionExpression", reducer: ReducerSignature
+    ) -> StateGenerationExpression[M]:
         self._plan.set_reducer(reducer)
         return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
 
@@ -133,29 +148,36 @@ class CommandExpression(WebhookActionExpressionMixin):
         self._route_collection = routes
         self._triggers = RouteTriggers(action=action, filters=None, condition=condition)
 
-    def call(self, handler: CallbackSignature) -> RouteExpression:
+    def call(self, handler: HandlerSignature) -> RouteExpression:
         route = RouteDefinition(plan=ExecutionPlan().set_handler(handler), triggers=self._triggers)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def mutate(self: "ActionExpression", reducer: ReducerSignature) -> StateGenerationExpression[M]:
-        return StateGenerationExpression(self._route_collection, self._triggers, ExecutionPlan().set_reducer(reducer))
+    def mutate(
+        self: "ActionExpression", reducer: ReducerSignature
+    ) -> StateGenerationExpression[M]:
+        return StateGenerationExpression(
+            self._route_collection, self._triggers, ExecutionPlan().set_reducer(reducer)
+        )
 
 
 class PlayGameExpression:
     def __init__(self, routes: RouteCollection, game_short_name: str):
         self._route_collection = routes
         self._triggers = RouteTriggers(
-            filters=create(lambda _, cbq: cbq.game_short_name == game_short_name, "PlayGameFilter"),
+            filters=create(
+                lambda _, cbq: cbq.game_short_name == game_short_name, "PlayGameFilter"
+            ),
             action=None,
             condition=None,
         )
 
     def return_url(self, game_url: str) -> RouteExpression:
-        async def return_website(client: Client, callback_query: CallbackQuery):
+        async def return_website(client: IClient, callback_query: CallbackQuery):
             await callback_query.answer(url=game_url)
 
-        plan = ExecutionPlan(return_website)
+        plan = ExecutionPlan()
+        plan.set_view()  # TODO probably shouldn't be a view..?
         route = RouteDefinition(plan=plan, triggers=self._triggers)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -179,18 +201,19 @@ class ConditionsExpression(SendViewMixin):
         routes: RouteCollection,
         filters: Filter = None,
         condition: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
+        delete_trigger: bool = False,
     ):
         self._route_collection = routes
+        self._plan = ExecutionPlan().set_should_delete_trigger(delete_trigger)
         self._triggers = RouteTriggers(filters=filters, condition=condition, action=None)
 
-    def call(self, handler: CallbackSignature) -> RouteExpression:
-        plan = ExecutionPlan()
-        plan.set_handler(handler)
-        route = RouteDefinition(triggers=self._triggers, plan=plan)
+    def call(self, handler: HandlerSignature) -> RouteExpression:
+        self._plan.set_handler(handler)
+        route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def invoke(self, component: "BaseComponent"):
+    def invoke(self, component: "Component"):
         raise NotImplemented()
         # component.register(self)
         # async def invoke_component(client: PyroRendererClientMixin, message: Message):
@@ -202,8 +225,8 @@ class ConditionsExpression(SendViewMixin):
         # return RouteExpression(self._route_collection, route)
 
     def gather(self, state_generator: GathererSignature):
-        plan = ExecutionPlan().set_gatherer(state_generator).add_update_type(UpdateType.message)
-        return StateGenerationExpression(self._route_collection, self._triggers, plan)
+        self._plan.set_gatherer(state_generator).add_update_type(UpdateType.message)
+        return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
 
 
 @dataclass
@@ -213,13 +236,18 @@ class RouteBuilderContext:
 
 class RouteBuilder:
     def __init__(
-        self, routes: RouteCollection = None, current_client: Client = None, context: RouteBuilderContext = None,
+        self,
+        routes: RouteCollection = None,
+        current_client: IClient = None,
+        context: RouteBuilderContext = None,
     ):
         self._route_collection: RouteCollection = RouteCollection() if routes is None else routes
-        self._current_client: Optional[Client] = current_client or self._route_collection.current_client or None
+        self._current_client: Optional[
+            IClient
+        ] = current_client or self._route_collection.current_client or None
         self.context = context or RouteBuilderContext()
 
-    def use(self, client: Client) -> "RouteBuilder":
+    def use(self, client: IClient) -> "RouteBuilder":
         self._route_collection.current_client = client
         return self
 
@@ -227,9 +255,14 @@ class RouteBuilder:
         self._route_collection.add_for_current_client(route)
 
     def on(
-        self, filters: Optional[Filter], condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
+        self,
+        filters: Optional[Filter],
+        condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
+        delete_trigger: bool = False,
     ) -> ConditionsExpression:
-        return ConditionsExpression(self._route_collection, filters=filters, condition=condition_func)
+        return ConditionsExpression(
+            self._route_collection, filters=filters, condition=condition_func, delete_trigger=True
+        )
 
     # def on_command(
     #     self,
@@ -244,18 +277,20 @@ class RouteBuilder:
     #     raise NotImplemented
 
     def on_action(
-        self, action: Union[str, int], condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
+        self,
+        action: Union[str, int],
+        condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
     ) -> ActionExpression:
         return ActionExpression(self._route_collection, action=action, condition=condition_func)
 
     def on_play_game(self, game_short_name: str) -> PlayGameExpression:
         return PlayGameExpression(self._route_collection, game_short_name=game_short_name)
 
-    def always_call(self, handler: CallbackSignature) -> RouteExpression:
+    def always_call(self, handler: HandlerSignature) -> RouteExpression:
         return ConditionsExpression(self._route_collection).call(handler)
 
     @contextmanager
-    def using(self, client: Client) -> ContextManager[None]:
+    def using(self, client: IClient) -> ContextManager[None]:
         previous = self._route_collection.current_client
         self.use(client)
         yield
@@ -265,7 +300,7 @@ class RouteBuilder:
         raise NotImplemented()
         # self._route_collection.add_for_current_client(Route())
 
-    def register_component(self, component: Type["BaseComponent"]):
+    def register_component(self, component: Type["Component"]):
         component.register(self)
         return self
 

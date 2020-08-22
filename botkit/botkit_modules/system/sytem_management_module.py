@@ -3,11 +3,10 @@ from dataclasses import dataclass
 import asyncio
 from buslane.commands import Command, CommandHandler
 from haps import Inject, Container
-from haps.exceptions import UnknownDependency
 from pyrogram import Filters, Message, User, Client
 from typing import Optional, List, Any, Literal
 
-from botkit.dispatching.callbackqueries.callback_manager import (
+from botkit.persistence.callback_manager import (
     RedisCallbackManager,
     ICallbackManager,
 )

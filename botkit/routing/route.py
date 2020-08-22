@@ -15,10 +15,10 @@ from pyrogram.client.filters.filter import Filter
 from pyrogram.client.handlers.handler import Handler
 
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
-from botkit.routing.pipelines.factories.pipeline_factories import PIPELINE_FACTORIES
+from botkit.routing.pipelines.factories.updates.others import PIPELINE_FACTORIES
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.triggers import ActionIdTypes, RouteTriggers
-from botkit.routing.pipelines.callbacks import CallbackSignature
+from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.update_types.updatetype import UpdateType
 
 M = TypeVar("M")
@@ -28,11 +28,11 @@ M = TypeVar("M")
 class RouteHandler:
     update_type: UpdateType
     filter: UpdateFilterSignature
-    callback: CallbackSignature
+    callback: HandlerSignature
     description: str
     scope: Literal["global", "module"] = "module"
     action_id: Optional[ActionIdTypes] = None
-    # TODO: ☝ this is not so nice as it is not be set for some instances. Instead maybe go for "unique key in scope"
+    # TODO: ☝ this is not so nice as it is not set for some instances. Instead maybe go for "unique key in scope"
     #  that is always calculated..?
 
     @cached_property
@@ -81,7 +81,7 @@ class RouteDefinition:
 
 
 def _create_pyrogram_handler(
-    callback: CallbackSignature, update_filter: UpdateFilterSignature, update_type: UpdateType
+    callback: HandlerSignature, update_filter: UpdateFilterSignature, update_type: UpdateType
 ) -> Handler:
     assert callback is not None
 

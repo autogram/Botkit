@@ -1,31 +1,38 @@
-from functools import wraps
 from typing import Any, Union
 
 from pyrogram import CallbackQuery
 
-from botkit.dispatching.callbackqueries.callback_manager import CallbackActionContext
-from botkit.routing.pipelines.callbacks import CallbackSignature
-from botkit.routing.pipelines.factories.base import PipelineFactory
-from botkit.routing.pipelines.gatherer import GatherStepFactory
-from botkit.routing.pipelines.reduce_step_factory import ReduceStepFactory
-from botkit.routing.pipelines.view_render_step_factory import ViewRenderStepFactory
+from botkit.routing.pipelines.callbacks import HandlerSignature
+from botkit.routing.pipelines.factories.base import UpdatePipelineFactory
+from botkit.routing.pipelines.factories.steps.custom_handler_step_factory import (
+    CustomHandlerStepFactory,
+)
+from botkit.routing.pipelines.factories.steps.gather_step_factory import GatherStepFactory
+from botkit.routing.pipelines.factories.steps.reduce_step_factory import ReduceStepFactory
+from botkit.routing.pipelines.factories.steps.view_render_step_factory import ViewRenderStepFactory
 from botkit.routing.types import TState
+from botkit.routing.update_types.updatetype import UpdateType
+from botkit.types.client import IClient
 from botkit.views.botkit_context import BotkitContext
-from botkit.views.renderer_client_mixin import PyroRendererClientMixin
 
 
-class CallbackQueryPipelineFactory(PipelineFactory):
+class CallbackQueryPipelineFactory(UpdatePipelineFactory):
+    @property
+    def update_type(self):
+        return UpdateType.callback_query
+
+    # TODO: implement
     # def create_update_filter(self) -> UpdateFilterSignature:
     #     pass  # TODO: not game
 
-    def create_callback(self) -> CallbackSignature:
+    def create_callback(self) -> HandlerSignature:
         gather_initial_state, gather_async = GatherStepFactory.create_step(self.plan._gatherer)
         mutate_previous_state, mutate_async = ReduceStepFactory.create_step(self.plan._reducer)
         send_view = ViewRenderStepFactory.create_step(self.plan._view)
-        handler = self.plan._handler
+        handle, handle_async = CustomHandlerStepFactory.create_step(self.plan._handler)
 
         async def handle_callback_query(
-            client: PyroRendererClientMixin, callback_query: CallbackQuery, context: BotkitContext = None
+            client: IClient, callback_query: CallbackQuery, context: BotkitContext = None
         ) -> Union[bool, Any]:
 
             if not context:
@@ -49,9 +56,10 @@ class CallbackQueryPipelineFactory(PipelineFactory):
             if send_view:
                 await send_view(context)
 
-            if handler:
-                return await handler.func(client, callback_query, next_state)
+            if handle:
+                if handle_async:
+                    return await handle(callback_query, context)
+                else:
+                    return handle(callback_query, context)
 
-        if handler:
-            wraps(handle_callback_query, handler.func)
         return handle_callback_query

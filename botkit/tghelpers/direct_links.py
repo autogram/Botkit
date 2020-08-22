@@ -49,5 +49,5 @@ async def direct_link(
             return f"https://web.Telegram.org/#/im?p=u{peer.id}"
         else:
             raise ValueError(
-                f"User has no username, creating direct link on platform {platform} not possible."
+                f"_IdentifiableUser has no username, creating direct link on platform {platform} not possible."
             )

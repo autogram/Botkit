@@ -2,16 +2,21 @@ from typing import Any, Collection, Dict, Iterator, List, Optional, Union
 
 from cached_property import cached_property
 from haps import Container
+from haps.exceptions import NotConfigured
 from pyrogram import InlineKeyboardButton
 
 from botkit import buttons
-from botkit.dispatching.callbackqueries.callback_manager import CallbackActionContext, ICallbackManager
+from botkit.persistence.callback_manager import (
+    CallbackActionContext,
+    ICallbackManager,
+    MemoryDictCallbackManager,
+)
 from botkit.inlinequeries.contexts import DefaultInlineModeContext, IInlineModeContext
 from botkit.settings import botkit_settings
 from botkit.utils.sentinel import NotSet, Sentinel
 
 
-class _InlineMenuRowBuilder:
+class InlineMenuRowBuilder:
     def __init__(self, state: Optional[Any], override_buttons: List[Any] = None):
         if override_buttons:
             self.buttons = override_buttons
@@ -30,8 +35,11 @@ class _InlineMenuRowBuilder:
         return not len(self.buttons)
 
     def switch_inline_button(
-        self, caption: str, in_context: IInlineModeContext = DefaultInlineModeContext(), current_chat: bool = True,
-    ) -> "_InlineMenuRowBuilder":
+        self,
+        caption: str,
+        in_context: IInlineModeContext = DefaultInlineModeContext(),
+        current_chat: bool = True,
+    ) -> "InlineMenuRowBuilder":
         button = buttons.switch_inline_button(caption, in_context, current_chat=current_chat)
         self.buttons.append(button)
         return self
@@ -43,7 +51,7 @@ class _InlineMenuRowBuilder:
         payload: Any = None,
         notification: Union[str, None, Sentinel] = NotSet,
         show_alert: bool = False,
-    ) -> "_InlineMenuRowBuilder":
+    ) -> "InlineMenuRowBuilder":
         """
         :param notification: Defaulting to the caption text, this is the message to be shown at the top of the user's
         screen on button press. Pass `None` to disable.
@@ -81,34 +89,35 @@ class _InlineMenuRowBuilder:
     #     raise NotImplementedError()
 
 
-class InlineMenuRowsCollection(Collection[_InlineMenuRowBuilder]):
+class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
     def __init__(self, state: Optional[Any], override_rows: List[List[Any]] = None):
         self._state = state
         if override_rows:
             self._rows = {
-                n: _InlineMenuRowBuilder(state=self._state, override_buttons=x) for n, x in enumerate(override_rows)
+                n: InlineMenuRowBuilder(state=self._state, override_buttons=x)
+                for n, x in enumerate(override_rows)
             }
         else:
-            self._rows: Dict[int, _InlineMenuRowBuilder] = {}
+            self._rows: Dict[int, InlineMenuRowBuilder] = {}
 
     def __len__(self) -> int:
         return len(self._get_nonempty_rows())
 
-    def __iter__(self) -> Iterator[_InlineMenuRowBuilder]:
+    def __iter__(self) -> Iterator[InlineMenuRowBuilder]:
         return iter(self._get_nonempty_rows())
 
     def __contains__(self, __x: Any) -> bool:
         return False  # TODO: implement???
 
-    def __getitem__(self, index: int) -> _InlineMenuRowBuilder:
+    def __getitem__(self, index: int) -> InlineMenuRowBuilder:
         if index < 0:
             # TODO: apply modulo and document what this does
             index = len(self._rows) - 2 - index
         else:
             index = index
-        return self._rows.setdefault(index, _InlineMenuRowBuilder(state=self._state))
+        return self._rows.setdefault(index, InlineMenuRowBuilder(state=self._state))
 
-    def _get_nonempty_rows(self) -> List[_InlineMenuRowBuilder]:
+    def _get_nonempty_rows(self) -> List[InlineMenuRowBuilder]:
         return [x for x in self._rows.values() if not x.is_empty]
 
 
