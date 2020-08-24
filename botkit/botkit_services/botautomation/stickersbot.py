@@ -6,7 +6,7 @@ from commons.coreservices.botautomation.base import BotAutomationBase
 
 
 class StickersBot(BotAutomationBase):
-    __username__ = '@Stickers'
+    __username__ = "@Stickers"
 
     @dataclass
     class State(object):
@@ -17,8 +17,8 @@ class StickersBot(BotAutomationBase):
 
     async def init_addsticker(self, sticker_pack: str):
         wait_event = self.conversation.wait_event(
-            NewMessage(incoming=True, chats=[self.__username__], pattern=r'^Alright! Now send .*'),
-            timeout=10
+            NewMessage(incoming=True, chats=[self.__username__], pattern=r"^Alright! Now send .*"),
+            timeout=10,
         )
         await self.conversation.send_message("/addsticker")
         await self.conversation.send_message(sticker_pack)
@@ -28,21 +28,19 @@ class StickersBot(BotAutomationBase):
 
     async def add_sticker(self, sticker: Message, emojis: str):
         if not self.state.addsticker_initialized:
-            raise RuntimeError("Cannot add_for_current_client sticker to pack without initializing first.")
+            raise RuntimeError(
+                "Cannot add_for_current_client sticker to pack without initializing first."
+            )
 
         wait_event = self.conversation.wait_event(
-            NewMessage(incoming=True, chats=[self.__username__]),
-            timeout=10
+            NewMessage(incoming=True, chats=[self.__username__]), timeout=10
         )
         await self.client.forward_messages(self.__username__, [sticker])
         response: NewMessage.Event = await wait_event
 
         # TODO: error handling
-        print(response.message)
+        print(response.message_descriptor)
 
         self.state.sticker_forwarded = True
 
         await self.conversation.send_message(emojis)
-
-
-

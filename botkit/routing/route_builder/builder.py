@@ -21,7 +21,7 @@ from pyrogram.client.filters.filter import Filter
 from pyrogram.client.filters.filters import create
 from pyrogram.client.handlers.handler import Handler
 
-from botkit.routing.pipelines.execution_plan import ExecutionPlan
+from botkit.routing.pipelines.execution_plan import ExecutionPlan, SendTarget, SendTo, SendTo
 from botkit.routing.pipelines.gatherer import GathererSignature
 from botkit.routing.pipelines.reducer import ReducerSignature
 from botkit.routing.route import RouteDefinition
@@ -89,14 +89,16 @@ class StateGenerationExpression(Generic[M]):
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def then_send(self, view_or_view_type, via: IClient = None):
+    def then_send(
+        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+    ):
         if via and not self._route_collection.current_client.is_user:
             raise ValueError(
                 "Can only send a view `via` another bot when the client that this route belongs to is a "
                 "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
                 self._route_collection.current_client,
             )
-        self._plan.set_view(view_or_view_type, "send", send_via=via)
+        self._plan.set_view(view_or_view_type, "send").set_send_via(via).set_send_target(to)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -261,7 +263,10 @@ class RouteBuilder:
         delete_trigger: bool = False,
     ) -> ConditionsExpression:
         return ConditionsExpression(
-            self._route_collection, filters=filters, condition=condition_func, delete_trigger=True
+            self._route_collection,
+            filters=filters,
+            condition=condition_func,
+            delete_trigger=delete_trigger,
         )
 
     # def on_command(

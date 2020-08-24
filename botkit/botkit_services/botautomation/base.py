@@ -21,7 +21,9 @@ def notify_on_exception(func):
         try:
             result = await func(cls, event)
         except UnexpectedBehaviorException as e:
-            return await cls.use.notify_here(event.message, e.message, Duration.ERROR_SHORT)
+            return await cls.use.notify_here(
+                event.message_descriptor, e.message, Duration.ERROR_SHORT
+            )
 
         return result
 
@@ -29,7 +31,6 @@ def notify_on_exception(func):
 
 
 class UnexpectedBehaviorException(Exception):
-
     def __init__(self, message, *args: object, **kwargs: object) -> None:
         self.message = message
         super().__init__(*args, **kwargs)
@@ -62,11 +63,7 @@ class BotAutomationBase(object):
     client: IUserClient = Inject()
     lookup: ILookupService = Inject()
 
-    def __init__(
-            self,
-            default_timeout=10,
-            total_timeout=60,
-    ) -> None:
+    def __init__(self, default_timeout=10, total_timeout=60,) -> None:
         self.timeout = default_timeout
         self.total_timeout = total_timeout
         self.msg: Message = None
@@ -83,7 +80,7 @@ class BotAutomationBase(object):
     async def start_bot(self, **kwargs):
         if not self._initialized:
             await self.initialize()
-        await self.send_command('start', **kwargs)
+        await self.send_command("start", **kwargs)
 
     async def reactivate_bot(self):
         """ Override if the bot has unusual behavior """
@@ -91,30 +88,26 @@ class BotAutomationBase(object):
 
     def _args(self, kwargs: Dict = None) -> Dict:
         default = dict(
-            entity=self.username,
-            timeout=self.timeout,
-            total_timeout=self.total_timeout
+            entity=self.username, timeout=self.timeout, total_timeout=self.total_timeout
         )
         if kwargs:
-            return {**default, **kwargs}  # TODO: make sure this overrides the default dict and not vice versa
+            return {
+                **default,
+                **kwargs,
+            }  # TODO: make sure this overrides the default dict and not vice versa
         return default
 
     async def send_message(self, text: str, **conversation_kwargs):
-        return await self._communicate(
-            lambda conv: conv.send_message(text),
-            **conversation_kwargs
-        )
+        return await self._communicate(lambda conv: conv.send_message(text), **conversation_kwargs)
 
     async def send_file(self, file: Any, caption: str = None, **conversation_kwargs):
         return await self._communicate(
-            lambda conv: conv.send_file(file, caption=caption),
-            **conversation_kwargs
+            lambda conv: conv.send_file(file, caption=caption), **conversation_kwargs
         )
 
     async def send_command(self, name: str, **kwargs):
         return await self._communicate(
-            lambda conv: conv.send_message(f"/{name.lstrip('/')}"),
-            **kwargs
+            lambda conv: conv.send_message(f"/{name.lstrip('/')}"), **kwargs
         )
 
     async def click_button(self, query: str, matcher: Matcher = Matcher.Equals):
@@ -129,17 +122,13 @@ class BotAutomationBase(object):
     async def send_inline_query(self, query: str) -> InlineResults:
         return await self.client.inline_query(self.username, query)
 
-    async def _communicate(
-            self,
-            func: Callable[[Conversation], Any],
-            **kwargs
-    ) -> Message:
+    async def _communicate(self, func: Callable[[Conversation], Any], **kwargs) -> Message:
         """
         Sends user_message and fetches a response
         TODO: fetch multiple responses like in tgintegration
         """
         async with self.client.conversation(**self._args(kwargs)) as conv:
-            print('executing')
+            print("executing")
             sent = await func(conv)
             print("done,", sent)
             response = await conv.get_response(sent)
@@ -173,5 +162,7 @@ class BotAutomationBase(object):
 
 # region utils
 def is_media_event(event: NewMessage) -> bool:
-    return bool(event.message.media)
+    return bool(event.message_descriptor.media)
+
+
 # endregion

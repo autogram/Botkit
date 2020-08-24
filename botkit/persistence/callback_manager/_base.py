@@ -35,11 +35,15 @@ class ICallbackManager(ABC):
 
     @abstractmethod
     def clear(self):
-        pass
+        ...
 
     @abstractmethod
     def force_sync(self):
-        pass
+        ...
+
+    @abstractmethod
+    def remove_outdated(self, days: int = 7):
+        ...
 
 
 def generate_id() -> str:

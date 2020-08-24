@@ -7,7 +7,7 @@ from typing import Dict, Union
 
 class IdleTownBotBase(BotAutomationBase):
 
-    __username__ = '@IdleTownBot'
+    __username__ = "@IdleTownBot"
 
     @staticmethod
     async def sleep():
@@ -24,29 +24,29 @@ class IdleTownBotBase(BotAutomationBase):
         await self.client.clear_chat()
         await asyncio.sleep(2)
 
-        start: Message = await self.conversation.send_message('/start')
+        start: Message = await self.conversation.send_message("/start")
         main_buttons = await self.get_buttons()
         await self.sleep()
 
         # Get World Exp if possible
-        if 'worldexp' in main_buttons:
-            await self.conversation.send_message(main_buttons['worldexp'])
+        if "worldexp" in main_buttons:
+            await self.conversation.send_message(main_buttons["worldexp"])
             worldexp = await self.get_buttons()
             await self.sleep()
 
-            await self.conversation.send_message(worldexp['claimx1'])
+            await self.conversation.send_message(worldexp["claimx1"])
             confirm_buttons = await self.get_buttons()
             await self.sleep()
 
-            await self.conversation.send_message(confirm_buttons['yes'])
+            await self.conversation.send_message(confirm_buttons["yes"])
             await self.sleep()
 
         # Construct buildings
-        await self.conversation.send_message(main_buttons['buildings'])
+        await self.conversation.send_message(main_buttons["buildings"])
         build_buttons = await self.get_buttons()
         await self.sleep()
 
-        for building in ['lumbermill', 'goldmine', 'armory', 'smithy']:
+        for building in ["lumbermill", "goldmine", "armory", "smithy"]:
             response_text = ""
             while "you don't have enough" not in response_text.lower():
                 await self.conversation.send_message(build_buttons[building])
@@ -63,7 +63,7 @@ class IdleTownBotBase(BotAutomationBase):
         await self.sleep()
 
         # For every possible equipment, upgrade it until there are not enough resources left
-        for equip in (b for k, b in equip_buttons.items() if 'up' in k):
+        for equip in (b for k, b in equip_buttons.items() if "up" in k):
             while True:
                 await self.conversation.send_message(equip)
                 response_text = await self.get_text()
@@ -72,34 +72,34 @@ class IdleTownBotBase(BotAutomationBase):
                     break
 
         # Attack Player
-        await self.conversation.send_message(main_buttons['battle'])
+        await self.conversation.send_message(main_buttons["battle"])
         battle = await self.get_buttons()
         await self.sleep()
 
-        await self.conversation.send_message(battle['arena'])
+        await self.conversation.send_message(battle["arena"])
         arena = await self.get_buttons()
         await self.sleep()
 
-        await self.conversation.send_message(arena['normalmatch'])
+        await self.conversation.send_message(arena["normalmatch"])
         normal_match = await self.get_buttons()
         await self.sleep()
 
-        if 'fight' in normal_match:
-            await self.conversation.send_message(normal_match['fight'])
+        if "fight" in normal_match:
+            await self.conversation.send_message(normal_match["fight"])
             fight = await self.get_buttons()
             await self.sleep()
 
         # Attack Boss
-        await self.conversation.send_message(battle['bosses'])
+        await self.conversation.send_message(battle["bosses"])
         bosses = await self.get_buttons()
         await self.sleep()
-        if 'attackmax' in bosses:
-            await self.conversation.send_message(bosses['attackmax'])
+        if "attackmax" in bosses:
+            await self.conversation.send_message(bosses["attackmax"])
             await self.sleep()
 
 
 def ascii_chars(text):
-    return ''.join(x for x in text if str.isalpha(x) or str.isdigit(x)).strip()
+    return "".join(x for x in text if str.isalpha(x) or str.isdigit(x)).strip()
 
 
 def get_buttons(event_or_message: Union[NewMessage.Event, Message]):
@@ -107,7 +107,7 @@ def get_buttons(event_or_message: Union[NewMessage.Event, Message]):
     Helper function to create a dictionary for easy access to keyboard inline_buttons
     """
     if isinstance(event_or_message, NewMessage.Event):
-        message = event_or_message.message
+        message = event_or_message.message_descriptor
     else:
         message = event_or_message
 

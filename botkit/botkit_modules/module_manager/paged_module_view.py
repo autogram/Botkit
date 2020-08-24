@@ -11,7 +11,7 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
             if not m.is_enabled:
                 builder.spc().italic("(disabled)")
 
-            builder.para()
+            builder.para
 
             if m.route_descriptions:
                 builder.text("Routes: ")
@@ -26,13 +26,15 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
             else:
                 builder.text("No routes.")
 
-            builder.para().br()
+            builder.para.br()
 
     def render_markup(self, builder: InlineMenuBuilder) -> None:
         row_builder = builder.rows[99]
         if self.state.has_previous_page:
             row_builder.action_button("⬅️", "page_back", self.state)
-        row_builder.switch_inline_button(str(self.state.current_page_number), ModuleInlineContext("Module"))
+        row_builder.switch_inline_button(
+            str(self.state.current_page_number), ModuleInlineContext("Module")
+        )
         if self.state.has_next_page:
             row_builder.action_button("➡️", "page_forward", self.state)
 

@@ -1,6 +1,7 @@
+import inspect
 from dataclasses import dataclass
-from enum import Enum
-from typing import Callable, Optional, Set, Type, Union
+from enum import Enum, auto
+from typing import Callable, Optional, Set, Tuple, Type, Union
 from uuid import UUID
 
 from typing_extensions import Literal
@@ -14,18 +15,31 @@ from botkit.routing.update_types.update_type_inference import infer_update_types
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.utils.typed_callable import TypedCallable
+from botkit.views.botkit_context import BotkitContext
 from botkit.views.functional_views import ViewRenderFuncSignature
 from botkit.views.views import MessageViewBase
 
 
-class SendTarget(Enum):
-    to_same_chat = 1
-    to_same_chat_quote = 2
-    to_same_chat_quote_replied_to = 3
-    to_user_in_private = 4
-    to_specific_chat = 5  # TODO: implement
-    # edit_outgoing = x  <-- Nope. I think this should be handled by quick actions
+class SendTo(Enum):
+    same_chat = auto()
+    same_chat_quote = auto()
+    same_chat_quote_replied_to = auto()
+    same_chat_quote_original_replied_to = auto()
+    user_in_private = auto()
 
+
+ChatTarget = Union[SendTo, int, str]
+
+SendTargetFuncSignature = Callable[
+    [BotkitContext], Union[ChatTarget, Tuple[ChatTarget, Optional[int]]]
+]
+SendTargetFuncSignatureExamplesStr = """
+def _(ctx: BotkitContext) -> SendTo: ...
+def _(ctx: BotkitContext) -> Union[int, str]: ...
+def _(ctx: BotkitContext) -> Tuple[SendTo, None]: ...
+def _(ctx: BotkitContext) -> Tuple[SendTo, int]: ...
+"""
+SendTarget = Union[ChatTarget, SendTargetFuncSignature]
 
 ViewCommandLiteral = Literal["send", "update"]
 
@@ -34,11 +48,10 @@ ViewCommandLiteral = Literal["send", "update"]
 class ViewParameters:
     command: ViewCommandLiteral
     view: Union[Type[MessageViewBase], MessageViewBase, ViewRenderFuncSignature]
-    send_target: Optional[SendTarget] = None
     send_via: Optional[IClient] = None
+    send_target: Optional[SendTarget] = SendTo.same_chat
 
 
-# TODO: refactor to have only `add_step(Factory)`! Each `set_*` should add a factory type.
 class ExecutionPlan:
     def __init__(self) -> None:
         self._gatherer: Optional[TypedCallable[GathererSignature]] = None
@@ -57,7 +70,10 @@ class ExecutionPlan:
         if state_generator is None:
             return self
 
-        gatherer = TypedCallable(func=state_generator)
+        if inspect.isclass(state_generator):
+            gatherer = TypedCallable(func=lambda: state_generator())
+        else:
+            gatherer = TypedCallable(func=state_generator)
 
         if gatherer.num_non_optional_params > 1:
             raise ValueError(
@@ -117,9 +133,7 @@ class ExecutionPlan:
         self._state_transition = next_state_guid
         return self
 
-    def set_view(
-        self, view: TView, command: ViewCommandLiteral, send_via: IClient = None
-    ) -> "ExecutionPlan":
+    def set_view(self, view: TView, command: ViewCommandLiteral) -> "ExecutionPlan":
         """
         If `send_via` is present, then the executing client must be a userbot. This is checked when using
         the `RouteBuilder`.
@@ -129,32 +143,49 @@ class ExecutionPlan:
                 "View is already set. Not sure what to do with this, most likely a bug. Contact @JosXa."
             )
 
-        if send_via and not send_via.is_bot:
-            raise ValueError(
-                "Sending a message `via` is only possible with regular bots, not with userbots.",
-                send_via,
-            )
-
         if command == "send":
             # TODO: Allow specifying the send target
-            self._view = ViewParameters(
-                command=command, view=view, send_target=SendTarget.to_same_chat, send_via=send_via
-            )
+            self._view = ViewParameters(command=command, view=view, send_target=SendTo.same_chat)
         elif command == "update":
-            if send_via:
-                raise ValueError(
-                    "Cannot *update* a view `via` another bot. This is only possible when *sending* a new view."
-                )
             self._view = ViewParameters(command=command, view=view)
         else:
             raise ValueError(f"Unknown view command: '{command}'")
 
         return self
 
-    def set_send_target(self, send_target: SendTarget) -> "ExecutionPlan":
-        # TODO: use
+    def set_send_via(self, send_via: IClient) -> "ExecutionPlan":
+        if send_via is None:
+            self._view.send_via = None
+            return
+
         if not self._view:
-            raise ValueError("A view should be set before choosing a send target.")
+            raise ValueError("Please specify the view to be sent first.")
+
+        if not send_via.is_bot:
+            raise ValueError(
+                "Sending a message `via` is only possible with regular bots, not with userbots.",
+                send_via,
+            )
+
+        if self._view.command == "update":
+            raise ValueError(
+                "Cannot *update* a view `via` another bot. This is only possible when *sending* a new view."
+            )
+
+        self._view.send_via = send_via
+        return self
+
+    def set_send_target(self, send_target: SendTarget) -> "ExecutionPlan":
+        if not self._view:
+            raise ValueError("A view should be set before specifying a send target.")
+
+        if self._view.command == "update":
+            raise NotImplementedError(
+                "I am not sure what should happen when trying to *update* an existing view with "
+                "a specific `send_target` (which might be different from that of the existing message). "
+                "If you have a valid use case for this, please open a GitHub issue!"
+            )
+
         self._view.send_target = send_target
         return self
 

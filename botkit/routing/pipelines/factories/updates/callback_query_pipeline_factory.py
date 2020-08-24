@@ -9,7 +9,10 @@ from botkit.routing.pipelines.factories.steps.custom_handler_step_factory import
 )
 from botkit.routing.pipelines.factories.steps.gather_step_factory import GatherStepFactory
 from botkit.routing.pipelines.factories.steps.reduce_step_factory import ReduceStepFactory
-from botkit.routing.pipelines.factories.steps.view_render_step_factory import ViewRenderStepFactory
+from botkit.routing.pipelines.factories.steps.render_view_step_factory import RenderViewStepFactory
+from botkit.routing.pipelines.factories.steps.send_view_step_factory import (
+    CommitRenderedViewStepFactory,
+)
 from botkit.routing.types import TState
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
@@ -28,7 +31,8 @@ class CallbackQueryPipelineFactory(UpdatePipelineFactory):
     def create_callback(self) -> HandlerSignature:
         gather_initial_state, gather_async = GatherStepFactory.create_step(self.plan._gatherer)
         mutate_previous_state, mutate_async = ReduceStepFactory.create_step(self.plan._reducer)
-        send_view = ViewRenderStepFactory.create_step(self.plan._view)
+        render_view = RenderViewStepFactory.create_step(self.plan._view)
+        commit_rendered_view = CommitRenderedViewStepFactory.create_step(self.plan._view)
         handle, handle_async = CustomHandlerStepFactory.create_step(self.plan._handler)
 
         async def handle_callback_query(
@@ -53,8 +57,11 @@ class CallbackQueryPipelineFactory(UpdatePipelineFactory):
             if next_state:
                 context.state = next_state
 
-            if send_view:
-                await send_view(context)
+            if render_view:
+                # TODO: It remains to be seen whether having `rendered_message` on the `context` is useful.
+                # It might turn out that just passing it to the `send_or_update` step is the better choice.
+                context.rendered_message = render_view(context)
+                await commit_rendered_view(context)
 
             if handle:
                 if handle_async:

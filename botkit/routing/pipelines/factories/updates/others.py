@@ -8,7 +8,9 @@ from botkit.routing.pipelines.factories.steps.custom_handler_step_factory import
 )
 from botkit.routing.pipelines.factories.steps.gather_step_factory import GatherStepFactory
 from botkit.routing.pipelines.factories.steps.reduce_step_factory import ReduceStepFactory
-from botkit.routing.pipelines.factories.steps.view_render_step_factory import ViewRenderStepFactory
+from botkit.routing.pipelines.factories.steps.send_view_step_factory import (
+    CommitRenderedViewStepFactory,
+)
 from botkit.routing.pipelines.factories.updates.callback_query_pipeline_factory import (
     CallbackQueryPipelineFactory,
 )
