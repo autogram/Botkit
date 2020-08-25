@@ -22,7 +22,11 @@ class Ping(BaseModel):
 
 class StatusPings:
     def __init__(
-        self, client: Client, log_chat: Union[int, str], environment: str, environment_priority: List[str],
+        self,
+        client: Client,
+        log_chat: Union[int, str],
+        environment: str,
+        environment_priority: List[str],
     ):
         self.log_chat = log_chat
         self.environment = environment
@@ -99,7 +103,9 @@ class StatusPings:
                 return
 
             # Waiting for all other instances to be offline for some time
-            if self.timestamp_older_than(queried_ping.ping_time, seconds=self.reactivate_after_seconds):
+            if self.timestamp_older_than(
+                queried_ping.ping_time, seconds=self.reactivate_after_seconds
+            ):
                 command = ToggleSystemStateCommand(
                     new_state="unpause",
                     triggered_by=self.__class__.__name__,
@@ -117,13 +123,17 @@ class StatusPings:
                     f"{self.environment} ready to take over."
                 )
             else:
-                self.log.debug(f"Paused since another instance with higher priority ({queried_ping.env}) is running.")
+                self.log.debug(
+                    f"Paused since another instance with higher priority ({queried_ping.env}) is running."
+                )
 
     def has_higher_priority(self, env: str, compare_to: str) -> Optional[bool]:
         try:
             return self.priority.index(env) < self.priority.index(compare_to)
         except ValueError:
-            self.log.exception(f"Environment priority map does not contain '{env}' and '{compare_to}'.")
+            self.log.exception(
+                f"Environment priority map does not contain '{env}' and '{compare_to}'."
+            )
             return None
 
     async def query_most_recent_ping(self) -> Optional[Ping]:
@@ -164,7 +174,11 @@ class StatusPings:
 
     @staticmethod
     def timestamp_between(dt: datetime, min_seconds: int, max_seconds: int):
-        return dt + timedelta(max_seconds) > datetime.now(tz=pytz.UTC) > dt + timedelta(seconds=min_seconds)
+        return (
+            dt + timedelta(max_seconds)
+            > datetime.now(tz=pytz.UTC)
+            > dt + timedelta(seconds=min_seconds)
+        )
 
     async def _send_ping(self, force_resend: bool = False):
         self.last_sent_ping = Ping(env=self.environment, ping_time=datetime.now(tz=pytz.UTC))
@@ -177,4 +191,6 @@ class StatusPings:
                 return
             except:
                 pass
-        self.last_ping_msg = await self.client.send_message(self.log_chat, self.last_sent_ping.json())
+        self.last_ping_msg = await self.client.send_message(
+            self.log_chat, self.last_sent_ping.json()
+        )

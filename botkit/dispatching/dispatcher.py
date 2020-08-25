@@ -9,6 +9,7 @@ from botkit.dispatching.callbackqueries.callbackactiondispatcher import Callback
 from botkit.core.modules import Module
 from botkit.routing.route import RouteHandler
 from botkit.routing.update_types.updatetype import UpdateType
+from botkit.types.client import IClient
 
 """
 Indicates where the evaluation of individual updates takes place
@@ -24,7 +25,7 @@ class BotkitDispatcher:
     def __init__(self):
         self.callback_action_dispatchers: Dict[Client, CallbackActionDispatcher] = dict()
         self._inline_query_factory: Any = None
-        self._module_handlers: Dict[int, Dict[Client, List[Handler]]] = dict()
+        self.module_handlers: Dict[int, Dict[Client, List[Handler]]] = dict()
 
         self.log = logzero.setup_logger(BotkitDispatcher.__name__)
 
@@ -34,7 +35,9 @@ class BotkitDispatcher:
         for client, routes in module.route_collection.routes_by_client.items():
             for route in routes:
                 for update_type, route_wrapper in route.handler_by_update_type.items():
-                    await self.add_route_for_update_type(module, client, update_type, route_wrapper)
+                    await self.add_route_for_update_type(
+                        module, client, update_type, route_wrapper
+                    )
 
             """
             TODO: split this up into:
@@ -52,7 +55,8 @@ class BotkitDispatcher:
             """
 
         self.log.info(
-            f"({module.group_index}) {module.get_name()} loaded" + (" with: " + ", ".join(log_msg) if log_msg else "")
+            f"({module.group_index}) {module.get_name()} loaded"
+            + (" with: " + ", ".join(log_msg) if log_msg else "")
         )
 
     async def add_route_for_update_type(
@@ -89,14 +93,14 @@ class BotkitDispatcher:
     async def remove_module_routes(self, module: Module):
         group = module.group_index
 
-        for client, h in self._module_handlers[group].items():
+        for client, h in self.module_handlers[group].items():
             for handler in h:
                 try:
                     client.remove_handler(handler, group)
                 except Exception:
                     self.log.exception(f"Could not remove handler {handler} from group {group}.")
 
-        del self._module_handlers[group]
+        del self.module_handlers[group]
 
     async def add_handler(self, group: int, client: Client, handler: Handler):
         assert group is not None
@@ -106,16 +110,21 @@ class BotkitDispatcher:
         async with client.dispatcher.locks_list[-1]:
             client.add_handler(handler, group)
 
-            self._module_handlers.setdefault(group, {})
-            self._module_handlers[group].setdefault(client, [])
-            self._module_handlers[group][client].append(handler)
+            self.module_handlers.setdefault(group, {})
+            self.module_handlers[group].setdefault(client, [])
+            self.module_handlers[group][client].append(handler)
 
     def is_registered(self, module: Module) -> bool:
-        return module.group_index in self._module_handlers
+        return module.group_index in self.module_handlers
 
     async def _get_or_create_action_dispatcher(self, client) -> CallbackActionDispatcher:
+
         if not (action_dispatcher := self.callback_action_dispatchers.get(client)):
-            self.callback_action_dispatchers[client] = (action_dispatcher := CallbackActionDispatcher())
+            self.callback_action_dispatchers[client] = (
+                action_dispatcher := CallbackActionDispatcher()
+            )
+
             # All callback queries use the same group (only one of them applies for a given update)
             await self.add_handler(0, client, action_dispatcher.pyrogram_handler)
+
         return action_dispatcher

@@ -103,6 +103,8 @@ def evaluate_send_target(send_target: SendTarget, context: BotkitContext) -> _Ev
     else:
         static_send_target = send_target
 
+    if static_send_target == SendTo.self or static_send_target == SendTo.self.name:
+        return _EvaluatedSendTarget("me", None)
     if static_send_target == SendTo.same_chat or static_send_target == SendTo.same_chat.name:
         return _EvaluatedSendTarget(context.chat_id, None)
     if (

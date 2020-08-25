@@ -44,7 +44,7 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
 
                     return result
                 except Exception as e:
-                    raise GatherStepError(gatherer) from e
+                    raise GatherStepError(e)
 
             return gather_initial_state_async, is_coroutine
 

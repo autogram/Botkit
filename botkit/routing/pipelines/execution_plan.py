@@ -21,6 +21,7 @@ from botkit.views.views import MessageViewBase
 
 
 class SendTo(Enum):
+    self = auto()
     same_chat = auto()
     same_chat_quote = auto()
     same_chat_quote_replied_to = auto()

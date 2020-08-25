@@ -21,7 +21,8 @@ from pyrogram.client.filters.filter import Filter
 from pyrogram.client.filters.filters import create
 from pyrogram.client.handlers.handler import Handler
 
-from botkit.routing.pipelines.execution_plan import ExecutionPlan, SendTarget, SendTo, SendTo
+from botkit.routing.pipelines.callbacks import HandlerSignature
+from botkit.routing.pipelines.execution_plan import ExecutionPlan, SendTarget, SendTo
 from botkit.routing.pipelines.gatherer import GathererSignature
 from botkit.routing.pipelines.reducer import ReducerSignature
 from botkit.routing.route import RouteDefinition
@@ -31,7 +32,6 @@ from botkit.routing.route_builder.types import IExpressionWithCallMethod, TView
 from botkit.routing.route_builder.webhook_action_expression import WebhookActionExpressionMixin
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.types import TState
-from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.views.base import InlineResultViewBase
@@ -83,7 +83,7 @@ class StateGenerationExpression(Generic[M]):
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def then_update(self, view_type):  # TODO: update with functional views
+    def then_update(self, view_type) -> RouteExpression:
         self._plan.set_view(view_type, "update")
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
@@ -91,7 +91,7 @@ class StateGenerationExpression(Generic[M]):
 
     def then_send(
         self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
-    ):
+    ) -> RouteExpression:
         if via and not self._route_collection.current_client.is_user:
             raise ValueError(
                 "Can only send a view `via` another bot when the client that this route belongs to is a "
@@ -126,8 +126,16 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
-    def send_view(self, view: TView) -> RouteExpression:
-        self._plan.set_view(view, "send")
+    def send_view(
+        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+    ):
+        if via and not self._route_collection.current_client.is_user:
+            raise ValueError(
+                "Can only send a view `via` another bot when the client that this route belongs to is a "
+                "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
+                self._route_collection.current_client,
+            )
+        self._plan.set_view(view_or_view_type, "send").set_send_via(via).set_send_target(to)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)

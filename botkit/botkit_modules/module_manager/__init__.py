@@ -55,7 +55,7 @@ class ModuleManagerModule(Module):
         module_to_enable = module_info.page_items[0]
         module_name = module_to_enable.name
         module = self.module_loader.get_module_by_name(module_name)
-        await self.module_loader.register_module(module)
+        await self.module_loader.try_register_module(module)
         module_to_enable.is_enabled = True
         return module_info
 

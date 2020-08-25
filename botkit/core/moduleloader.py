@@ -48,11 +48,11 @@ class ModuleLoader:
         tasks: List[Coroutine] = []
         for n, module in enumerate(self.modules):
             module.group_index = n
-            tasks.append(self.register_module(module))
+            tasks.append(self.try_register_module(module))
 
-        results = await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
 
-    async def register_module(self, module: Module) -> None:
+    async def try_register_module(self, module: Module) -> None:
         try:
             if self.is_disabled(module):
                 log.debug(f"{module.get_name()} is disabled.")

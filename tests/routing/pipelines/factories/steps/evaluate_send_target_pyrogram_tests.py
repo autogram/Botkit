@@ -28,6 +28,7 @@ def context():
 @pytest.mark.parametrize(
     "send_target,expected",
     [
+        (SendTo.self, ("me", None)),
         (SendTo.same_chat, (SAME_CHAT_ID, None)),
         (SendTo.same_chat_quote, (SAME_CHAT_ID, MESSAGE_ID)),
         (SendTo.same_chat_quote_replied_to, (SAME_CHAT_ID, REPLIED_TO_MESSAGE_ID)),

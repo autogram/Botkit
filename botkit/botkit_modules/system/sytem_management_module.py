@@ -6,6 +6,7 @@ from haps import Inject, Container
 from pyrogram import Filters, Message, User, Client
 from typing import Optional, List, Any, Literal
 
+from botkit.botkit_modules.system.system_tests import notests
 from botkit.persistence.callback_manager import (
     RedisCallbackManager,
     ICallbackManager,
@@ -49,7 +50,9 @@ class SystemManagementModule(Module):
         routes.on(restart_command & only_owner).call(self.restart_system)
 
         routes.on(Filters.command(["off", "pause"]) & only_owner).call(self.handle_pause_command)
-        routes.on(Filters.command(["on", "unpause"]) & only_owner).call(self.handle_unpause_command)
+        routes.on(Filters.command(["on", "unpause"]) & only_owner).call(
+            self.handle_unpause_command
+        )
 
         command_bus.register(_ToggleSystemStateCommandHandler(self))
 
@@ -59,14 +62,19 @@ class SystemManagementModule(Module):
         await message.delete()
         command_bus.execute(
             ToggleSystemStateCommand(
-                new_state="pause", triggered_by="user", reason_phrase="User requested restart of system.",
+                new_state="pause",
+                triggered_by="user",
+                reason_phrase="User requested restart of system.",
             )
         )
         await asyncio.sleep(2)
         command_bus.execute(
-            ToggleSystemStateCommand(new_state="unpause", triggered_by="user", reason_phrase="Starting back up.",)
+            ToggleSystemStateCommand(
+                new_state="unpause", triggered_by="user", reason_phrase="Starting back up.",
+            )
         )
 
+    @notests
     async def handle_pause_command(self, _client, message: Message):
         await message.delete()
         if self.system_paused:
@@ -83,14 +91,18 @@ class SystemManagementModule(Module):
             and not self.module_loader.is_disabled(x)
             and not isinstance(x, type(self))
         ]
-        self.log.info(f"Pausing modules:\n" + "\n".join([m.get_name() for m in loaded_modules]) + "\n...")
+        self.log.info(
+            f"Pausing modules:\n" + "\n".join([m.get_name() for m in loaded_modules]) + "\n..."
+        )
         tasks = [self.module_loader.unregister_module(m) for m in loaded_modules]
         await asyncio.gather(*tasks, return_exceptions=True)
         self.system_paused = True
         self.paused_modules = loaded_modules
 
         try:
-            callback_manager: RedisCallbackManager = Container().get_object(ICallbackManager, "redis")
+            callback_manager: RedisCallbackManager = Container().get_object(
+                ICallbackManager, "redis"
+            )
             callback_manager.callbacks.sync()
             self.log.info("Callbacks synced.")
         except:
@@ -110,7 +122,7 @@ class SystemManagementModule(Module):
         if self.paused_modules:
             self.log.info(f"Unpausing {len(self.paused_modules)} modules...")
             for m in self.paused_modules:
-                await self.module_loader.register_module(m)
+                await self.module_loader.try_register_module(m)
         else:
             self.log.error(
                 f"For some reason there were no paused modules: {self.paused_modules}. "
