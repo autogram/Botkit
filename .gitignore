@@ -114,6 +114,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-.idea/botkit.iml
-.idea/inspectionProfiles/profiles_settings.xml
-/.idea/botkit.iml
+.idea
