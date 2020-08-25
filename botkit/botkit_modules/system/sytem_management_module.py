@@ -57,13 +57,13 @@ class SystemManagementModule(Module):
     async def restart_system(_, message: Message):
         # TDOO: add notification
         await message.delete()
-        command_bus.create_callback(
+        command_bus.execute(
             ToggleSystemStateCommand(
                 new_state="pause", triggered_by="user", reason_phrase="User requested restart of system.",
             )
         )
         await asyncio.sleep(2)
-        command_bus.create_callback(
+        command_bus.execute(
             ToggleSystemStateCommand(new_state="unpause", triggered_by="user", reason_phrase="Starting back up.",)
         )
 
