@@ -28,7 +28,7 @@ class StatusPings:
         self.environment = environment
         self.client = client
         self.ping_interval: int = 6
-        self.reactivate_after_seconds: int = 30  # minimum 20
+        self.reactivate_after_seconds: int = 20  # minimum 20
         self.last_sent_ping: Optional[Ping] = None
         self.last_ping_msg: Optional[Message] = None
         self.priority = environment_priority
@@ -73,7 +73,7 @@ class StatusPings:
                         reason_phrase=f"Another instance in environment {queried_ping.env} came online and it has a "
                         f"higher priority.",
                     )
-                    command_bus.create_callback(command)
+                    command_bus.execute(command)
                     self.status = "waiting"
                     return
         elif self.status == "waiting":
@@ -83,7 +83,7 @@ class StatusPings:
                     triggered_by=self.__class__.__name__,
                     reason_phrase=f"Could not find any ping messages.",
                 )
-                command_bus.create_callback(command)
+                command_bus.execute(command)
                 self.status = "active"
                 return
 
@@ -94,7 +94,7 @@ class StatusPings:
                     reason_phrase=f"The other currently-active instance in environment {queried_ping.env} hast a lower "
                     f"priority {self.environment}.",
                 )
-                command_bus.create_callback(command)
+                command_bus.execute(command)
                 self.status = "active"
                 return
 
@@ -105,7 +105,7 @@ class StatusPings:
                     triggered_by=self.__class__.__name__,
                     reason_phrase=f"The environment {queried_ping.env} went offline.",
                 )
-                command_bus.create_callback(command)
+                command_bus.execute(command)
                 self.status = "active"
             elif self.timestamp_between(
                 queried_ping.ping_time,
