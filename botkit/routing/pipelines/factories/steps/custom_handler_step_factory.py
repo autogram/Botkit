@@ -1,9 +1,10 @@
+import sys
 import warnings
 from typing import Any, Awaitable, Callable, Optional
 
 from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.pipelines.factories.factory_types import IStepFactory, TResult, TUserInput
-from botkit.routing.pipelines.factories.steps._base import StepError
+from botkit.routing.pipelines.factories.steps._base import StepError, T
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import ModelViewBase
 from botkit.views.botkit_context import BotkitContext
@@ -33,7 +34,7 @@ class CustomHandlerStepFactory(
                 try:
                     result = await handler.func(*args)
                 except Exception as e:
-                    raise HandleStepError(handler) from e
+                    raise HandleStepError(e)
 
                 if isinstance(result, ModelViewBase):
                     # TODO
@@ -55,7 +56,7 @@ class CustomHandlerStepFactory(
                 try:
                     result = handler.func(*args)
                 except Exception as e:
-                    raise HandleStepError(handler) from e
+                    raise HandleStepError(e) from e
 
                 if isinstance(result, ModelViewBase):
                     # TODO

@@ -29,13 +29,32 @@ class _HtmlTextBuilder(BaseTextBuilder):
         return cls._apply_end(cls._wrap_and_escape(text, "b", if_), end)
 
     def mono(self, text: Any, end="", if_: bool = True):
-        return self._append_with_end(self._wrap_and_escape(text, "code", if_), end)
+        return self.code(text, end, if_)
 
     def code(self, text: Any, end="", if_: bool = True):
-        return self.mono(text, end, if_)
+        return self._append_with_end(self._wrap_and_escape(text, "code", if_), end)
+
+    def mono_block(self, text: Any, end="", if_: bool = True):
+        return self.code_block(text, end, if_)
+
+    def code_block(self, text: Any, end="", if_: bool = True):
+        return self._append(self.as_code_block(text, end, if_))
 
     @classmethod
     def as_mono(cls, text: Any, end="", if_: bool = True) -> str:
+        return cls.as_code(text, end, if_)
+
+    @classmethod
+    def as_code(cls, text: Any, end="", if_: bool = True) -> str:
+        return cls._apply_end(cls._wrap_and_escape(text, "code", if_), end)
+
+    @classmethod
+    def as_mono_block(cls, text: Any, end="", if_: bool = True) -> str:
+        return cls.as_code_block(text, end, if_)
+
+    @classmethod
+    def as_code_block(cls, text: Any, end="", if_: bool = True) -> str:
+        text = f"\n{text}\n"
         return cls._apply_end(cls._wrap_and_escape(text, "code", if_), end)
 
     def strike(self, text: Any, end="", if_: bool = True):

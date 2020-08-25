@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, Union
+from typing import Any, Union, cast
 
 from botkit.builders.htmlbuilder import HtmlBuilder
 from botkit.builders.inlinemenubuilder import InlineMenuBuilder
@@ -13,6 +13,7 @@ from botkit.views.base import (
     RenderedMessage,
     RenderedMessageMarkup,
     RenderedPollMessage,
+    RenderedTextMessage,
     TState,
 )
 
@@ -33,8 +34,10 @@ class TextView(MessageViewBase[TState], RenderMarkupBase):
     def render_body(self, builder: HtmlBuilder) -> None:
         pass
 
-    def render(self) -> RenderedMessage:
+    def render(self) -> RenderedTextMessage:
         rendered = super(TextView, self).render()
+        rendered.__class__ = RenderedTextMessage
+        rendered = cast(RenderedTextMessage, rendered)
 
         builder = HtmlBuilder()
         self.render_body(builder)

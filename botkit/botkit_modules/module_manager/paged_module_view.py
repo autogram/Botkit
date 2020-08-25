@@ -11,7 +11,7 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
             if not m.is_enabled:
                 builder.spc().italic("(disabled)")
 
-            builder.para
+            builder.enforce_min_width(70)
 
             if m.route_descriptions:
                 builder.text("Routes: ")
@@ -25,8 +25,6 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
                         builder.strike(r)
             else:
                 builder.text("No routes.")
-
-            builder.para.br()
 
     def render_markup(self, builder: InlineMenuBuilder) -> None:
         row_builder = builder.rows[99]

@@ -60,7 +60,7 @@ class UpdateFieldExtractor:  # TODO: implement properly
             return self.update.command[1:]
 
     @property
-    def command_arg_str(self) -> Optional[str]:
+    def command_args_str(self) -> Optional[str]:
         return " ".join(self.command_args) if self.command_args else None
 
     @property

@@ -1,18 +1,18 @@
 from botkit.builders.text.emoji import Emoji
 from botkit.builders.text.htmltextbuilder import _HtmlTextBuilder
-from botkit.builders.text.iconographybuilder import IconographyBuilder
+from botkit.builders.text.iconographybuilder import Iconography, IconographyBuilder
 
 
 class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
     def h1(self, title: str):
         self.parts.append(f"▶️ ")
         self.bold(title)
-        self.para
+        self.para()
         return self
 
     def h3(self, title: str):
         self.bold(title.upper(), end=".")
-        self.para
+        self.para()
         return self
 
     def headline(self, title: str, level: int):
@@ -25,6 +25,9 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
 
     def as_success(self, text):
         return "{} {}".format(Emoji.white_check_mark, text, hide_keyboard=True)
+
+    def enforce_min_width(self, width: int):
+        self.code_block(" " * width + Iconography.ZERO_WIDTH_WHITESPACE)
 
     def as_love(self, text):
         return "💖 {}".format(text, hide_keyboard=True)

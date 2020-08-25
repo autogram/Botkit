@@ -32,7 +32,9 @@ class CallbackActionDispatcher:
 
     @property
     def pyrogram_handler(self) -> CallbackQueryHandler:
-        game_callback_filter = create(lambda _, cbq: bool(cbq.game_short_name), "GameCallbackQuery")
+        game_callback_filter = create(
+            lambda _, cbq: bool(cbq.game_short_name), "GameCallbackQuery"
+        )
         return CallbackQueryHandler(self.handle, filters=~game_callback_filter)
 
     @staticmethod
@@ -40,24 +42,32 @@ class CallbackActionDispatcher:
         return route.triggers.filters(update) if callable(route.triggers.filters) else True
 
     async def handle(self, client: IClient, callback_query: CallbackQuery) -> Union[bool, Any]:
-        cb_ctx: Optional[CallbackActionContext] = await self._get_context_or_respond(callback_query)
+        cb_ctx: Optional[CallbackActionContext] = await self._get_context_or_respond(
+            callback_query
+        )
         if not cb_ctx:
             return False
 
         route = self._action_routes[cb_ctx.action]
 
-        botkit_context: BotkitContext = BotkitContext(
-            client=client, update=callback_query, state=cb_ctx.state, action=cb_ctx.action, payload=cb_ctx.payload
+        context: BotkitContext = BotkitContext(
+            client=client,
+            update=callback_query,
+            state=cb_ctx.state,
+            action=cb_ctx.action,
+            payload=cb_ctx.payload,
         )
 
         try:
             # TODO: Time out after a few seconds (maybe 3)
             tasks = []
             if cb_ctx.notification:
-                tasks.append(callback_query.answer(cb_ctx.notification, show_alert=cb_ctx.show_alert))
+                tasks.append(
+                    callback_query.answer(cb_ctx.notification, show_alert=cb_ctx.show_alert)
+                )
 
             # noinspection PyTypeChecker
-            result = asyncio.create_task(route.callback(client, callback_query, botkit_context))
+            result = asyncio.create_task(route.callback(client, callback_query, context))
             tasks.append(result)
             await asyncio.gather(*tasks)
             return result.result()
@@ -70,7 +80,9 @@ class CallbackActionDispatcher:
     def callback_manager(self) -> ICallbackManager:
         return Container().get_object(ICallbackManager, botkit_settings.callback_manager_qualifier)
 
-    async def _get_context_or_respond(self, callback_query: CallbackQuery) -> Optional[CallbackActionContext]:
+    async def _get_context_or_respond(
+        self, callback_query: CallbackQuery
+    ) -> Optional[CallbackActionContext]:
         context = self.callback_manager.lookup_callback(callback_query.data)
 
         if not context:

@@ -6,7 +6,7 @@ authors = ["JosXa"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pyrogram = {git = "https://github.com/pyrogram/pyrogram", rev = "asyncio-dev"}
+pyrogram = {git = "https://github.com/pyrogram/pyrogram", rev = "55fc4faf3436fbf1d47a36e4190955c686121514"}
 tgintegration = {git = "https://github.com/josxa/tgintegration", rev = "async-develop"}
 tgcrypto = "^1.2.0"
 cached_property = "^1.5.1"

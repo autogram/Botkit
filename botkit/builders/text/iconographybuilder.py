@@ -3,10 +3,18 @@ from botkit.builders.text.emoji import replace_aliases
 from botkit.builders.text.mdformat import number_as_emoji
 
 
+class Iconography:
+    ZERO_WIDTH_WHITESPACE = "\xad"
+
+
 class IconographyBuilder(BaseTextBuilder):
     def emoji_spc(self):
         """ Renders the horizontal width of an emoji as two `en` whitespace characters (U+2002) """
         self.parts.append("	 	 ")
+        return self
+
+    def zero_width_whitespace_1(self):
+        self.parts.append(Iconography.ZERO_WIDTH_WHITESPACE)
         return self
 
     def emojize(self, alias: str):

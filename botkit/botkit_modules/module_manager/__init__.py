@@ -9,6 +9,7 @@ from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.services.companionbotservice import CompanionBotService
 from botkit.views.renderer_client_mixin import PyroRendererClientMixin
 from ...types.client import IClient
+from ...views.botkit_context import BotkitContext
 
 
 class ModuleManagerModule(Module):
@@ -21,7 +22,11 @@ class ModuleManagerModule(Module):
 
     def register(self, routes: RouteBuilder):
         with routes.using(self.user_client):
-            routes.on(Filters.command("modules", prefixes=["#", "/"])).call(self.show_modules)
+            (
+                routes.on(Filters.command("modules", prefixes=["#", "/"]))
+                .gather(self.get_modules)
+                .then_send(PagedModuleView, via=self.bot_client)
+            )
 
         with routes.using(self.bot_client):
             (
@@ -37,18 +42,13 @@ class ModuleManagerModule(Module):
             routes.on_action("disable").mutate(self.disable_module).then_update(PagedModuleView)
             routes.on_action("enable").mutate(self.enable_module).then_update(PagedModuleView)
 
-    async def show_modules(self, client: PyroRendererClientMixin, message: Message) -> None:
-        await self.companion.send_view_via(
-            message.chat.id,
-            PagedModuleView(
-                ModuleInfosCollectionModel(
-                    all_items=[
-                        ModuleInfo.from_module(m, self.module_loader)
-                        for m in self.module_loader.modules
-                        if m.route_collection
-                    ]
-                )
-            ),
+    def get_modules(self) -> ModuleInfosCollectionModel:
+        return ModuleInfosCollectionModel(
+            all_items=[
+                ModuleInfo.from_module(m, self.module_loader)
+                for m in self.module_loader.modules
+                if m.route_collection
+            ]
         )
 
     async def enable_module(self, module_info: ModuleInfosCollectionModel):

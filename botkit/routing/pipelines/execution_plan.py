@@ -156,7 +156,7 @@ class ExecutionPlan:
     def set_send_via(self, send_via: IClient) -> "ExecutionPlan":
         if send_via is None:
             self._view.send_via = None
-            return
+            return self
 
         if not self._view:
             raise ValueError("Please specify the view to be sent first.")

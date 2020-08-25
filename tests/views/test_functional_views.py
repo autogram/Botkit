@@ -16,7 +16,7 @@ TITLE = "Saying henlo!"
 
 @view
 def full_view_experiment(state: TestModel, builder: ViewBuilder):
-    builder.html.text("Henlo my").spc()
+    builder.html.text("Henlo my").spc
     builder.html.bold("bestest", end=" ").mono("fren")
 
     builder.menu.rows[0].action_button("row 0, col 0", action="test")
