@@ -1,15 +1,13 @@
 from haps import Inject
-from pyrogram import Filters, Message
+from pyrogram.filters import command
 
 from botkit.core.moduleloader import ModuleLoader
 from botkit.core.modules import Module
-from .paged_module_view import PagedModuleView
-from .view_models import ModuleInfo, ModuleInfosCollectionModel
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.services.companionbotservice import CompanionBotService
-from botkit.views.renderer_client_mixin import PyroRendererClientMixin
+from .paged_module_view import PagedModuleView
+from .view_models import ModuleInfo, ModuleInfosCollectionModel
 from ...types.client import IClient
-from ...views.botkit_context import BotkitContext
 
 
 class ModuleManagerModule(Module):
@@ -23,7 +21,7 @@ class ModuleManagerModule(Module):
     def register(self, routes: RouteBuilder):
         with routes.using(self.user_client):
             (
-                routes.on(Filters.command("modules", prefixes=["#", "/"]))
+                routes.on(command("modules", prefixes=["#", "/"]))
                 .gather(self.get_modules)
                 .then_send(PagedModuleView, via=self.bot_client)
             )

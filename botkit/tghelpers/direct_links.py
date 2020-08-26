@@ -1,7 +1,8 @@
 from enum import IntEnum
 
-from pyrogram import Message, User, Chat, Client
-from pyrogram.api.types import Channel
+from pyrogram import Client
+from pyrogram.raw.types import Channel
+from pyrogram.types import Message, User, Chat
 from typing import Optional, Union, cast, Dict
 
 _links_cache: Dict[int, str] = {}
@@ -49,5 +50,5 @@ async def direct_link(
             return f"https://web.Telegram.org/#/im?p=u{peer.id}"
         else:
             raise ValueError(
-                f"_IdentifiableUser has no username, creating direct link on platform {platform} not possible."
+                f"User has no username, creating direct link on platform {platform} not possible."
             )

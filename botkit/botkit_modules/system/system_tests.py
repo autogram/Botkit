@@ -1,15 +1,13 @@
-from typing import Any, List, Optional
+from typing import List
 from unittest.mock import Mock
 
 from haps import Inject
-from pyrogram import Chat, Message, User
+from pyrogram.types import Chat, Message, User
 
 from botkit.core.moduleloader import ModuleLoader
-from botkit.core.modules import Module, module
-from botkit.routing.pipelines.callbacks import HandlerSignature
+from botkit.core.modules import Module
 from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.routing.route_builder.route_collection import RouteCollection
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 
@@ -44,6 +42,7 @@ class SystemTestsModule(Module):
 
     async def fire_request(self, update_type: UpdateType, route: RouteHandler):
         try:
+            # noinspection PyUnresolvedReferences
             should_not_test = route.callback.notests
             return
         except AttributeError:

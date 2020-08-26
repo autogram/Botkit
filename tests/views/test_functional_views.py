@@ -36,8 +36,8 @@ def test_full_view_can_be_rendered(di):
     assert res.title == TITLE
 
 
-def test_using_photo_rendered_message_is_media():
-    def f(_, builder: ViewBuilder):
-        builder.
-
-    render_functional_view()
+# def test_using_photo_rendered_message_is_media():
+#     def f(_, builder: ViewBuilder):
+#         builder.
+#
+#     render_functional_view()

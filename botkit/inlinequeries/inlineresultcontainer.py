@@ -1,6 +1,6 @@
 from typing import List
 
-from pyrogram import InlineQueryResult, InlineQuery
+from pyrogram.types import InlineQuery, InlineQueryResult
 
 
 class InlineResultContainer:

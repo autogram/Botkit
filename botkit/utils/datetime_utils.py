@@ -3,7 +3,7 @@ from typing import Optional
 
 import pytz
 
-from pyrogram import Message
+from pyrogram.types import Message
 
 
 def get_message_date(message: Message, including_edits: bool = True) -> datetime:

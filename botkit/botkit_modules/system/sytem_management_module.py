@@ -3,10 +3,12 @@ from dataclasses import dataclass
 import asyncio
 from buslane.commands import Command, CommandHandler
 from haps import Inject, Container
-from pyrogram import Filters, Message, User, Client
+from pyrogram import filters
+from pyrogram.types import Message, User
 from typing import Optional, List, Any, Literal
 
 from botkit.botkit_modules.system.system_tests import notests
+from botkit.libraries.annotations import IClient
 from botkit.persistence.callback_manager import (
     RedisCallbackManager,
     ICallbackManager,
@@ -19,7 +21,7 @@ from botkit.routing.route_builder.builder import RouteBuilder
 
 @dataclass
 class _LoadCtx:
-    user_client_me: User
+    user_client_id: int
 
 
 @dataclass
@@ -32,25 +34,25 @@ class ToggleSystemStateCommand(Command):
 class SystemManagementModule(Module):
     module_loader: ModuleLoader = Inject()
 
-    def __init__(self, user_client: Client) -> None:
+    def __init__(self, user_client: IClient) -> None:
         self.user_client = user_client
 
         self.system_paused: bool = False
         self.paused_modules: Optional[List[Module]] = None
 
     async def load(self) -> _LoadCtx:
-        return _LoadCtx(user_client_me=await self.user_client.get_me())
+        return _LoadCtx(user_client_id=(await self.user_client.get_me()).id)
 
     def register(self, routes: RouteBuilder):
         routes.use(self.user_client)
 
-        restart_command = Filters.command("r", prefixes=[".", "#"]) | Filters.command("restart")
-        only_owner = Filters.user(routes.context.load_result.user_client_me.id)
+        restart_command = filters.command("r", prefixes=[".", "#"]) | filters.command("restart")
+        only_owner = filters.user(routes.context.load_result.user_client_id)
 
         routes.on(restart_command & only_owner).call(self.restart_system)
 
-        routes.on(Filters.command(["off", "pause"]) & only_owner).call(self.handle_pause_command)
-        routes.on(Filters.command(["on", "unpause"]) & only_owner).call(
+        routes.on(filters.command(["off", "pause"]) & only_owner).call(self.handle_pause_command)
+        routes.on(filters.command(["on", "unpause"]) & only_owner).call(
             self.handle_unpause_command
         )
 

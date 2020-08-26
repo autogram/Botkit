@@ -8,21 +8,21 @@ from more_itertools import flatten
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable
 
-PYROGRAM_UPDATE_TYPES: Dict[Type[pyrogram.Update], UpdateType] = {
-    pyrogram.Message: UpdateType.message,
-    pyrogram.CallbackQuery: UpdateType.callback_query,
-    pyrogram.InlineQuery: UpdateType.inline_query,
-    pyrogram.Poll: UpdateType.poll,
+PYROGRAM_UPDATE_TYPES: Dict[Type[pyrogram.types.Update], UpdateType] = {
+    pyrogram.types.Message: UpdateType.message,
+    pyrogram.types.CallbackQuery: UpdateType.callback_query,
+    pyrogram.types.InlineQuery: UpdateType.inline_query,
+    pyrogram.types.Poll: UpdateType.poll,
     # pyrogram.??? TODO: there is no one type to indicate user status
 }
 
 # noinspection PyUnresolvedReferences
-PYROGRAM_HANDLER_TYPES: Dict[UpdateType, pyrogram.client.handlers.handler.Handler] = {
-    UpdateType.message: pyrogram.MessageHandler,
-    UpdateType.callback_query: pyrogram.CallbackQueryHandler,
-    UpdateType.inline_query: pyrogram.InlineQueryHandler,
-    UpdateType.poll: pyrogram.PollHandler,
-    UpdateType.user_status: pyrogram.UserStatusHandler,
+PYROGRAM_HANDLER_TYPES: Dict[UpdateType, pyrogram.handlers.handler.Handler] = {
+    UpdateType.message: pyrogram.handlers.MessageHandler,
+    UpdateType.callback_query: pyrogram.handlers.CallbackQueryHandler,
+    UpdateType.inline_query: pyrogram.handlers.InlineQueryHandler,
+    UpdateType.poll: pyrogram.handlers.PollHandler,
+    UpdateType.user_status: pyrogram.handlers.UserStatusHandler,
 }
 
 
@@ -49,12 +49,14 @@ def determine_pyrogram_handler_update_types(handler: TypedCallable) -> Set[Updat
                 break  # inner
 
     if not found_arg_types:
-        raise ValueError(f"No matching update type found for handler {handler} with signature {handler.type_hints}.")
+        raise ValueError(
+            f"No matching update type found for handler {handler} with signature {handler.type_hints}."
+        )
 
     return found_arg_types
 
 
-def _get_update_types(t: Any) -> List[Type[pyrogram.Update]]:
+def _get_update_types(t: Any) -> List[Type[pyrogram.types.Update]]:
     if _is_pyrogram_update_type(t):
         return [t]  # Direct subclass
     else:
@@ -66,4 +68,4 @@ def _get_update_types(t: Any) -> List[Type[pyrogram.Update]]:
 
 
 def _is_pyrogram_update_type(t: Any) -> bool:
-    return inspect.isclass(t) and issubclass(t, pyrogram.Update)
+    return inspect.isclass(t) and issubclass(t, pyrogram.types.Update)

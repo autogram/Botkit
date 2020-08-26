@@ -1,7 +1,9 @@
-from pyrogram import Message
+from pyrogram.types import Message
 
-from botkit.routing.pipelines.callbacks import HandlerSignature
-from botkit.routing.pipelines.factories.base import UpdatePipelineFactory
+from botkit.libraries.annotations import HandlerSignature
+from botkit.routing.pipelines.factories.updates.update_pipeline_factory import (
+    UpdatePipelineFactory,
+)
 from botkit.routing.pipelines.factories.steps.custom_handler_step_factory import (
     CustomHandlerStepFactory,
 )

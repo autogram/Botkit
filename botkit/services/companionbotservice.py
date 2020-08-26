@@ -3,37 +3,36 @@ from asyncio import Event
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
-from haps import INSTANCE_SCOPE, inject
+from haps import INSTANCE_SCOPE, SINGLETON_SCOPE, base, inject, scope
 from logzero import logger as log
-from pyrogram import (
+from pyrogram.filters import create
+from pyrogram.handlers import InlineQueryHandler
+from pyrogram.handlers.handler import Handler
+from pyrogram.raw.base.messages import BotResults
+from pyrogram.types import (
     InlineQuery,
     InlineQueryResultArticle,
     InputTextMessageContent,
-    InlineQueryHandler,
     Message,
     InlineQueryResultPhoto,
-    MessageHandler,
-    Filters,
     Photo,
 )
-from pyrogram.api.types.messages import BotResults
-from pyrogram.client.filters.filters import create
-from pyrogram.client.handlers.handler import Handler
 from typing import Union, Optional, AsyncIterator
 
 from botkit.botkit_services.services import service
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 from botkit.types.client import IClient
-from botkit.views.base import (
+from botkit.views.base import InlineResultViewBase
+from botkit.views.rendered_messages import (
     RenderedMediaMessage,
     RenderedMessage,
-    InlineResultViewBase,
     RenderedMessageBase,
     RenderedTextMessage,
 )
 
 
-@service(scope=INSTANCE_SCOPE)
+@base
+@scope(SINGLETON_SCOPE)
 class CompanionBotService:
     def __init__(self, user_client: IClient, bot_client: IClient):
         self.user_client = user_client
@@ -71,7 +70,7 @@ class CompanionBotService:
 
             await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=0)
 
-        inline_id_filter = create(lambda _, ilq: ilq.query == query_text, "QueryFilter")
+        inline_id_filter = create(lambda _, __, ilq: ilq.query == query_text, "QueryFilter")
 
         group = -99
         dispatcher = self.bot_client.dispatcher
@@ -150,7 +149,7 @@ class CompanionBotService:
             # noinspection PyTypeChecker
             await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=1)
 
-        inline_id_filter = create(lambda _, ilq: ilq.query == query_text, "QueryFilter")
+        inline_id_filter = create(lambda _, __, ilq: ilq.query == query_text, "QueryFilter")
 
         handler = InlineQueryHandler(answer_inline_query, inline_id_filter)
 
@@ -196,7 +195,7 @@ class CompanionBotService:
     ) -> Message:
         rendered: RenderedMessage = view.render()
         return await self.send_rendered_message(
-            chat_id=chat_id, view=view, reply_to=reply_to, silent=silent, hide_via=hide_via
+            chat_id=chat_id, rendered=rendered, reply_to=reply_to, silent=silent, hide_via=hide_via
         )
 
     @asynccontextmanager
@@ -224,9 +223,9 @@ class CompanionBotService:
         async with self.add_handler(
             MessageHandler(
                 record_message,
-                filters=Filters.media
-                & Filters.chat(user_message.from_user.id)
-                & Filters.forwarded,
+                filters=filters.media
+                & filters.chat(user_message.from_user.id)
+                & filters.forwarded,
             )
         ):
             await self.user_client.forward_messages(
@@ -249,7 +248,7 @@ class CompanionBotService:
             await message.delete()
 
         async with self.add_handler(
-            MessageHandler(record_message, filters=Filters.photo & Filters.chat(user_id))
+            MessageHandler(record_message, filters=filters.photo & filters.chat(user_id))
         ):
             await self.user_client.send_photo(bot_id, photo=photo)
             await recorded_msg.wait()

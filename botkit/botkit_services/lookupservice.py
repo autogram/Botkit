@@ -5,14 +5,13 @@ from typing import Dict, TypeVar, Any, List
 from haps import *
 from telethon.tl.custom import Message, Dialog
 
-from commons.core.routing import Event
 from commons.core.clients.userclient import IUserClient
 from commons.core.descriptors.base import EntityDescriptor
 from commons.core.util import string_similarity
 from telethon.tl import TLObject
 from telethon.utils import get_display_name as telethon_get_display_name
 
-T = TypeVar('P')
+T = TypeVar("P")
 
 
 class EntityNotFoundError(Exception):
@@ -22,26 +21,32 @@ class EntityNotFoundError(Exception):
 def get_display_name(entity: Any):
     if isinstance(entity, Dialog):
         return entity.name
-    if hasattr(entity, 'title'):
+    if hasattr(entity, "title"):
         return entity.title
     return telethon_get_display_name(entity)
+
 
 @base
 class ILookupService(ABC):
     @abstractmethod
-    async def resolve_peer(self, descriptor: EntityDescriptor, raise_=True): pass
+    async def resolve_peer(self, descriptor: EntityDescriptor, raise_=True):
+        pass
 
     @abstractmethod
-    async def resolve_full_peer(self, descriptor: EntityDescriptor): pass
+    async def resolve_full_peer(self, descriptor: EntityDescriptor):
+        pass
 
     @abstractmethod
-    async def get_message_by_id(self, chat: Any, message_id: int) -> Message: pass
+    async def get_message_by_id(self, chat: Any, message_id: int) -> Message:
+        pass
 
     @abstractmethod
-    async def get_previous_messages(self, event: Event, n: int = 1) -> List[Message]: pass
+    async def get_previous_messages(self, event: Event, n: int = 1) -> List[Message]:
+        pass
 
     @abstractmethod
-    async def get_last_message_in_chat(self, input_chat: Any) -> Message: pass
+    async def get_last_message_in_chat(self, input_chat: Any) -> Message:
+        pass
 
 
 @egg
@@ -63,11 +68,7 @@ class LookupService(ILookupService):
         return self.client.session.get_input_entity(descriptor)
 
     async def _resolve_chat_by_title(
-            self,
-            title: str,
-            confidence=0.9,
-            aggressive=False,
-            raise_=True
+        self, title: str, confidence=0.9, aggressive=False, raise_=True
     ) -> TLObject:
         results = await self.client.get_dialogs(limit=200)
 
@@ -87,11 +88,7 @@ class LookupService(ILookupService):
             return None
 
     async def _resolve_user_by_title(
-            self,
-            title: str,
-            confidence=0.9,
-            aggressive=False,
-            raise_=True
+        self, title: str, confidence=0.9, aggressive=False, raise_=True
     ) -> TLObject:
         results = await self.client.get_dialogs(limit=40)
 
@@ -104,7 +101,9 @@ class LookupService(ILookupService):
         # Search failed.
         for d in results:
             try:
-                participants = self.client.iter_participants(d.input_entity, 200, search='', aggressive=aggressive)
+                participants = self.client.iter_participants(
+                    d.input_entity, 200, search="", aggressive=aggressive
+                )
                 async for p in participants:
                     if matches_query(get_display_name(p)):
                         return p.entity

@@ -3,8 +3,8 @@ import traceback
 from dataclasses import dataclass
 from typing import *
 
-import pyrogram
-from pyrogram import Update
+import pyrogram.types
+from pyrogram.types import Update
 
 from botkit.future_tgtypes.chat import Chat
 from botkit.future_tgtypes.message import Message
@@ -18,13 +18,13 @@ class UpdateFieldExtractor:  # TODO: implement properly
 
     @property
     def chat(self) -> Optional[Chat]:
-        if isinstance(self.update, pyrogram.Message):
+        if isinstance(self.update, pyrogram.types.Message):
             return self.update.chat
         return None
 
     @property
     def user(self) -> Optional[Chat]:
-        if isinstance(self.update, pyrogram.Message):
+        if isinstance(self.update, pyrogram.types.Message):
             return self.update.from_user
         return None
 
@@ -66,7 +66,7 @@ class UpdateFieldExtractor:  # TODO: implement properly
     @property
     def replied_to_message(self) -> Optional[Message]:
         # TODO: turn into protocols
-        if isinstance(self.update, pyrogram.Message):
+        if isinstance(self.update, pyrogram.types.Message):
             return self.update.reply_to_message
 
     @property

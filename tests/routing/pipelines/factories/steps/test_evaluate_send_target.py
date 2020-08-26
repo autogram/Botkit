@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
-from pyrogram import Chat, Message, User
+from pyrogram.types import Chat, Message, User
 
 from botkit.routing.pipelines.execution_plan import SendTo
 from botkit.routing.pipelines.factories.steps.send_view_step_factory import evaluate_send_target
@@ -15,7 +15,6 @@ REPLIED_TO_MESSAGE_ID = 2000
 
 @pytest.fixture(scope="function")
 def context():
-
     (replied_to_message := Mock(Message)).configure_mock(message_id=REPLIED_TO_MESSAGE_ID)
     (chat := Mock(Chat)).configure_mock(id=SAME_CHAT_ID)
     (user := Mock(User)).configure_mock(id=USER_ID)

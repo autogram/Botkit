@@ -1,4 +1,4 @@
-from pyrogram import InlineKeyboardButton
+from pyrogram.types import InlineKeyboardButton
 
 from botkit.inlinequeries.contexts import IInlineModeContext, DefaultInlineModeContext
 
@@ -14,5 +14,5 @@ def switch_inline_button(
             "switch_inline_query" + "_current_chat"
             if current_chat
             else "": in_context.format_query()
-        }
+        },
     )

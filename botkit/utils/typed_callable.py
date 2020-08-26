@@ -3,7 +3,17 @@ import warnings
 from dataclasses import dataclass
 
 from cached_property import cached_property
-from typing import Any, Awaitable, Callable, Dict, Generic, Protocol, TypeVar, get_type_hints
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generic,
+    Protocol,
+    TypeVar,
+    Union,
+    get_type_hints,
+)
 
 
 T = TypeVar("T", bound=Callable)

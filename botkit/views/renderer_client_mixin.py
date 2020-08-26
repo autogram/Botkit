@@ -4,20 +4,21 @@ from typing import *
 try:
     # TODO: Turn this into a contextmanager, `with lib_check('Pyrogram'): import ...`
     # noinspection PyPackageRequirements
-    from pyrogram import Client, Message, User
+    from pyrogram import Client
+    from pyrogram.types import Message, User
 except ImportError as e:
     raise ImportError(
         "The Pyrogram library does not seem to be installed, so using Botkit in Pyrogram flavor is not possible. "
     ) from e
 
 from botkit.types.client import IClient
-from botkit.views.base import (
-    InlineResultViewBase,
+from botkit.views.base import InlineResultViewBase
+from botkit.views.types import TState
+from botkit.views.rendered_messages import (
     RenderedMediaMessage,
     RenderedMessageBase,
     RenderedStickerMessage,
     RenderedTextMessage,
-    TState,
 )
 from botkit.views.functional_views import ViewRenderFuncSignature
 from botkit.views.views import MessageViewBase

@@ -18,7 +18,7 @@ from typing import List, Union, TYPE_CHECKING
 
 from botkit.core.moduleloader import ModuleLoader
 from botkit.core.modules._module import Module
-from botkit.tghelpers.names import user_or_displayname
+from botkit.tghelpers.names import user_or_display_name
 from abc import ABC
 
 
@@ -47,14 +47,14 @@ class Startup(Application, ABC):
         await asyncio.gather(*start_tasks)
 
     async def __start_client(self, client):
-        session_path = client.session_name if hasattr(client, 'session_name') else client.session.filename
-
-        log.debug(
-            f"Starting session " f"{session_path}..."
+        session_path = (
+            client.session_name if hasattr(client, "session_name") else client.session.filename
         )
+
+        log.debug(f"Starting session " f"{session_path}...")
         await client.start()
         me = await client.get_me()
-        log.info(f"Started {user_or_displayname(me)} as {client.__class__.__name__}.")
+        log.info(f"Started {user_or_display_name(me)} as {client.__class__.__name__}.")
 
     def run(self) -> None:
         log.debug("Autodiscovery completed. Initializing...")
@@ -90,7 +90,7 @@ class Startup(Application, ABC):
     async def _shutdown(self, loop: AbstractEventLoop):
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         [task.cancel() for task in tasks]
-        log.info(f"Cancelling {len(tasks)} outstanding tasks")
-        await asyncio.gather(*tasks, return_exceptions=True)
+        log.info(f"Cancelling {len(tasks)} running or outstanding tasks")
+        await asyncio.gather(*tasks)
         await self.on_shutdown()
         loop.stop()

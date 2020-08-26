@@ -1,15 +1,15 @@
 from typing import Optional
 
-from common.inlinequeries.contexts import PrefixBasedInlineQueryContext
+from botkit.inlinequeries.contexts import PrefixBasedInlineModeContext
 
 
 def parse(text: str, prefix: str, delimiter: Optional[str] = None):
-    ctx = PrefixBasedInlineQueryContext(prefix, delimiter=delimiter or ": ")
+    ctx = PrefixBasedInlineModeContext(prefix, delimiter=delimiter or ": ")
     return ctx.parse_input(text)
 
 
 def format(user_input: str, prefix: str, delimiter: Optional[str] = None):
-    ctx = PrefixBasedInlineQueryContext(prefix, delimiter=delimiter or ": ")
+    ctx = PrefixBasedInlineModeContext(prefix, delimiter=delimiter or ": ")
     return ctx.format_query(user_input)
 
 
@@ -63,9 +63,7 @@ def test_format_input_whitespace():
 
 
 def test_format_input_newlines():
-    assert (
-        format(user_input=" a\nb\nc ", prefix="lala", delimiter=": ") == "lala: a\nb\nc"
-    )
+    assert format(user_input=" a\nb\nc ", prefix="lala", delimiter=": ") == "lala: a\nb\nc"
 
 
 # endregion

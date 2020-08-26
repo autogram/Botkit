@@ -1,18 +1,13 @@
 import inspect
 import warnings
-from timeit import timeit
-from typing import Any, Awaitable, Callable, List, Optional, Union, cast
+from typing import Callable, List, Optional, cast
 
-from pyrogram import Update
-from pyrogram.errors import MessageIdInvalid
-
-from botkit.routing.pipelines.execution_plan import SendTarget, SendTo, ViewParameters
+from botkit.routing.pipelines.execution_plan import ViewParameters
 from botkit.routing.pipelines.factories.factory_types import IStepFactory
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.services.companionbotservice import CompanionBotService
-from botkit.views.base import RenderedMessageBase
 from botkit.views.botkit_context import BotkitContext
 from botkit.views.functional_views import quacks_like_view_render_func, render_functional_view
+from botkit.views.rendered_messages import RenderedMessageBase
 from botkit.views.views import MessageViewBase
 
 

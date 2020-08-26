@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Any, DefaultDict, Dict, Generic, Optional, TypeVar, Union
+from typing import Any, Generic, Optional, TypeVar, Union
 
 from botkit.dispatching.callbackqueries.types import CallbackActionType
 from botkit.future_tgtypes.update_field_extractor import UpdateFieldExtractor
-from botkit.routing.types import TState
-from botkit.views.base import RenderedMessage
-from botkit.views.sender_interface import IViewSender
+from .rendered_messages import RenderedMessage
+from .sender_interface import IViewSender
+from ..routing.types import TState
 
 TPayload = TypeVar("TPayload")
 

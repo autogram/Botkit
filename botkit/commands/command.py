@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 
 from mypy_extensions import TypedDict
-from pyrogram import Update
-from pyrogram.client.filters.filter import Filter
+from pyrogram.filters import Filter
+from pyrogram.types import Update
 from typing import Union, Dict, List, Tuple, Optional
 from typing_extensions import Literal
 import pyrogram
@@ -17,9 +17,6 @@ command_categories: Dict[str, CommandCategory] = {
     "user": {"privacy": "self"},
     "bot": {"privacy": "public"},
 }
-
-
-
 
 
 # trigger_dict = {"private": True, "contains_url": True}
@@ -38,7 +35,7 @@ command_categories: Dict[str, CommandCategory] = {
 # CommandDefinition(
 #     name="browse",
 #     quick_action=QuickAction(
-#         trigger=EntityFilters.url & Filters.private,
+#         trigger=EntityFilters.url & filters.private,
 #     ),
 #     quick_action_prompt=True,  # actions get included in quick actions reply keyboard
 #     delete_query=True
@@ -53,7 +50,7 @@ class CommandParser:
 
     @classmethod
     def from_declaration(
-            cls, value: Union[str, List[str], Tuple[str], "CommandParser"]
+        cls, value: Union[str, List[str], Tuple[str], "CommandParser"]
     ) -> "CommandParser":
         if isinstance(value, CommandParser):
             return value  # for when user already provides initialized object
@@ -83,13 +80,12 @@ class CommandDefinition:
 
 # region Routing
 
-QUICK_ACTION_UPDATE_TYPES = (pyrogram.Message, pyrogram.Poll)
+QUICK_ACTION_UPDATE_TYPES = (pyrogram.types.Message, pyrogram.types.Poll)
 
 
 async def match_quick_actions(commands: List[CommandDefinition], update: Update):
     if not isinstance(update, QUICK_ACTION_UPDATE_TYPES):
         return
-
 
 
 # endregion

@@ -1,15 +1,8 @@
 from typing import Dict, Type
 
-from pyrogram import CallbackQuery
-
-from botkit.routing.pipelines.factories.base import UpdatePipelineFactory
-from botkit.routing.pipelines.factories.steps.custom_handler_step_factory import (
-    CustomHandlerStepFactory,
-)
-from botkit.routing.pipelines.factories.steps.gather_step_factory import GatherStepFactory
-from botkit.routing.pipelines.factories.steps.reduce_step_factory import ReduceStepFactory
-from botkit.routing.pipelines.factories.steps.send_view_step_factory import (
-    CommitRenderedViewStepFactory,
+from botkit.libraries.annotations import HandlerSignature
+from botkit.routing.pipelines.factories.updates.update_pipeline_factory import (
+    UpdatePipelineFactory,
 )
 from botkit.routing.pipelines.factories.updates.callback_query_pipeline_factory import (
     CallbackQueryPipelineFactory,
@@ -17,9 +10,7 @@ from botkit.routing.pipelines.factories.updates.callback_query_pipeline_factory 
 from botkit.routing.pipelines.factories.updates.message_pipeline_factory import (
     MessagePipelineFactory,
 )
-from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.types.client import IClient
 
 
 class InlineQueryPipelineFactory(UpdatePipelineFactory):

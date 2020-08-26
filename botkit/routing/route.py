@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from typing import Dict, List, Literal, Optional, TypeVar, cast
 
 from cached_property import cached_property
-from pyrogram import (
+from pyrogram.filters import Filter
+from pyrogram.handlers import (
     CallbackQueryHandler,
     InlineQueryHandler,
     MessageHandler,
@@ -11,14 +12,13 @@ from pyrogram import (
     RawUpdateHandler,
     UserStatusHandler,
 )
-from pyrogram.client.filters.filter import Filter
-from pyrogram.client.handlers.handler import Handler
+from pyrogram.handlers.handler import Handler
 
+from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
 from botkit.routing.pipelines.factories.updates.others import PIPELINE_FACTORIES
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.triggers import ActionIdTypes, RouteTriggers
-from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.update_types.updatetype import UpdateType
 
 M = TypeVar("M")

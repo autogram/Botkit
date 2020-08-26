@@ -3,7 +3,7 @@ from typing import Any
 from .htmlbuilder import HtmlBuilder
 from .inlinemenubuilder import InlineMenuBuilder
 from .metabuilder import MetaBuilder
-from ..views.base import RenderedMessage, RenderedTextMessage
+from ..views.rendered_messages import RenderedMessage, RenderedTextMessage
 
 
 class ViewBuilder:

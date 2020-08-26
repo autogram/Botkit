@@ -9,7 +9,7 @@ from typing import (
 from decorators import FuncDecorator
 
 from botkit.builders import ViewBuilder
-from botkit.views.base import RenderedMessage
+from botkit.views.rendered_messages import RenderedMessage
 
 T = TypeVar("T")
 

@@ -2,12 +2,14 @@ from typing import cast
 from unittest.mock import Mock
 
 import pytest
-from pyrogram import Client, Filters, Message
+from pyrogram import filters
+from pyrogram.types import Message
 
 from botkit.core.modules import Module
+from botkit.libraries.annotations import IClient
 from botkit.routing.route_builder.builder import RouteBuilder, StateRouteBuilder
 
-client: Client = Mock(Client)
+client: IClient = Mock(IClient)
 
 
 def test_state_machine_initialization_via_num_arguments():
@@ -51,18 +53,18 @@ class StateMachineTestModule(Module):
         entry_points = cast(StateRouteBuilder, entry_points)
         ended = cast(StateRouteBuilder, ended)
 
-        def entry_point(client: Client, message: Message):
+        def entry_point(client: IClient, message: Message):
             pass
 
-        def end(client: Client, message: Message):
+        def end(client: IClient, message: Message):
             pass
 
-        entry_points.on(Filters.text).call(entry_point).and_transition_to(ended)
-        ended.on(Filters.text).call(end).and_exit_state()
+        entry_points.on(filters.text).call(entry_point).and_transition_to(ended)
+        ended.on(filters.text).call(end).and_exit_state()
 
 
 def test_state_machine_routing():
-    # TODO: implement
+    pass  # TODO: implement
     # module = StateMachineTestModule()
     # dispatcher = BotkitDispatcher()
     #

@@ -10,11 +10,13 @@ from botkit.views.base import (
     InlineResultViewBase,
     ModelViewBase,
     RenderMarkupBase,
+)
+from botkit.views.types import TState
+from botkit.views.rendered_messages import (
     RenderedMessage,
     RenderedMessageMarkup,
     RenderedPollMessage,
     RenderedTextMessage,
-    TState,
 )
 
 

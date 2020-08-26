@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, Optional, TypeVar, Union, overload
 
-from botkit.views.base import RenderedMessageBase
+from botkit.views.rendered_messages import RenderedMessageBase
 from botkit.views.views import MediaView, MessageViewBase, StickerView, TextView
 
 Message = TypeVar("Message")

@@ -4,8 +4,9 @@ from typing import Any, Dict, Optional, Union
 from cached_property import cached_property
 from haps import Container
 from logzero import logger as log
-from pyrogram import CallbackQuery, CallbackQueryHandler, Update
-from pyrogram.client.filters.filters import create
+from pyrogram.filters import create
+from pyrogram.handlers import CallbackQueryHandler
+from pyrogram.types import CallbackQuery, Update
 
 from botkit.persistence.callback_manager import CallbackActionContext, ICallbackManager
 from botkit.routing.route import RouteDefinition, RouteHandler
@@ -33,13 +34,13 @@ class CallbackActionDispatcher:
     @property
     def pyrogram_handler(self) -> CallbackQueryHandler:
         game_callback_filter = create(
-            lambda _, cbq: bool(cbq.game_short_name), "GameCallbackQuery"
+            lambda _, __, cbq: bool(cbq.game_short_name), "GameCallbackQuery"
         )
         return CallbackQueryHandler(self.handle, filters=~game_callback_filter)
 
     @staticmethod
-    def check(update: Update, route: RouteDefinition):
-        return route.triggers.filters(update) if callable(route.triggers.filters) else True
+    def check(client: IClient, update: Update, route: RouteDefinition):
+        return route.triggers.filters(client, update) if callable(route.triggers.filters) else True
 
     async def handle(self, client: IClient, callback_query: CallbackQuery) -> Union[bool, Any]:
         cb_ctx: Optional[CallbackActionContext] = await self._get_context_or_respond(

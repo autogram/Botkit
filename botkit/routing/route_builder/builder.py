@@ -16,12 +16,11 @@ from typing import (
 )
 from uuid import UUID, uuid4
 
-from pyrogram import CallbackQuery
-from pyrogram.client.filters.filter import Filter
-from pyrogram.client.filters.filters import create
-from pyrogram.client.handlers.handler import Handler
+from pyrogram.filters import Filter, create
+from pyrogram.handlers.handler import Handler
+from pyrogram.types import CallbackQuery
 
-from botkit.routing.pipelines.callbacks import HandlerSignature
+from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan, SendTarget, SendTo
 from botkit.routing.pipelines.gatherer import GathererSignature
 from botkit.routing.pipelines.reducer import ReducerSignature
@@ -176,7 +175,7 @@ class PlayGameExpression:
         self._route_collection = routes
         self._triggers = RouteTriggers(
             filters=create(
-                lambda _, cbq: cbq.game_short_name == game_short_name, "PlayGameFilter"
+                lambda _, __, cbq: cbq.game_short_name == game_short_name, "PlayGameFilter"
             ),
             action=None,
             condition=None,
@@ -241,7 +240,7 @@ class ConditionsExpression(SendViewMixin):
 
 @dataclass
 class RouteBuilderContext:
-    load_result: Any = None
+    load_result: Optional[Any] = None
 
 
 class RouteBuilder:

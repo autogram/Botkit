@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from pyrogram import Message
+from pyrogram.types import Message
 from typing import Optional
 
 
@@ -69,15 +69,11 @@ class TextMessageModel(BaseModel):
             from_user_id=msg.from_user.id if msg.from_user else None,
             forward_from_id=msg.forward_from.id if msg.forward_from else None,
             forward_sender_name=msg.forward_sender_name,
-            forward_from_chat_id=msg.forward_from_chat.id
-            if msg.forward_from_chat
-            else None,
+            forward_from_chat_id=msg.forward_from_chat.id if msg.forward_from_chat else None,
             forward_from_message_id=msg.forward_from_message_id,
             forward_signature=msg.forward_signature,
             forward_date=msg.forward_date,
-            reply_to_message_id=msg.reply_to_message.message_id
-            if msg.reply_to_message
-            else None,
+            reply_to_message_id=msg.reply_to_message.message_id if msg.reply_to_message else None,
             mentioned=msg.mentioned,
             empty=msg.empty,
             service=msg.service,

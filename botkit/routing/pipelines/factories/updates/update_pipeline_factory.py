@@ -1,15 +1,17 @@
 import inspect
+import traceback
 from abc import ABC, abstractmethod
-from typing import cast
+from typing import Awaitable, cast
 
-from pyrogram import Update
+from pyrogram.types import Update
 from unsync import Unfuture, unsync
 
-from botkit.routing.pipelines.callbacks import HandlerSignature
+from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.update_types.updatetype import UpdateType
+from botkit.types.client import IClient
 
 
 class UpdatePipelineFactory(ABC):
@@ -78,30 +80,30 @@ class UpdatePipelineFactory(ABC):
         return "".join(parts)
 
     def create_update_filter(self) -> UpdateFilterSignature:
-        is_awaitable = None
+        return self.triggers.filters
         cond = self.triggers.condition
         filters = self.triggers.filters
 
-        if cond:
-            if inspect.isawaitable(cond):
-                is_awaitable = True
-            else:
-                is_awaitable = False
+        cond_is_awaitable = cond and inspect.isawaitable(cond)
 
-        def check(update: Update) -> bool:
+        async def check(client: IClient, update: Update) -> bool:
             if cond is not None:
 
-                @unsync
-                async def check_cond():
-                    return await cond()
-
-                res = cast(Unfuture, check_cond())
-                if not res.result:
-                    return False
+                if cond_is_awaitable:
+                    if not await cond():
+                        return False
 
             if filters:
-                return filters(update)
+                try:
+                    return await filters(client, update)
+                except:
+                    print(filters)
+                    print(type(filters))
+                    traceback.print_exc()
 
             return False
+
+        # TODO: Hotfix for weird PR in pyro
+        check.__call__ = check
 
         return check

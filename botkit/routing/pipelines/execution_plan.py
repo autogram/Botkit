@@ -7,10 +7,10 @@ from uuid import UUID
 from typing_extensions import Literal
 
 from botkit.core.components import Component
+from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.gatherer import GathererSignature, GathererSignatureExamplesStr
 from botkit.routing.pipelines.reducer import ReducerSignature, ReducerSignatureExamplesStr
 from botkit.routing.route_builder.types import TView
-from botkit.routing.pipelines.callbacks import HandlerSignature
 from botkit.routing.update_types.update_type_inference import infer_update_types
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient

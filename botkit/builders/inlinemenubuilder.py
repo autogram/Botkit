@@ -3,7 +3,7 @@ from typing import Any, Collection, Dict, Iterator, List, Optional, Union
 from cached_property import cached_property
 from haps import Container
 from haps.exceptions import NotConfigured
-from pyrogram import InlineKeyboardButton
+from pyrogram.types import InlineKeyboardButton
 
 from botkit import buttons
 from botkit.persistence.callback_manager import (
@@ -16,6 +16,7 @@ from botkit.settings import botkit_settings
 from botkit.utils.sentinel import NotSet, Sentinel
 
 
+# noinspection PyIncorrectDocstring
 class InlineMenuRowBuilder:
     def __init__(self, state: Optional[Any], override_buttons: List[Any] = None):
         if override_buttons:

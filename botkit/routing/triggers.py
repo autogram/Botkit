@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
-from pyrogram.client.filters.filter import Filter
 from typing import Optional, Callable, Union, Awaitable
+
+from pyrogram.filters import Filter
+
+from botkit.routing.pipelines.filters import UpdateFilterSignature
 
 ActionIdTypes = Union[int, str]
 

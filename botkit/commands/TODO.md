@@ -11,9 +11,9 @@ Commands from all modules get registered in a central place.
 A singleton (compound, all types) internal handler goes through all registered commands and builds a list
  `quick_action_matches: List[CommandDefinition]`.
 Then it replies with reply keyboard buttons. `botkit.use_quick_actions()` ??
- 
+
 modulemanager
- 
+
 ```
 routes.register_command()
 ```
@@ -30,23 +30,23 @@ routes.register_command()
 
 ## Quick Action Registry (Ideas)
 
-### Filters.text
+### filters.text
 (Most common. Needs a good hierarchical menu)
 - **Use in inline query** -> "Which bot @?" - @letmebot -> Share button
 - **Remind me**
-  -> `ChoiceView("Who to remind?", ["Just me", "Someone else", "Me and others"])` 
+  -> `ChoiceView("Who to remind?", ["Just me", "Someone else", "Me and others"])`
   -> `DateTimePickerView("When?")`
 - **Edit** -> `send_as_user(...)` (so that user can edit)
 - **Share** -> `ShareView(...)`
 
-### Filters.text (multiple)
+### filters.text (multiple)
 "Does this message belong to the others?" yes/no
-- **Merge** -> 
-- **Delete** (if forwarded and user admin) 
+- **Merge** ->
+- **Delete** (if forwarded and user admin)
     -> "This will delete messages 1-3, 7, and 8 from {origin_chat_title}" (yes/no)
 - **Open in VSCode**
 
-### Filters.link
+### filters.link
 - **Open in browser** -> `ChoiceView(links) if len(links) > 1 else links[0]`
 - **Add to Pocket** -> `ChoiceView(links, multiple=True) if len(links) > 1 else links[0]`
 
@@ -57,17 +57,17 @@ routes.register_command()
 - Notion
     - Add to project -> `ChoiceView(...)`
 
-### Filters.sticker
+### filters.sticker
 - Add to pack
 - Optimize
 
-### Filters.sticker (multiple)
+### filters.sticker (multiple)
 - Merge
 
-### Filters.command
+### filters.command
 - Choose bot
 
-### Filters.contains_emoji
+### filters.contains_emoji
 - Explain emojis
 
 # Editor

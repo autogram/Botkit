@@ -5,10 +5,11 @@ import logzero
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from pyrogram import Client
-from pyrogram import Message
 from typing import Literal
 from typing import Optional, Union, List
 from typing import cast
+
+from pyrogram.types import Message
 from typing_extensions import AsyncGenerator
 
 from botkit.botkit_modules.system.sytem_management_module import ToggleSystemStateCommand

@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
-from abc import ABC, abstractmethod
 from typing import Callable, Generic, List, Optional, Tuple, TypeVar
 
 from boltons.typeutils import classproperty
-from pyrogram import Update
 
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable

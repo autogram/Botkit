@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Union
 
 import logzero
 from pyrogram import Client
-from pyrogram.client.handlers.handler import Handler
+from pyrogram.handlers.handler import Handler
 from typing_extensions import Literal
 
 from botkit.dispatching.callbackqueries.callbackactiondispatcher import CallbackActionDispatcher
@@ -62,7 +62,7 @@ class BotkitDispatcher:
     async def add_route_for_update_type(
         self,
         module_or_group: Union[int, Module],
-        client: Client,
+        client: IClient,
         update_type: UpdateType,
         route_handler: RouteHandler,
     ):

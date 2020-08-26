@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
 from buslane.events import Event, EventHandler
-from pyrogram import CallbackQuery, Client
+from pyrogram.types import CallbackQuery
 from unittest.mock import Mock
 
+from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.builder import RouteBuilder
+from botkit.types.client import IClient
 
-client: Client = Mock(Client)
+client: IClient = Mock(IClient)
 callback_query: CallbackQuery = Mock(CallbackQuery)
 
 
@@ -30,6 +32,6 @@ def test_route_with_publish_expression_fires_event():
     builder.use(client)
     builder.on_action(ACTION).publish(event)
 
-    route = builder._route_collection.routes_by_client[client][0]
+    route: RouteDefinition = builder._route_collection.routes_by_client[client][0]
 
-    assert route.callback is not None
+    assert len(route.pyrogram_handlers) == 1
