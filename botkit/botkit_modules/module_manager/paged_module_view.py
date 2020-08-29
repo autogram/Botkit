@@ -8,8 +8,8 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
     def render_body(self, builder: HtmlBuilder) -> None:
         for m in self.state.page_items:
             builder.bold(m.name)
-            if not m.is_enabled:
-                builder.spc().italic("(disabled)")
+            if not m.is_active:
+                builder.spc().italic("(deactivated)")
 
             builder.enforce_min_width(70)
 
@@ -19,7 +19,7 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
                 for r in m.route_descriptions:
                     builder.br().bullet()
 
-                    if m.is_enabled:
+                    if m.is_active:
                         builder.text(r)
                     else:
                         builder.strike(r)
@@ -37,10 +37,10 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
             row_builder.action_button("➡️", "page_forward", self.state)
 
         for n, info in enumerate(self.state.page_items):
-            if info.route_descriptions and info.name not in "ModuleManagerModule":
+            if info.name not in "ModuleManagerModule":
                 caption = HtmlBuilder()
-                caption.text("Disable" if info.is_enabled else "Enable")
+                caption.text("Deactivate" if info.is_active else "Activate")
                 caption.spc().text(info.name)
                 builder.rows[n + 1].action_button(
-                    caption.render(), "disable" if info.is_enabled else "enable", self.state,
+                    caption.render(), "deactivate" if info.is_active else "activate", self.state,
                 )

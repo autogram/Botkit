@@ -93,7 +93,11 @@ class BotkitDispatcher:
     async def remove_module_routes(self, module: Module):
         group = module.group_index
 
-        for client, h in self.module_handlers[group].items():
+        if not (module_handlers := self.module_handlers.get(group)):
+            self.log.info(f"No routes to remove for {module.get_name()}.")
+            return
+
+        for client, h in module_handlers.items():
             for handler in h:
                 try:
                     client.remove_handler(handler, group)

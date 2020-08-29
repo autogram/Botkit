@@ -1,15 +1,15 @@
-import traceback
-
 import asyncio
+from enum import Enum, auto
+from typing import Any, Coroutine, Dict, Iterable, KeysView, List, Optional, Tuple, Type
 
-from haps import Inject
-from haps.config import Config
+import logzero
+from haps import Inject, config
+from haps.config import Config, Configuration
 from logzero import logger as log
-from typing import Any, List, Coroutine, Optional, Type
 
-from botkit.core.modules._module import Module
-from botkit.botkit_services.services import service
 from botkit.botkit_services.options.base import IOptionStore
+from botkit.botkit_services.services import service
+from botkit.core.modules._module import Module
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.routing.route_builder.builder import RouteBuilder, RouteBuilderContext
 from botkit.routing.route_builder.route_collection import RouteCollection
@@ -27,19 +27,40 @@ DISABLED_MODULES = [
 
 # noinspection PyMethodMayBeStatic
 
-# DisabledModules = ListOption(
-#     name="disabled_modules", description="List of modules that should be ignored on system " "start", default_value=[],
-# )
+# DisabledModules = ListOption( name="disabled_modules", description="List of modules that should be ignored on
+# system " "start", default_value=[], )
+
+
+class ModuleStatus(Enum):
+    inactive = auto()
+    active = auto()
+    disabled = auto()
+    failed = auto()
 
 
 @service
 class ModuleLoader:
-    modules: List[Module] = Config("modules")
     options: IOptionStore = Inject()
 
     def __init__(self) -> None:
         self.route_builder_class = RouteBuilder
         self.dispatcher = BotkitDispatcher()
+
+        discovered_modules: List[Module] = Configuration().get_var("modules")
+
+        self.__module_statuses: Dict[Module, ModuleStatus] = {
+            m: ModuleStatus.disabled if m.get_name() in DISABLED_MODULES else ModuleStatus.inactive
+            for m in discovered_modules
+        }
+
+        self.log = logzero.setup_logger(ModuleLoader.__class__.__name__)
+
+    @property
+    def modules(self) -> Iterable[Module]:
+        return self.__module_statuses.keys()
+
+    def add_module(self, module: Module) -> None:
+        self.__module_statuses[module] = ModuleStatus.inactive
 
     def get_module_by_name(self, name: str) -> Optional[Module]:
         return next((m for m in self.modules if m.get_name() == name), None)
@@ -48,40 +69,56 @@ class ModuleLoader:
         tasks: List[Coroutine] = []
         for n, module in enumerate(self.modules):
             module.group_index = n
-            tasks.append(self.try_register_module(module))
+            tasks.append(self.try_activate_module(module))
 
         await asyncio.gather(*tasks)
 
-    async def try_register_module(self, module: Module) -> None:
+    async def try_activate_module(self, module: Module) -> None:
         try:
-            if self.is_disabled(module):
+            if self.get_module_status(module) == ModuleStatus.disabled:
                 log.debug(f"{module.get_name()} is disabled.")
                 module.route_collection = []
                 return
-            if self.is_active(module):
+            if self.get_module_status(module) == ModuleStatus.active:
                 raise ValueError("Nothing to register as the module is already active.")
 
-            return await self._register_module_or_fail(module)
+            return await self._activate_module_or_fail(module)
         except:
             log.exception(f"Could not load {module.get_name()}.")
 
-    async def _register_module_or_fail(self, module: Module) -> None:
+    async def _activate_module_or_fail(self, module: Module) -> None:
         assert module.group_index is not None
+
+        async def rollback() -> None:
+            self.__module_statuses[module] = ModuleStatus.failed
+            try:
+                await module.unload()
+            except:
+                pass
 
         try:
             load_result = await module.load()
         except Exception as e:
-            log.error(
-                f"Calling `load()` on {module.get_name()} failed with {e.__class__.__name__}. Skipping module "
+            log.exception(
+                f"Calling `load()` on {module.get_name()} failed. Skipping module "
                 f"initialization..."
             )
-            traceback.print_exc()
-            return
+            await rollback()
+            raise e
 
-        route_collection = self.build_module_routes(self.route_builder_class, module, load_result)
-        module.route_collection = route_collection
+        try:
+            route_collection = self.build_module_routes(
+                self.route_builder_class, module, load_result
+            )
+            module.route_collection = route_collection
 
-        await self.dispatcher.add_module_routes(module)
+            await self.dispatcher.add_module_routes(module)
+        except Exception as e:
+            log.exception(f"Could not build module routes for module {module.get_name()}.")
+            await rollback()
+            raise e
+
+        self.__module_statuses[module] = ModuleStatus.active
 
     @staticmethod
     def build_module_routes(
@@ -99,24 +136,25 @@ class ModuleLoader:
         return route_collection
 
     async def unregister_module(self, module: Module):
-        if not self.is_active(module):
+        if self.get_module_status(module) != ModuleStatus.active:
             raise ValueError("Cannot unregister as the module is not loaded.")
 
-        await module.unload()
+        try:
+            await module.unload()
+        except:
+            self.log.exception(f"Could not unload module {module.get_name()}.")
 
-        await self.dispatcher.remove_module_routes(module)
+        try:
+            await self.dispatcher.remove_module_routes(module)
+        except:
+            self.log.exception(f"Could not remove routes of module {module.get_name()}.")
 
-        assert not self.is_active(module)
+        self.__module_statuses[module] = ModuleStatus.inactive
 
         # if not any((bool(x) for x in client.dispatcher.groups.values())):
         #     print(
         #         "A client could be shut down, but that logic is not implemented yet."
         #     )
 
-    def is_active(self, module: Module) -> bool:
-        return self.dispatcher.is_registered(module)
-
-    def is_disabled(self, module: Module) -> bool:
-        name = module.get_name()
-        # return self.options.get_global_value()
-        return name in DISABLED_MODULES  # TODO: get from settings
+    def get_module_status(self, module: Module) -> ModuleStatus:
+        return self.__module_statuses[module]

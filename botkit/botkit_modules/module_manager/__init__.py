@@ -37,8 +37,16 @@ class ModuleManagerModule(Module):
                 .mutate(ModuleInfosCollectionModel.flip_next_page)
                 .then_update(PagedModuleView)
             )
-            routes.on_action("disable").mutate(self.disable_module).then_update(PagedModuleView)
-            routes.on_action("enable").mutate(self.enable_module).then_update(PagedModuleView)
+            (
+                routes.on_action("deactivate")
+                .mutate(self.deactivate_module)
+                .then_update(PagedModuleView)
+            )
+            (
+                routes.on_action("activate")
+                .mutate(self.activate_module)
+                .then_update(PagedModuleView)
+            )
 
     def get_modules(self) -> ModuleInfosCollectionModel:
         return ModuleInfosCollectionModel(
@@ -49,18 +57,18 @@ class ModuleManagerModule(Module):
             ]
         )
 
-    async def enable_module(self, module_info: ModuleInfosCollectionModel):
+    async def activate_module(self, module_info: ModuleInfosCollectionModel):
         module_to_enable = module_info.page_items[0]
         module_name = module_to_enable.name
         module = self.module_loader.get_module_by_name(module_name)
-        await self.module_loader.try_register_module(module)
-        module_to_enable.is_enabled = True
+        await self.module_loader.try_activate_module(module)
+        module_to_enable.module_state = self.module_loader.get_module_status(module)
         return module_info
 
-    async def disable_module(self, module_info: ModuleInfosCollectionModel):
+    async def deactivate_module(self, module_info: ModuleInfosCollectionModel):
         module_to_disable = module_info.page_items[0]
         module_name = module_to_disable.name
         module = self.module_loader.get_module_by_name(module_name)
         await self.module_loader.unregister_module(module)
-        module_to_disable.is_enabled = False
+        module_to_disable.module_state = self.module_loader.get_module_status(module)
         return module_info

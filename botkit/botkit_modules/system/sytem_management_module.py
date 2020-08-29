@@ -124,7 +124,7 @@ class SystemManagementModule(Module):
         if self.paused_modules:
             self.log.info(f"Unpausing {len(self.paused_modules)} modules...")
             for m in self.paused_modules:
-                await self.module_loader.try_register_module(m)
+                await self.module_loader.try_activate_module(m)
         else:
             self.log.error(
                 f"For some reason there were no paused modules: {self.paused_modules}. "

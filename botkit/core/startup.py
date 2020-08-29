@@ -82,7 +82,8 @@ class Startup(Application, ABC):
 
     async def _start_async(self):
         await self._start_clients()
-        self.module_loader.modules.extend(self.get_extra_modules())
+        for m in self.get_extra_modules() or []:
+            self.module_loader.add_module(m)
         await self.module_loader.register_enabled_modules()
         await self.run_startup_tasks()
         log.info("Ready.")

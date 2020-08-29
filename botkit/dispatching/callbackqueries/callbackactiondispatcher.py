@@ -60,19 +60,14 @@ class CallbackActionDispatcher:
         )
 
         try:
-            # TODO: Time out after a few seconds (maybe 3)
-            tasks = []
+            result = await route.callback(client, callback_query, context)
             if cb_ctx.notification:
-                tasks.append(
+                # Answer asynchronously, no need to wait.
+                asyncio.ensure_future(
                     callback_query.answer(cb_ctx.notification, show_alert=cb_ctx.show_alert)
                 )
-
-            # noinspection PyTypeChecker
-            result = asyncio.create_task(route.callback(client, callback_query, context))
-            tasks.append(result)
-            await asyncio.gather(*tasks)
-            return result.result()
-        except:
+            return result
+        except Exception as e:
             log.exception(f"A handler failed: {route.description}")
             await callback_query.answer(text="Sorry, something went wrong.", show_alert=False)
             return False

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Generic, Optional, TypeVar, Union
 
@@ -10,18 +11,32 @@ from ..routing.types import TState
 TPayload = TypeVar("TPayload")
 
 
+class IContextStore:
+    """
+    TODO: These are experiments. What is needed?
+    - per chat global
+    - per user global
+    - per chat and module
+    - per user and module
+    - associated to message (is this equivalent to "per view", i.e. `view_state`?)
+    """
+
+    @property
+    @abstractmethod
+    def chat(self):
+        ...
+
+
 @dataclass
 class BotkitContext(Generic[TState, TPayload], UpdateFieldExtractor):
+    # store: IContextStore = None
+
+    # TODO: rename to `view_state`?
     state: TState
 
     client: Union[IViewSender, Any]
     action: Optional[CallbackActionType] = None
     payload: Optional[TPayload] = None
-
-    # TODO: These are experiments
-    message_data: Any = None
-    chat_data: Any = None
-    user_data: Any = None
 
     # TODO: It might or might not make sense to have this here. It may be removed in the future in favor of
     # simple argument passing inside the pipelines.

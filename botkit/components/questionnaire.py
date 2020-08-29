@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from botkit.core.components import Component
 from botkit.routing.route_builder.builder import RouteBuilder
+from botkit.views.botkit_context import BotkitContext
 
 
 class Questionnaire(BaseModel):
@@ -32,5 +33,6 @@ class QuestionnaireComponent(Component):
     def register(self, routes: RouteBuilder):
         pass
 
-    async def invoke(self, *args, **kwargs):
-        pass
+    async def invoke(self, context: BotkitContext):
+        for s in self._slots:
+            pass

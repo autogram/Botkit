@@ -12,7 +12,8 @@ from botkit.views.types import KeyboardTypes
 
 
 class RenderedMessageBase:
-    pass
+    title: Optional[str] = None
+    description: Optional[str] = None
 
 
 @dataclass
@@ -30,9 +31,6 @@ class RenderedMessageMarkup(RenderedMessageBase):
 
 @dataclass
 class RenderedMessage(RenderedMessageMarkup):
-    title: Optional[str] = None
-    description: Optional[str] = None
-
     parse_mode: str = "html"
     disable_web_page_preview: bool = True
 
