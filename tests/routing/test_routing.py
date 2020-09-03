@@ -13,7 +13,7 @@ from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 client: IClient = Mock(IClient)
 callback_query: CallbackQuery = Mock(CallbackQuery)
@@ -27,7 +27,7 @@ def test_route_with_mutation_step_produces_valid_callback() -> None:
     class MyModel:
         value: str = "before"
 
-        def mutate_something_without_returning(self, context: BotkitContext):
+        def mutate_something_without_returning(self, context: Context):
             assert context.payload == PAYLOAD
             self.value = context.payload
 
@@ -53,13 +53,13 @@ def test_route_with_mutation_step_produces_valid_callback() -> None:
     assert TypedCallable(callback).type_hints == {
         "client": IClient,
         "callback_query": CallbackQuery,
-        "context": BotkitContext,
+        "context": Context,
         "return": str,
     }
 
     state = MyModel()
 
-    action_context: BotkitContext = BotkitContext(
+    action_context: Context = Context(
         client=client, update=callback_query, state=state, action=ACTION, payload=PAYLOAD
     )
 
@@ -104,7 +104,7 @@ def test_route_with_gather_step_produces_valid_callback() -> None:
         "return": MyModel,
     }
 
-    action_context: BotkitContext = BotkitContext(
+    action_context: Context = Context(
         client=client, update=callback_query, state=MyModel(), action=ACTION
     )
 
@@ -124,7 +124,7 @@ def test_full_with_dispatcher() -> None:
     class MyModel:
         value: str = "before"
 
-        def mutate_something_without_returning(self, context: BotkitContext):
+        def mutate_something_without_returning(self, context: Context):
             assert context.payload == PAYLOAD
             self.value = context.payload
 
@@ -157,7 +157,7 @@ def test_full_with_dispatcher() -> None:
 
     state = MyModel()
 
-    action_context: BotkitContext = BotkitContext(
+    action_context: Context = Context(
         client=client, update=callback_query, state=state, action=ACTION
     )
 

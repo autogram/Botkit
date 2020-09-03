@@ -4,7 +4,7 @@ from typing import Awaitable, Callable, Union
 from botkit.persistence.callback_manager import CallbackActionContext
 
 from botkit.libraries._checks import is_installed
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 if TYPE_CHECKING:
     from botkit.types.client import IClient
@@ -31,8 +31,8 @@ if is_installed("pyrogram"):
         Callable[[TArg, TArg], Awaitable[ReturnType]],
         Callable[[TArg, TArg, TArg, TArg], Awaitable[ReturnType]],
         # Library routes with botkit context as last arg
-        Callable[[TArg, TArg, BotkitContext], Awaitable[ReturnType]],
-        Callable[[TArg, TArg, TArg, TArg, BotkitContext], Awaitable[ReturnType]],
+        Callable[[TArg, TArg, Context], Awaitable[ReturnType]],
+        Callable[[TArg, TArg, TArg, TArg, Context], Awaitable[ReturnType]],
     ]
 
 

@@ -130,6 +130,7 @@ class CompanionBotService:
                     input_message_content=None,
                 )
             elif isinstance(rendered, RenderedTextMessage):
+                print("text is:", rendered.text)
                 result = InlineQueryResultArticle(
                     title="sent via userbot",
                     input_message_content=InputTextMessageContent(

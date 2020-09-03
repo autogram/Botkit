@@ -9,7 +9,7 @@ from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.services.companionbotservice import CompanionBotService
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 
 class CommitRenderedViewStepError(StepError):
@@ -20,7 +20,7 @@ _EvaluatedSendTarget = namedtuple("_EvaluatedSendTarget", ["peer_id", "reply_to_
 
 
 class CommitRenderedViewStepFactory(
-    IStepFactory[ViewParameters, Optional[Callable[[BotkitContext], Awaitable[Any]]]]
+    IStepFactory[ViewParameters, Optional[Callable[[Context], Awaitable[Any]]]]
 ):
     @property
     def applicable_update_types(self) -> List[UpdateType]:
@@ -37,7 +37,7 @@ class CommitRenderedViewStepFactory(
 
         if view_params.command == "send":
 
-            async def send_view(context: BotkitContext) -> None:
+            async def send_view(context: Context) -> None:
                 try:
                     target = evaluate_send_target(send_target, context)
 
@@ -71,7 +71,7 @@ class CommitRenderedViewStepFactory(
 
         elif view_params.command == "update":
 
-            async def update_view(context: BotkitContext):
+            async def update_view(context: Context):
                 if (
                     inline_message_id := getattr(context.update, "inline_message_id", None)
                 ) is not None:
@@ -86,7 +86,7 @@ class CommitRenderedViewStepFactory(
                         return None
 
                 # We need to differentiate button clicks on regular and inline (query) messages:
-                # TODO: Merge all these into BotkitContext
+                # TODO: Merge all these into Context
                 if (message := getattr(context.update, "message", None)) is not None:
                     # CallbackQuery with message
                     chat_id = message.chat.id
@@ -107,7 +107,7 @@ class CommitRenderedViewStepFactory(
             return update_view
 
 
-def evaluate_send_target(send_target: SendTarget, context: BotkitContext) -> _EvaluatedSendTarget:
+def evaluate_send_target(send_target: SendTarget, context: Context) -> _EvaluatedSendTarget:
     assert send_target is not None
 
     if callable(send_target):

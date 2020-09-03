@@ -18,10 +18,11 @@ from botkit.persistence.callback_manager import (
 from botkit.core.moduleloader import ModuleLoader
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
+from botkit.routing.pipelines.execution_plan import SendTo
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.settings import botkit_settings
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 log = create_logger("system_management_module", use_standard_format=False)
 
@@ -43,7 +44,7 @@ class SystemManagementModule(Module):
 
     def __init__(self, user_client: IClient, bot_client: Optional[IClient] = None) -> None:
         self.user_client = user_client
-        self.opt_bot_client = bot_client
+        self.bot_client = bot_client
 
         self.system_paused: bool = False
         self.paused_modules: Optional[List[Module]] = None
@@ -75,12 +76,14 @@ class SystemManagementModule(Module):
                 # TODO: We could do without the gather step completely as LogSettings can be
                 # replaced with functions
                 .gather(LogSettingsRepository).then_send(
-                    log_settings_view, via=self.opt_bot_client or None
+                    log_settings_view,
+                    via=self.bot_client or None,
+                    to=SendTo.same_chat_quote_replied_to,
                 )
             )
 
-        if self.opt_bot_client:
-            with routes.using(self.opt_bot_client):
+        if self.bot_client:
+            with routes.using(self.bot_client):
                 (
                     routes.on_action("select_log_level")
                     .mutate(LogSettingsRepository.set_global_botkit_log_level)
@@ -192,7 +195,7 @@ class LogSettingsRepository:
     def current_level(self) -> int:
         return botkit_settings.log_level
 
-    def set_global_botkit_log_level(self, ctx: BotkitContext):
+    def set_global_botkit_log_level(self, ctx: Context):
         log.info(f"Botkit log level changed to {ctx.payload}")
         botkit_settings.log_level = ctx.payload
 
@@ -216,7 +219,8 @@ def log_settings_view(state: LogSettingsRepository, builder: ViewBuilder) -> Non
 
     # Menu will not be rendered if no bot client is set up
     for n, (level, name) in enumerate(state.ALL_LEVELS.items()):
-        caption = f"👉 {name}" if level == state.current_level else name
+        # https://fsymbols.com/signs/arrow/
+        caption = f"➤ {name}" if level == state.current_level else name
         builder.menu.rows[n].action_button(
             caption, "select_log_level", level, notification=f"Global log level set to {name}."
         )

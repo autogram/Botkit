@@ -8,7 +8,7 @@ from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 
 class GatherStepError(StepError[GathererSignature]):
@@ -47,7 +47,7 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
 
         if is_coroutine:
 
-            async def gather_initial_state_async(context: BotkitContext):
+            async def gather_initial_state_async(context: Context):
                 log.debug(f"Gathering initial state via {gatherer.name}")
                 try:
                     if requires_context:
@@ -66,7 +66,7 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
 
         else:
 
-            def gather_initial_state(context: BotkitContext):
+            def gather_initial_state(context: Context):
                 log.debug(f"Gathering initial state via {gatherer.name}")
                 try:
                     if requires_context:

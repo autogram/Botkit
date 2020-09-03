@@ -5,7 +5,7 @@ from pyrogram.types import Chat, Message, User
 
 from botkit.routing.pipelines.execution_plan import SendTo
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import evaluate_send_target
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 SAME_CHAT_ID = 123
 USER_ID = 321
@@ -21,7 +21,7 @@ def context():
     (message := Mock(Message)).configure_mock(
         chat=chat, message_id=MESSAGE_ID, reply_to_message=replied_to_message, from_user=user
     )
-    return BotkitContext(state=None, client=None, update=message)
+    return Context(state=None, client=None, update=message)
 
 
 @pytest.mark.parametrize(
@@ -60,8 +60,8 @@ def test_evaluate_send_target(send_target, expected, context):
 
 
 SendTargetFuncSignatureExamplesStr = """
-def _(ctx: BotkitContext) -> SendTo: ...
-def _(ctx: BotkitContext) -> Union[int, str]: ...
-def _(ctx: BotkitContext) -> Tuple[SendTo, None]: ...
-def _(ctx: BotkitContext) -> Tuple[SendTo, int]: ...
+def _(ctx: Context) -> SendTo: ...
+def _(ctx: Context) -> Union[int, str]: ...
+def _(ctx: Context) -> Tuple[SendTo, None]: ...
+def _(ctx: Context) -> Tuple[SendTo, int]: ...
 """

@@ -15,7 +15,7 @@ from botkit.routing.update_types.update_type_inference import infer_update_types
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature
 from botkit.views.views import MessageViewBase
 
@@ -31,14 +31,12 @@ class SendTo(Enum):
 
 ChatTarget = Union[SendTo, int, str]
 
-SendTargetFuncSignature = Callable[
-    [BotkitContext], Union[ChatTarget, Tuple[ChatTarget, Optional[int]]]
-]
+SendTargetFuncSignature = Callable[[Context], Union[ChatTarget, Tuple[ChatTarget, Optional[int]]]]
 SendTargetFuncSignatureExamplesStr = """
-def _(ctx: BotkitContext) -> SendTo: ...
-def _(ctx: BotkitContext) -> Union[int, str]: ...
-def _(ctx: BotkitContext) -> Tuple[SendTo, None]: ...
-def _(ctx: BotkitContext) -> Tuple[SendTo, int]: ...
+def _(ctx: Context) -> SendTo: ...
+def _(ctx: Context) -> Union[int, str]: ...
+def _(ctx: Context) -> Tuple[SendTo, None]: ...
+def _(ctx: Context) -> Tuple[SendTo, int]: ...
 """
 SendTarget = Union[ChatTarget, SendTargetFuncSignature]
 
@@ -71,10 +69,11 @@ class ExecutionPlan:
         if state_generator is None:
             return self
 
-        if inspect.isclass(state_generator):
-            gatherer = TypedCallable(func=lambda: state_generator())
-        else:
-            gatherer = TypedCallable(func=state_generator)
+        # TODO: test
+        # if inspect.isclass(state_generator):
+        #     gatherer = TypedCallable(func=lambda: state_generator())
+        # else:
+        gatherer = TypedCallable(func=state_generator)
 
         if gatherer.num_non_optional_params > 1:
             raise ValueError(

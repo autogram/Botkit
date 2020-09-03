@@ -6,7 +6,7 @@ from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import ModelViewBase
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 
 class HandleStepError(StepError[HandlerSignature]):
@@ -14,9 +14,7 @@ class HandleStepError(StepError[HandlerSignature]):
 
 
 class CustomHandlerStepFactory(
-    IStepFactory[
-        TypedCallable[HandlerSignature], Optional[Callable[[BotkitContext], Awaitable[Any]]]
-    ]
+    IStepFactory[TypedCallable[HandlerSignature], Optional[Callable[[Context], Awaitable[Any]]]]
 ):
     @classmethod
     def create_step(cls, handler):

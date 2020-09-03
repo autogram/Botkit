@@ -13,7 +13,7 @@ from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.triggers import ActionIdTypes
 from botkit.settings import botkit_settings
 from botkit.types.client import IClient
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 
 class CallbackActionDispatcher:
@@ -51,7 +51,7 @@ class CallbackActionDispatcher:
 
         route = self._action_routes[cb_ctx.action]
 
-        context: BotkitContext = BotkitContext(
+        context: Context = Context(
             client=client,
             update=callback_query,
             state=cb_ctx.state,

@@ -7,7 +7,7 @@ from logzero import setup_logger
 
 from botkit.routing.types import TState
 from botkit.settings import botkit_settings
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 if TYPE_CHECKING:
     from botkit.routing.route_builder.builder import RouteBuilder
@@ -27,7 +27,7 @@ class Component(Generic[TState], ABC):
         ...
 
     @abstractmethod
-    async def invoke(self, context: BotkitContext):
+    async def invoke(self, context: Context):
         ...
 
     @property

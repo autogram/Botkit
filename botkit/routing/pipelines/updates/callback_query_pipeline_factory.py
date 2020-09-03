@@ -15,7 +15,7 @@ from botkit.routing.types import TState
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 
 class CallbackQueryPipelineFactory(UpdatePipelineFactory):
@@ -37,7 +37,7 @@ class CallbackQueryPipelineFactory(UpdatePipelineFactory):
         log = create_logger()
 
         async def handle_callback_query(
-            _: IClient, callback_query: CallbackQuery, context: BotkitContext = None
+            _: IClient, callback_query: CallbackQuery, context: Context = None
         ) -> Union[bool, Any]:
             if not context:
                 raise NotImplementedError("No context provided for callback query.")

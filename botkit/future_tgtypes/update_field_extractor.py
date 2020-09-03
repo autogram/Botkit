@@ -51,6 +51,9 @@ class UpdateFieldExtractor:  # TODO: implement properly
 
     @property
     def command_name(self) -> Optional[str]:
+        """
+        Returns the name of the command without the leading slash or `None` if the update is not a command.
+        """
         if hasattr(self.update, "command"):  # Pyrogram
             return self.update.command[0]
 
@@ -61,6 +64,9 @@ class UpdateFieldExtractor:  # TODO: implement properly
 
     @property
     def command_args_str(self) -> Optional[str]:
+        """
+        Returns everything after the /command as a string.
+        """
         return " ".join(self.command_args) if self.command_args else None
 
     @property

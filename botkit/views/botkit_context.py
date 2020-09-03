@@ -28,7 +28,7 @@ class IContextStore:
 
 
 @dataclass
-class BotkitContext(Generic[TState, TPayload], UpdateFieldExtractor):
+class Context(Generic[TState, TPayload], UpdateFieldExtractor):
     # store: IContextStore = None
 
     # TODO: rename to `view_state`?

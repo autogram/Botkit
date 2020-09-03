@@ -12,7 +12,7 @@ from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import (
 )
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
-from botkit.views.botkit_context import BotkitContext
+from botkit.views.botkit_context import Context
 
 
 class MessagePipelineFactory(UpdatePipelineFactory):
@@ -36,7 +36,7 @@ class MessagePipelineFactory(UpdatePipelineFactory):
         delete_trigger = DeleteTriggerStepFactory.create_step(self.plan._should_delete_trigger)
 
         async def handle_message(client: IClient, message: Message) -> None:
-            context = BotkitContext(client=client, update=message, state=None)
+            context = Context(client=client, update=message, state=None)
 
             try:
                 if gather_initial_state is not None:

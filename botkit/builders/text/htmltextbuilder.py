@@ -65,7 +65,7 @@ class _HtmlTextBuilder(BaseTextBuilder):
         return cls._apply_end(cls._wrap_and_escape(text, "s", if_), end)
 
     def link(self, text: Any, href: str, end="", if_: bool = True):
-        html = f'<a href="{self.escape_html(href)}">{self.escape_html(text)}</a>'
+        html = f'<a href="{href}">{self.escape_html(text)}</a>'
         return self._append_with_end(html, end)
 
     @classmethod
