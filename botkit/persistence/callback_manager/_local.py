@@ -24,3 +24,7 @@ class MemoryDictCallbackManager(ICallbackManager):
 
     def force_sync(self):
         pass
+
+    def remove_outdated(self, days: int = 7):
+        pass
+

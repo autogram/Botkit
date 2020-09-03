@@ -3,7 +3,8 @@ import logging
 import pytest
 
 from botkit.settings import botkit_settings
-from botkit.utils.botkit_logging.setup import create_logger, get_all_botkit_loggers
+from botkit.utils.botkit_logging.lookup import get_all_botkit_loggers
+from botkit.utils.botkit_logging.setup import create_logger
 
 
 @pytest.fixture(autouse=True)
