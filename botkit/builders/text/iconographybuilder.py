@@ -1,3 +1,5 @@
+from typing import Optional
+
 from botkit.builders.text.basetextbuilder import BaseTextBuilder
 from botkit.builders.text.emoji import replace_aliases
 from botkit.builders.text.mdformat import number_as_emoji
@@ -20,6 +22,9 @@ class IconographyBuilder(BaseTextBuilder):
     def emojize(self, alias: str):
         self.parts.append(replace_aliases(alias))
         return self
+
+    def dash_long(self, end: Optional[str] = " "):
+        return self._append_with_end("—", end=end)
 
     def bullet(self):
         self.parts.append("▪️")
