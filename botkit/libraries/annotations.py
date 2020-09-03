@@ -30,7 +30,7 @@ if is_installed("pyrogram"):
         # Plain library handler signatures
         Callable[[TArg, TArg], Awaitable[ReturnType]],
         Callable[[TArg, TArg, TArg, TArg], Awaitable[ReturnType]],
-        # Library routes with states
+        # Library routes with botkit context as last arg
         Callable[[TArg, TArg, BotkitContext], Awaitable[ReturnType]],
         Callable[[TArg, TArg, TArg, TArg, BotkitContext], Awaitable[ReturnType]],
     ]

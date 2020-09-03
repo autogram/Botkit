@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 
 class BaseTextBuilder:
@@ -24,26 +24,25 @@ class BaseTextBuilder:
         self.parts.append(text)
         return self
 
-    def _append_with_end(self, text: str, end: str):
+    def _append_with_end(self, text: str, end: Optional[str]):
         self.parts.append(self._apply_end(text, end))
         return self
 
     @staticmethod
-    def _apply_end(text: str, end: str) -> str:
+    def _apply_end(text: str, end: Optional[str]) -> str:
         if text is None:
             raise ValueError("Trying to append None value.")
 
         text = str(text)
-        end = str(end)
 
         if text is None:
             raise ValueError(f"Cannot append '{text}' to message.")
-        if end == "":
+        if end in ["", None]:
             return text
         else:
-            return text + end
+            return text + str(end)
 
     def render(self) -> str:
         if not self.parts:
-            return ""
+            return "\xad"  # zero-width char
         return "".join(self.parts)

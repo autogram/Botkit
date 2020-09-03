@@ -1,6 +1,9 @@
+from typing import Optional
+
 from botkit.builders.text.emoji import Emoji
 from botkit.builders.text.htmltextbuilder import _HtmlTextBuilder
 from botkit.builders.text.iconographybuilder import Iconography, IconographyBuilder
+from botkit.builders.text.telegram_entity_builder import TelegramEntityBuilder
 
 
 class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
@@ -40,3 +43,11 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
 
     def as_none_action(self, text):
         return "{} {}".format(Emoji.negative_squared_cross_mark, text)
+
+    def as_cta(self, text):
+        """ Call-to-action """
+        return self.as_bold(self.as_action_hint(text))
+
+    def cta(self, call_to_action: str, end: Optional[str] = "\n"):
+        self._append_with_end(self.as_cta(call_to_action), end=end)
+        return self

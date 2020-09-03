@@ -11,6 +11,7 @@ from pyrogram.types import (
 from botkit.views.types import KeyboardTypes
 
 
+@dataclass
 class RenderedMessageBase:
     title: Optional[str] = None
     description: Optional[str] = None

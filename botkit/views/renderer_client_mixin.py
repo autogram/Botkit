@@ -29,7 +29,7 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
         self,
         peer: Union[int, str],
         rendered: RenderedMessageBase,
-        reply_to_message_id: Optional[int] = None,
+        reply_to: Optional[int] = None,
         schedule_date: Optional[int] = None,
     ) -> Message:
         if isinstance(rendered, RenderedTextMessage):
@@ -39,7 +39,7 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
                 parse_mode=rendered.parse_mode,
                 disable_web_page_preview=rendered.disable_web_page_preview,
                 reply_markup=rendered.inline_keyboard_markup,
-                reply_to_message_id=reply_to_message_id,
+                reply_to_message_id=reply_to,
                 schedule_date=schedule_date,
             )
         elif isinstance(rendered, RenderedMediaMessage):
@@ -50,14 +50,14 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
                 caption=rendered.caption,
                 parse_mode=rendered.parse_mode,
                 reply_markup=rendered.inline_keyboard_markup,
-                reply_to_message_id=reply_to_message_id,
+                reply_to_message_id=reply_to,
                 schedule_date=schedule_date,
             )
         elif isinstance(rendered, RenderedStickerMessage):
             return await self.send_sticker(
                 peer,
                 sticker=rendered.sticker,
-                reply_to_message_id=reply_to_message_id,
+                reply_to_message_id=reply_to,
                 schedule_date=schedule_date,
                 reply_markup=rendered.reply_markup,
             )
@@ -145,7 +145,7 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
         return await self.send_rendered_message(
             peer=peer,
             rendered=rendered,
-            reply_to_message_id=reply_to_message_id,
+            reply_to=reply_to_message_id,
             schedule_date=schedule_date,
         )
 

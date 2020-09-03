@@ -139,10 +139,15 @@ class ExecutionPlan:
         If `send_via` is present, then the executing client must be a userbot. This is checked when using
         the `RouteBuilder`.
         """
+        if not self._update_types:
+            self.add_update_type(UpdateType.message)
         if self._view is not None:
             raise ValueError(
                 "View is already set. Not sure what to do with this, most likely a bug. Contact @JosXa."
             )
+
+        if inspect.isawaitable(view):
+            raise ValueError("A view function must not be awaitable.")
 
         if command == "send":
             # TODO: Allow specifying the send target

@@ -32,6 +32,7 @@ class BotkitContext(Generic[TState, TPayload], UpdateFieldExtractor):
     # store: IContextStore = None
 
     # TODO: rename to `view_state`?
+    # TODO: maybe this shouldn't even be part of the context ubt always be passed separately (because of reducers)?
     state: TState
 
     client: Union[IViewSender, Any]

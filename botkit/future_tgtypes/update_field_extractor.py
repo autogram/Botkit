@@ -41,7 +41,7 @@ class UpdateFieldExtractor:  # TODO: implement properly
         return MessageDescriptor.from_update(self.update)
 
     @property
-    def message_id(self) -> Optional[int]:
+    def message_id(self) -> Optional[Union[int, str]]:
         return descriptor.message_id if (descriptor := self.message_descriptor) else None
 
     @property

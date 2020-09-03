@@ -16,8 +16,8 @@ from pyrogram.handlers.handler import Handler
 
 from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
-from botkit.routing.pipelines.factories.updates.others import PIPELINE_FACTORIES
 from botkit.routing.pipelines.filters import UpdateFilterSignature
+from botkit.routing.pipelines.updates.others import PIPELINE_FACTORIES
 from botkit.routing.triggers import ActionIdTypes, RouteTriggers
 from botkit.routing.update_types.updatetype import UpdateType
 
@@ -67,7 +67,7 @@ class RouteDefinition:
             results[update_type] = RouteHandler(
                 update_type=update_type,
                 filter=factory.create_update_filter(),
-                callback=factory.create_callback(),
+                callback=factory.create_unified_callback(),
                 description=factory.get_description(),
                 scope="module",  # TODO implement
                 action_id=self.triggers.action,

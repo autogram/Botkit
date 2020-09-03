@@ -13,7 +13,7 @@ class IViewSender(ABC, Generic[Message]):
         self,
         peer: Union[int, str],
         rendered: RenderedMessageBase,
-        reply_to_message_id: Optional[int] = None,
+        reply_to: Optional[int] = None,
         schedule_date: Optional[int] = None,
     ) -> Message:
         ...

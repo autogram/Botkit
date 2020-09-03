@@ -6,6 +6,7 @@ from typing import Generic, Optional, TYPE_CHECKING, TypeVar
 from logzero import setup_logger
 
 from botkit.routing.types import TState
+from botkit.settings import botkit_settings
 from botkit.views.botkit_context import BotkitContext
 
 if TYPE_CHECKING:
@@ -36,7 +37,9 @@ class Component(Generic[TState], ABC):
     @property
     def logger(self) -> Logger:
         if not getattr(self, "_logger", None):
-            self._logger: Logger = setup_logger(self.__class__.__name__)
+            self._logger: Logger = setup_logger(
+                self.__class__.__name__, formatter=botkit_settings.log_formatter
+            )
             self._logger.setLevel(logging.INFO)
         # noinspection Mypy
         return self._logger

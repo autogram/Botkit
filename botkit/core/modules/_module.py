@@ -7,6 +7,7 @@ from logzero import setup_logger
 
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.routing.route_builder.route_collection import RouteCollection
+from botkit.settings import botkit_settings
 
 
 @base
@@ -38,6 +39,8 @@ class Module:
     @property
     def logger(self) -> Logger:
         if not getattr(self, "_logger", None):
-            self._logger: Logger = setup_logger(self.__class__.__name__)
+            self._logger = setup_logger(
+                self.__class__.__name__, formatter=botkit_settings.log_formatter
+            )
         # noinspection Mypy
         return self._logger

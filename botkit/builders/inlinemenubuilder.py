@@ -2,14 +2,12 @@ from typing import Any, Collection, Dict, Iterator, List, Optional, Union
 
 from cached_property import cached_property
 from haps import Container
-from haps.exceptions import NotConfigured
 from pyrogram.types import InlineKeyboardButton
 
-from botkit import buttons
+from botkit.uncategorized import buttons
 from botkit.persistence.callback_manager import (
     CallbackActionContext,
     ICallbackManager,
-    MemoryDictCallbackManager,
 )
 from botkit.inlinequeries.contexts import DefaultInlineModeContext, IInlineModeContext
 from botkit.settings import botkit_settings
@@ -128,6 +126,10 @@ class InlineMenuBuilder(object):
         self._rows = InlineMenuRowsCollection(state=self._state)
 
         self.force_reply = False
+
+    @property
+    def is_dirty(self) -> bool:
+        return bool(self._rows._get_nonempty_rows()) or self.force_reply
 
     def add_rows(self, rows: Collection[InlineKeyboardButton]) -> "InlineMenuBuilder":
         # TODO: should also take a row builder

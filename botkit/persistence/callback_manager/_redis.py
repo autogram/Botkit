@@ -1,6 +1,13 @@
-import traceback
+import logging
+
+from botkit.settings import botkit_settings
+
+botkit_settings.log_level = logging.DEBUG
+
+from haps import Container, SINGLETON_SCOPE, egg, scope
 from datetime import datetime, timedelta
-from typing import Dict, List, Literal, Optional, Union, cast
+from haps import base
+from typing import Dict, List, Literal, Optional, Union
 from uuid import UUID
 
 from redis import Redis
@@ -14,11 +21,36 @@ from ._base import CallbackActionContext
 
 from logzero import logger as log
 
-# TODO: Try use json instead of pickled dicts? https://github.com/honzajavorek/redis-collections/issues/122
-# TODO: Force pydantic models?
+# noinspection PyUnresolvedReferences
+base.classes.add(Redis)
+
+
+class RedisClientUnavailableException(Exception):
+    pass
+
+
+@egg("redis")
+@scope(SINGLETON_SCOPE)
+def create_redis_callback_manager() -> ICallbackManager:
+    try:
+        redis = Container().get_object(Redis)
+    except Exception as e:
+        raise RedisClientUnavailableException(
+            "If `redis` is chosen as the qualifier for the botkit callback manager, "
+            "you must provide an instantiated `Redis` client to the dependency "
+            "injection. Refer to the `callback_manager_qualifier` setting documentation."
+        ) from e
+    redis_cbm = RedisCallbackManager(redis, "callbacks", maxsize=10)
+    redis_cbm.remove_outdated(botkit_settings.callbacks_ttl_days)
+    return redis_cbm
 
 
 class RedisCallbackManager(ICallbackManager):
+    """
+    # TODO: Try use json instead of pickled dicts? https://github.com/honzajavorek/redis-collections/issues/122
+    # TODO: Force pydantic models?
+    """
+
     def __init__(
         self,
         redis_client: Redis,
@@ -37,7 +69,7 @@ class RedisCallbackManager(ICallbackManager):
         :param maxsize: Ignored if storage_type is "normal".
         :type maxsize:
         """
-        # TODO: Add documentation that lru should be used in production
+        # TODO: Add documentation that LRU should be used in production
         if storage_type == "lru":
             self.callbacks: LRUDict[str, Dict] = LRUDict(
                 maxsize=maxsize, redis=redis_client, key=key + "_lru_dict"

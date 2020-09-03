@@ -7,8 +7,8 @@ from haps import Inject, config
 from haps.config import Config, Configuration
 from logzero import logger as log
 
-from botkit.botkit_services.options.base import IOptionStore
-from botkit.botkit_services.services import service
+from botkit.builtin_services.options.base import IOptionStore
+from botkit.builtin_services.services import service
 from botkit.core.modules._module import Module
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.routing.route_builder.builder import RouteBuilder, RouteBuilderContext
@@ -68,7 +68,7 @@ class ModuleLoader:
     async def register_enabled_modules(self) -> None:
         tasks: List[Coroutine] = []
         for n, module in enumerate(self.modules):
-            module.group_index = n
+            module.group_index = n + 1
             tasks.append(self.try_activate_module(module))
 
         await asyncio.gather(*tasks)

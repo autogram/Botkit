@@ -1,5 +1,8 @@
 [tool.poetry]
-name = "botkit"
+name = "autogram-botkit"
+packages = [
+    {include = "botkit"}
+]
 version = "0.2.0"
 description = ""
 authors = ["JosXa"]

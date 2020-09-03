@@ -89,7 +89,7 @@ class StateGenerationExpression(Generic[M]):
         return RouteExpression(self._route_collection, route)
 
     def then_send(
-        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None
     ) -> RouteExpression:
         if via and not self._route_collection.current_client.is_user:
             raise ValueError(
@@ -192,19 +192,7 @@ class PlayGameExpression:
         return RouteExpression(self._route_collection, route)
 
 
-class SendViewMixin(IExpressionWithCallMethod):
-    def reply_with_view(self, view: TView) -> RouteExpression:
-        """ Alias for `send_view` """
-        return self.send_view(view)
-
-    def send_view(self, view: TView) -> RouteExpression:
-        plan = ExecutionPlan().set_view(view, "send")
-        route = RouteDefinition(triggers=self._triggers, plan=plan)
-        self._route_collection.add_for_current_client(route)
-        return RouteExpression(self._route_collection, route)
-
-
-class ConditionsExpression(SendViewMixin):
+class ConditionsExpression(IExpressionWithCallMethod):
     def __init__(
         self,
         routes: RouteCollection,
@@ -218,6 +206,25 @@ class ConditionsExpression(SendViewMixin):
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
+        route = RouteDefinition(triggers=self._triggers, plan=self._plan)
+        self._route_collection.add_for_current_client(route)
+        return RouteExpression(self._route_collection, route)
+
+    def send(
+        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+    ) -> RouteExpression:
+        if via and not self._route_collection.current_client.is_user:
+            raise ValueError(
+                "Can only send a view `via` another bot when the client that this route belongs to is a "
+                "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
+                self._route_collection.current_client,
+            )
+        (
+            self._plan.set_view(view_or_view_type, "send")
+            .set_send_via(via)
+            .set_send_target(to)
+            .add_update_type(UpdateType.message)
+        )
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)

@@ -16,8 +16,12 @@ class ViewBuilder:
         self.menu = InlineMenuBuilder(state)
         self.meta = MetaBuilder()
 
+    @property
+    def is_dirty(self) -> bool:
+        return any((x.is_dirty for x in [self.html, self.menu, self.meta]))
+
     def render(self) -> RenderedMessage:
-        # TODO: implement the other message types
+        # TODO: implement the other message types aswell
         return RenderedTextMessage(
             text=self.html.render(),
             inline_buttons=self.menu.render(),

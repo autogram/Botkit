@@ -24,9 +24,10 @@ def quacks_like_view_render_func(obj: Any) -> bool:
     return True
 
 
-def render_functional_view(view_func: Callable, state: Any) -> RenderedMessage:
-    if state is None:
-        raise ValueError("No state was specified, cannot render.")
+def render_functional_view(view_func: Callable, state: Optional[Any]) -> RenderedMessage:
+    # TODO: Decide if htis is a good idea
+    # if state is None:
+    #     raise ValueError("No state was specified, cannot render.")
 
     # # TODO: (see paraminjector/TODO.md)
     # # TODO: Handle reply keyboards

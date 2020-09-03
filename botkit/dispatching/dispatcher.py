@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Union
 
-import logzero
 from pyrogram import Client
 from pyrogram.handlers.handler import Handler
 from typing_extensions import Literal
@@ -10,6 +9,7 @@ from botkit.core.modules import Module
 from botkit.routing.route import RouteHandler
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
+from botkit.utils.botkit_logging.setup import create_logger
 
 """
 Indicates where the evaluation of individual updates takes place
@@ -27,7 +27,7 @@ class BotkitDispatcher:
         self._inline_query_factory: Any = None
         self.module_handlers: Dict[int, Dict[Client, List[Handler]]] = dict()
 
-        self.log = logzero.setup_logger(BotkitDispatcher.__name__)
+        self.log = create_logger("dispatcher")
 
     async def add_module_routes(self, module: Module):
         log_msg = []

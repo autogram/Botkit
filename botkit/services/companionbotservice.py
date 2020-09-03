@@ -19,7 +19,7 @@ from pyrogram.types import (
 )
 from typing import Union, Optional, AsyncIterator
 
-from botkit.botkit_services.services import service
+from botkit.builtin_services.services import service
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 from botkit.types.client import IClient
 from botkit.views.base import InlineResultViewBase
@@ -102,7 +102,7 @@ class CompanionBotService:
         finally:
             self.bot_client.remove_handler(handler, group)
 
-    async def send_rendered_message(
+    async def send_rendered_message_via(
         self,
         chat_id: Union[int, str],
         rendered: RenderedMessageBase,
@@ -194,7 +194,7 @@ class CompanionBotService:
         hide_via: bool = False,
     ) -> Message:
         rendered: RenderedMessage = view.render()
-        return await self.send_rendered_message(
+        return await self.send_rendered_message_via(
             chat_id=chat_id, rendered=rendered, reply_to=reply_to, silent=silent, hide_via=hide_via
         )
 
