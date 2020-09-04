@@ -15,6 +15,6 @@ example_command:
     
 """
 
-expected_result = Command(
-    trigger=
-)
+# expected_result = Command(
+#     trigger=
+# )

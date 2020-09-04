@@ -1,8 +1,5 @@
-name: Botkit
+name: Build Botkit Master
 on: 
-  pull_request:
-    branches:
-    - master
   push:
     branches: 
     - master
@@ -18,6 +15,10 @@ jobs:
         os: [ubuntu-18.04, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.5.0
+        with:
+          access_token: ${{ github.token }}
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
@@ -29,9 +30,23 @@ jobs:
       - name: View poetry --help
         run: poetry --help
       - name: Poetry install
-        run: poetry install
+        run: poetry install --extras "redis hmr"
+      # TODO: check for (and manually fix?) outdated lockfile
+      - name: Show outdated packages
+        run: poetry show --outdated
+      - name: Lint with flake8
+        continue-on-error: true
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      # TODO: Run black checks
+      # TODO: Run mypy checks
       - name: Test with pytest
-        run: poetry run pytest --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+        # TODO: Somehow report back test results into PR or commit:
+        # - https://tryexceptpass.org/article/pytest-github-integration/
+        run: poetry run pytest tests/ --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
         with:
@@ -39,3 +54,28 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
+      - name: Publish test results to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          file: ./coverage.xml # optional
+          flags: pytest # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true # optional (default = false)
+      - name: Publish test results to Codeclimate
+        uses: paambaati/codeclimate-action@v2.6.0
+        env:
+          CC_TEST_REPORTER_ID: <code_climate_reporter_id>
+        with:
+          coverageLocations: ./coverage.xml
+
+  report:
+    runs-on: ubuntu-18.04
+    needs: build
+    steps:
+      - name: Report result via Telegram
+        uses: appleboy/telegram-action@master
+        with:
+          to: 62056065
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          args: The ${{ github.event_name }} workflow has completed.

@@ -1,4 +1,3 @@
-import functools
 from enum import IntEnum
 
 import functools
