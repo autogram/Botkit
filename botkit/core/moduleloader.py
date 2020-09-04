@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.exceptions import CancelledError
 from enum import Enum, auto
 from typing import Any, Coroutine, Dict, Iterable, List, Optional, Type
 
@@ -140,6 +141,8 @@ class ModuleLoader:
 
         try:
             await module.unload()
+        except CancelledError:
+            pass
         except:
             self.log.exception(f"Could not unload module {module.get_name()}.")
 

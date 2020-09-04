@@ -15,7 +15,7 @@ from botkit.persistence.callback_manager import (
     RedisCallbackManager,
     ICallbackManager,
 )
-from botkit.core.moduleloader import ModuleLoader
+from botkit.core.moduleloader import ModuleLoader, ModuleStatus
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
 from botkit.routing.pipelines.execution_plan import SendTo
@@ -123,8 +123,7 @@ class SystemManagementModule(Module):
         loaded_modules = [
             x
             for x in self.module_loader.modules
-            if self.module_loader.is_active(x)
-            and not self.module_loader.is_disabled(x)
+            if self.module_loader.get_module_status(x) == ModuleStatus.active
             and not isinstance(x, type(self))
         ]
         self.log.info(
