@@ -1,39 +1,41 @@
-on:
+name: Botkit
+on: 
   pull_request:
     branches:
     - master
   push:
-    branches:
+    branches: 
     - master
 
-name: Build Botkit
+
 jobs:
-  flake8:
-    name: flake8
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8]
+        poetry-version: [1.0, 1.0.10]
+        os: [ubuntu-18.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@master
-    - name: Install
-      uses: abatilo/actions-poetry@master
-      with:
-        args: install
-    - name: Run flake8
-      uses: abatilo/actions-poetry@master
-      with:
-        args: run python -m flake8 --show-source --import-order-style pep8 typed_json_dataclass
-          tests
-  pytest:
-    name: pytest
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: Install
-      uses: abatilo/actions-poetry@master
-      with:
-        args: install
-    - name: Run pytest
-      uses: abatilo/actions-poetry@master
-      with:
-        args: run python -m pytest --cov-report xml:codecov.xml --cov=typed_json_dataclass
-          --cov-report=html --junit-xml=coverage.xml --cov-branch --cov-fail-under=100
-          tests/
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: View poetry --help
+        run: poetry --help
+      - name: Poetry install
+        run: poetry install
+      - name: Test with pytest
+        run: poetry run pytest --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
