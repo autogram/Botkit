@@ -12,18 +12,12 @@ class InlineResultGenerator(ABC):
     #     return self.context.matches(inline_query.query)
 
     @abstractmethod
-    async def generate_results(
-        self, container: InlineResultContainer, user_input: str
-    ) -> bool:
+    async def generate_results(self, container: InlineResultContainer, user_input: str) -> bool:
         pass
 
-    async def generate(
-        self,
-        container: InlineResultContainer,
-        user_input: str
-    ) -> None:
+    async def generate(self, container: InlineResultContainer, user_input: str) -> None:
 
-        # user_input = self.context.parse_input(
+        # remove_trigger_setting = self.context.parse_input(
         #     query=inline_query.query, match_result=match_result
         # ).strip()
 

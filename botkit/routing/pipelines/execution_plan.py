@@ -51,6 +51,11 @@ class ViewParameters:
     send_target: Optional[SendTarget] = SendTo.same_chat
 
 
+class RemoveTrigger(Enum):
+    only_for_me = "only_me"
+    aggressively = "aggressively"
+
+
 class ExecutionPlan:
     def __init__(self) -> None:
         self._gatherer: Optional[TypedCallable[GathererSignature]] = None
@@ -59,7 +64,7 @@ class ExecutionPlan:
         self._handling_component: Optional[Component] = None
         self._view: Optional[ViewParameters] = None
         self._update_types: Set[UpdateType] = set()
-        self._should_delete_trigger: bool = False
+        self._remove_trigger_setting: Optional[RemoveTrigger] = None
         self._state_transition: Optional[UUID] = None  # TODO: implement
 
     def set_gatherer(self, state_generator: Optional[GathererSignature]) -> "ExecutionPlan":
@@ -205,6 +210,10 @@ class ExecutionPlan:
             raise error_cb(invalid_elems)
         self._update_types = desired_types
 
-    def set_should_delete_trigger(self, value: bool):
-        self._should_delete_trigger = value
+    def set_remove_trigger(self, remove_trigger: Union[RemoveTrigger, bool, None]):
+        if isinstance(remove_trigger, bool):
+            self._remove_trigger_setting = RemoveTrigger.only_for_me if remove_trigger else None
+        else:
+            # enum or None
+            self._remove_trigger_setting = remove_trigger
         return self

@@ -17,14 +17,19 @@ from botkit.views.botkit_context import Context
 
 
 class CallbackActionDispatcher:
-    def __init__(self, alert_on_error: bool = True):
+    def __init__(self, handle_errors: bool = True, alert_on_error: bool = True):
         self._action_routes: Dict[ActionIdTypes, RouteHandler] = dict()
 
+        self.handle_errors = handle_errors
         self.alert_on_error = alert_on_error
 
         self.bot_restarted_error_message = (
             "Sorry, looks like the bot has been restarted in the meantime "
             "and doesn't know what you clicked on. Please start over!"
+        )
+
+        self.no_action_found_error_message = (
+            "Sorry, but I am unsure how to handle this action at the moment."
         )
 
     def add_action_route(self, route: RouteHandler):
@@ -50,6 +55,7 @@ class CallbackActionDispatcher:
             return False
 
         route = self._action_routes[cb_ctx.action]
+        print(route)
 
         context: Context = Context(
             client=client,
@@ -67,7 +73,7 @@ class CallbackActionDispatcher:
                     callback_query.answer(cb_ctx.notification, show_alert=cb_ctx.show_alert)
                 )
             return result
-        except Exception as e:
+        except:
             log.exception(f"A handler failed: {route.description}")
             await callback_query.answer(text="Sorry, something went wrong.", show_alert=False)
             return False
@@ -83,11 +89,18 @@ class CallbackActionDispatcher:
 
         if not context:
             log.error("Could not find a callback query context.")
-            if self.alert_on_error:
-                await callback_query.answer(text=self.bot_restarted_error_message, show_alert=True)
+            if self.handle_errors:
+                await callback_query.answer(
+                    text=self.bot_restarted_error_message, show_alert=self.alert_on_error
+                )
             return None
 
         if context.action not in self._action_routes:
+            log.error("No route registered for callback query.")
+            if self.handle_errors:
+                await callback_query.answer(
+                    text=self.no_action_found_error_message, show_alert=self.alert_on_error
+                )
             return None
 
         return context

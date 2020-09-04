@@ -73,10 +73,6 @@ class CommandDefinition:
 
     quick_action: Optional[QuickAction] = None
 
-    delete_query: bool = False
-    quote: bool = True
-    reply_to_replied: bool = False
-
 
 # region Routing
 

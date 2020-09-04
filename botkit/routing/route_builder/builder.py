@@ -21,7 +21,12 @@ from pyrogram.handlers.handler import Handler
 from pyrogram.types import CallbackQuery
 
 from botkit.libraries.annotations import HandlerSignature
-from botkit.routing.pipelines.execution_plan import ExecutionPlan, SendTarget, SendTo
+from botkit.routing.pipelines.execution_plan import (
+    ExecutionPlan,
+    RemoveTrigger,
+    SendTarget,
+    SendTo,
+)
 from botkit.routing.pipelines.gatherer import GathererSignature
 from botkit.routing.pipelines.reducer import ReducerSignature
 from botkit.routing.route import RouteDefinition
@@ -198,10 +203,10 @@ class ConditionsExpression(IExpressionWithCallMethod):
         routes: RouteCollection,
         filters: Filter = None,
         condition: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
-        delete_trigger: bool = False,
+        remove_trigger: Union[RemoveTrigger, bool, None] = False,
     ):
         self._route_collection = routes
-        self._plan = ExecutionPlan().set_should_delete_trigger(delete_trigger)
+        self._plan = ExecutionPlan().set_remove_trigger(remove_trigger)
         self._triggers = RouteTriggers(filters=filters, condition=condition, action=None)
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
@@ -248,6 +253,10 @@ class ConditionsExpression(IExpressionWithCallMethod):
 @dataclass
 class RouteBuilderContext:
     load_result: Optional[Any] = None
+    """
+    Contains the return value of a module's asynchronous `load()` method so that the synchronous `register` has
+    access to data that should be retrieved from a coroutine.
+    """
 
 
 class RouteBuilder:
@@ -274,16 +283,16 @@ class RouteBuilder:
         self,
         filters: Optional[Filter],
         condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
-        delete_trigger: bool = False,
+        remove_trigger: Union[RemoveTrigger, bool, None] = None,
     ) -> ConditionsExpression:
         return ConditionsExpression(
             self._route_collection,
             filters=filters,
             condition=condition_func,
-            delete_trigger=delete_trigger,
+            remove_trigger=remove_trigger,
         )
 
-    # def on_command(
+    # def on_trigger(
     #     self,
     #     command_definition: _ParsedCommandDefinition,
     #     extra_filters: Optional[Filter],

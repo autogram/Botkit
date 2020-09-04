@@ -1,9 +1,5 @@
 # Conversation Proxy
 
-## TODO
-- [ ] Refactor!!!
-
-
 # Commands, Actions, QuickActions
 
 ## How it's gonna work

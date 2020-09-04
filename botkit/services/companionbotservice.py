@@ -5,8 +5,9 @@ from uuid import uuid4
 
 from haps import INSTANCE_SCOPE, SINGLETON_SCOPE, base, inject, scope
 from logzero import logger as log
+from pyrogram import filters
 from pyrogram.filters import create
-from pyrogram.handlers import InlineQueryHandler
+from pyrogram.handlers import InlineQueryHandler, MessageHandler
 from pyrogram.handlers.handler import Handler
 from pyrogram.raw.base.messages import BotResults
 from pyrogram.types import (
@@ -130,7 +131,6 @@ class CompanionBotService:
                     input_message_content=None,
                 )
             elif isinstance(rendered, RenderedTextMessage):
-                print("text is:", rendered.text)
                 result = InlineQueryResultArticle(
                     title="sent via userbot",
                     input_message_content=InputTextMessageContent(

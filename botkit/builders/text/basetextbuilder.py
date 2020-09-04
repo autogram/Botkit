@@ -5,7 +5,7 @@ class BaseTextBuilder:
     def __init__(self):
         self.parts = []
 
-    def raw(self, text: Any, end=""):
+    def raw(self, text: str, end=""):
         return self._append_with_end(text, end)
 
     def spc(self):

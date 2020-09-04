@@ -4,7 +4,7 @@ from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.steps._base import Continue, StepError
 from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
 from botkit.routing.pipelines.steps.custom_handler_step_factory import CustomHandlerStepFactory
-from botkit.routing.pipelines.steps.delete_trigger_step_factory import DeleteTriggerStepFactory
+from botkit.routing.pipelines.steps.delete_trigger_step_factory import RemoveTriggerStepFactory
 from botkit.routing.pipelines.steps.gather_step_factory import GatherStepError, GatherStepFactory
 from botkit.routing.pipelines.steps.render_view_step_factory import RenderViewStepFactory
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import (
@@ -33,7 +33,9 @@ class MessagePipelineFactory(UpdatePipelineFactory):
         # TODO: state transitions
         # should_transition = self.plan._state_transition
 
-        delete_trigger = DeleteTriggerStepFactory.create_step(self.plan._should_delete_trigger)
+        delete_trigger_message_async = RemoveTriggerStepFactory.create_step(
+            self.plan._remove_trigger_setting
+        )
 
         async def handle_message(client: IClient, message: Message) -> None:
             context = Context(client=client, update=message, state=None)
@@ -62,8 +64,8 @@ class MessagePipelineFactory(UpdatePipelineFactory):
                     return
                 raise e
 
-            if delete_trigger is not None:
-                await delete_trigger(context)
+            if delete_trigger_message_async is not None:
+                await delete_trigger_message_async(context)
 
         return handle_message
 

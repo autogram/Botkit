@@ -8,9 +8,9 @@
 #     return ctx.parse_input(text)
 #
 #
-# def fmt(user_input: str, prefix: str, delimiter: Optional[str] = None):
+# def fmt(remove_trigger_setting: str, prefix: str, delimiter: Optional[str] = None):
 #     ctx = PrefixBasedInlineModeContext(prefix, delimiter=delimiter or ": ")
-#     return ctx.format_query(user_input)
+#     return ctx.format_query(remove_trigger_setting)
 #
 #
 # # region parse_input tests
@@ -51,19 +51,19 @@
 #
 #
 # def test_format_input_happy_path():
-#     assert fmt(user_input="test", prefix="lala", delimiter=": ") == "lala: test"
+#     assert fmt(remove_trigger_setting="test", prefix="lala", delimiter=": ") == "lala: test"
 #
 #
 # def test_format_input_delimiter_in_prefix():
-#     assert fmt(user_input=" test ", prefix="lala: ", delimiter=": ") == "lala: test"
+#     assert fmt(remove_trigger_setting=" test ", prefix="lala: ", delimiter=": ") == "lala: test"
 #
 #
 # def test_format_input_whitespace():
-#     assert fmt(user_input=" test ", prefix="lala", delimiter=": ") == "lala: test"
+#     assert fmt(remove_trigger_setting=" test ", prefix="lala", delimiter=": ") == "lala: test"
 #
 #
 # def test_format_input_newlines():
-#     assert fmt(user_input=" a\nb\nc ", prefix="lala", delimiter=": ") == "lala: a\nb\nc"
+#     assert fmt(remove_trigger_setting=" a\nb\nc ", prefix="lala", delimiter=": ") == "lala: a\nb\nc"
 #
 #
 # # endregion

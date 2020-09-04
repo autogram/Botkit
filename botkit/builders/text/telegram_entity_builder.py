@@ -14,7 +14,7 @@ class TelegramEntityBuilder(BaseTextBuilder):
         return f"/{name}"
 
     def command(self, name: str, to_lower: bool = False, end: Optional[str] = " "):
-        return self._append_with_end(self.as_command(name=name, to_lower=to_lower), end=end)
+        return self._append_with_end(self.as_command(name=name, to_lower=to_lower), end)
 
     @classmethod
     def as_prompt(cls, text) -> "str":

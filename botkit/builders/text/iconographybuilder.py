@@ -2,11 +2,11 @@ from typing import Optional
 
 from botkit.builders.text.basetextbuilder import BaseTextBuilder
 from botkit.builders.text.emoji import replace_aliases
-from botkit.builders.text.mdformat import number_as_emoji
 
 
 class Iconography:
     ZERO_WIDTH_WHITESPACE = "\xad"
+    EMOJI_NUMBERS = "0️⃣1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣"
 
 
 class IconographyBuilder(BaseTextBuilder):
@@ -24,12 +24,19 @@ class IconographyBuilder(BaseTextBuilder):
         return self
 
     def dash_long(self, end: Optional[str] = " "):
-        return self._append_with_end("—", end=end)
+        return self._append_with_end("—", end)
 
-    def bullet(self):
-        self.parts.append("▪️")
-        return self
+    @classmethod
+    def as_number_emoji(cls, n: int) -> str:
+        idx = str(n)
+        result = []
 
-    def number_as_emoji(self, num: int):
-        self.parts.append(number_as_emoji(num))
+        for char in idx:
+            i = (int(char)) * 3
+            result += Iconography.EMOJI_NUMBERS[i : i + 3]
+
+        return "".join(result)
+
+    def number_emoji(self, num: int):
+        self.parts.append(self.as_number_emoji(num))
         return self

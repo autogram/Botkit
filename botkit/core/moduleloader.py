@@ -1,14 +1,15 @@
 import asyncio
 from enum import Enum, auto
-from typing import Any, Coroutine, Dict, Iterable, KeysView, List, Optional, Tuple, Type
+from typing import Any, Coroutine, Dict, Iterable, List, Optional, Type
 
 import logzero
-from haps import Inject, config
-from haps.config import Config, Configuration
+from haps import Inject
+from haps.config import Configuration
 from logzero import logger as log
 
 from botkit.builtin_services.options.base import IOptionStore
 from botkit.builtin_services.services import service
+from botkit.core.hmr import HotModuleReloadWorker
 from botkit.core.modules._module import Module
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.routing.route_builder.builder import RouteBuilder, RouteBuilderContext
@@ -25,11 +26,6 @@ DISABLED_MODULES = [
     "NotionCollectorModule",
 ]
 
-# noinspection PyMethodMayBeStatic
-
-# DisabledModules = ListOption( name="disabled_modules", description="List of modules that should be ignored on
-# system " "start", default_value=[], )
-
 
 class ModuleStatus(Enum):
     inactive = auto()
@@ -43,6 +39,8 @@ class ModuleLoader:
     options: IOptionStore = Inject()
 
     def __init__(self) -> None:
+        self.log = logzero.setup_logger(ModuleLoader.__class__.__name__)
+
         self.route_builder_class = RouteBuilder
         self.dispatcher = BotkitDispatcher()
 
@@ -53,19 +51,23 @@ class ModuleLoader:
             for m in discovered_modules
         }
 
-        self.log = logzero.setup_logger(ModuleLoader.__class__.__name__)
+        self._hmr_worker = HotModuleReloadWorker()
 
     @property
     def modules(self) -> Iterable[Module]:
         return self.__module_statuses.keys()
 
-    def add_module(self, module: Module) -> None:
+    @property
+    def active_modules(self) -> Iterable[Module]:
+        return (m for m, s in self.__module_statuses.items() if s == ModuleStatus.active)
+
+    def add_module_without_activation(self, module: Module) -> None:
         self.__module_statuses[module] = ModuleStatus.inactive
 
     def get_module_by_name(self, name: str) -> Optional[Module]:
         return next((m for m in self.modules if m.get_name() == name), None)
 
-    async def register_enabled_modules(self) -> None:
+    async def activate_enabled_modules(self) -> None:
         tasks: List[Coroutine] = []
         for n, module in enumerate(self.modules):
             module.group_index = n + 1
@@ -73,7 +75,12 @@ class ModuleLoader:
 
         await asyncio.gather(*tasks)
 
+        self._hmr_worker.start(self.modules)
+
     async def try_activate_module(self, module: Module) -> None:
+        if module not in self.__module_statuses:
+            self.add_module_without_activation(module)
+
         try:
             if self.get_module_status(module) == ModuleStatus.disabled:
                 log.debug(f"{module.get_name()} is disabled.")
@@ -100,8 +107,7 @@ class ModuleLoader:
             load_result = await module.load()
         except Exception as e:
             log.exception(
-                f"Calling `load()` on {module.get_name()} failed. Skipping module "
-                f"initialization..."
+                f"Calling `load()` on {module.get_name()} failed and the module will not be initialized."
             )
             await rollback()
             raise e
@@ -124,16 +130,9 @@ class ModuleLoader:
     def build_module_routes(
         route_builder_class: Type[RouteBuilder], module: Module, load_result: Any = None
     ) -> RouteCollection:
-        route_builder = route_builder_class(
-            # Attach result of `.load()` so that the synchronous `register` method has access to data only
-            # retrievable in an asynchronous coroutine.
-            context=RouteBuilderContext(load_result=load_result)
-        )
+        route_builder = route_builder_class(context=RouteBuilderContext(load_result=load_result))
         module.register(route_builder)
-
-        route_collection: RouteCollection = route_builder._route_collection
-
-        return route_collection
+        return route_builder._route_collection
 
     async def unregister_module(self, module: Module):
         if self.get_module_status(module) != ModuleStatus.active:

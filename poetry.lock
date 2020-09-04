@@ -682,6 +682,14 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "pyOpenSSL (>=0
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
 [[package]]
+category = "main"
+description = "Simple, modern file watching and code reload in python."
+name = "watchgod"
+optional = false
+python-versions = ">=3.5"
+version = "0.6"
+
+[[package]]
 category = "dev"
 description = "The comprehensive WSGI web application library."
 name = "werkzeug"
@@ -694,7 +702,7 @@ dev = ["pytest", "pytest-timeout", "coverage", "tox", "sphinx", "pallets-sphinx-
 watchdog = ["watchdog"]
 
 [metadata]
-content-hash = "fd7f9ca6f1e527d1c21d63ae708068b74cc4fea8c469ba2adfa4f8acbc5a4d6a"
+content-hash = "9c3a9724cb6173c3e067fec0a3a8e8f08f4913d3a0ecfb0a31225f0bbc7e5b6e"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1087,6 +1095,10 @@ unsync = [
 urllib3 = [
     {file = "urllib3-1.25.10-py2.py3-none-any.whl", hash = "sha256:e7983572181f5e1522d9c98453462384ee92a0be7fac5f1413a1e35c56cc0461"},
     {file = "urllib3-1.25.10.tar.gz", hash = "sha256:91056c15fa70756691db97756772bb1eb9678fa585d9184f24534b100dc60f4a"},
+]
+watchgod = [
+    {file = "watchgod-0.6-py35.py36.py37-none-any.whl", hash = "sha256:59700dab7445aa8e6067a5b94f37bae90fc367554549b1ed2e9d0f4f38a90d2a"},
+    {file = "watchgod-0.6.tar.gz", hash = "sha256:e9cca0ab9c63f17fc85df9fd8bd18156ff00aff04ebe5976cee473f4968c6858"},
 ]
 werkzeug = [
     {file = "Werkzeug-1.0.1-py2.py3-none-any.whl", hash = "sha256:2de2a5db0baeae7b2d2664949077c2ac63fbd16d98da0ff71837f7d1dea3fd43"},

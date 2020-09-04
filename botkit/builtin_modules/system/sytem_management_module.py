@@ -71,7 +71,7 @@ class SystemManagementModule(Module):
             (
                 routes.on(
                     filters.command(["log", "logging", "level", "loglevel"]) & only_owner,
-                    delete_trigger=True,
+                    remove_trigger=True,
                 )
                 # TODO: We could do without the gather step completely as LogSettings can be
                 # replaced with functions
@@ -89,6 +89,8 @@ class SystemManagementModule(Module):
                     .mutate(LogSettingsRepository.set_global_botkit_log_level)
                     .then_update(log_settings_view)
                 )
+                # TODO: find nice abstraction
+                # (routes.on_action("done").call(done))
 
     @staticmethod
     async def restart_system(_, message: Message):
@@ -162,7 +164,7 @@ class SystemManagementModule(Module):
                 f"For some reason there were no paused modules: {self.paused_modules}. "
                 f"Restarting with all modules instead."
             )
-            await self.module_loader.register_enabled_modules()
+            await self.module_loader.activate_enabled_modules()
 
         self.log.info("System unpaused.")
         self.system_paused = False
@@ -224,3 +226,5 @@ def log_settings_view(state: LogSettingsRepository, builder: ViewBuilder) -> Non
         builder.menu.rows[n].action_button(
             caption, "select_log_level", level, notification=f"Global log level set to {name}."
         )
+
+    builder.menu.rows[99].action_button("Done ✅", "done")
