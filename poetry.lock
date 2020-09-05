@@ -43,12 +43,13 @@ description = "Classes Without Boilerplate"
 name = "attrs"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "20.1.0"
+version = "20.2.0"
 
 [package.extras]
 dev = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface", "sphinx", "sphinx-rtd-theme", "pre-commit"]
 docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface"]
+tests_no_zope = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six"]
 
 [[package]]
 category = "dev"
@@ -518,7 +519,7 @@ description = "Telegram MTProto API Client Library and Framework for Python"
 name = "pyrogram"
 optional = false
 python-versions = "~=3.6"
-version = "1.0.6"
+version = "1.0.7"
 
 [package.dependencies]
 async-lru = "1.0.2"
@@ -814,7 +815,7 @@ hmr = ["watchgod"]
 redis = ["redis-collections"]
 
 [metadata]
-content-hash = "0dfa5608ca736efde1c38322759117a8f8be36e0d3306f9ed9165c365decb2b6"
+content-hash = "ea14b1b10f78bbf74de349b03b12bdf64d2d43c98c0cb5cb3d0dbd58f91d9fa6"
 lock-version = "1.0"
 python-versions = "^3.8"
 
@@ -835,8 +836,8 @@ atomicwrites = [
     {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
 ]
 attrs = [
-    {file = "attrs-20.1.0-py2.py3-none-any.whl", hash = "sha256:2867b7b9f8326499ab5b0e2d12801fa5c98842d2cbd22b35112ae04bf85b4dff"},
-    {file = "attrs-20.1.0.tar.gz", hash = "sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a"},
+    {file = "attrs-20.2.0-py2.py3-none-any.whl", hash = "sha256:fce7fc47dfc976152e82d53ff92fa0407700c21acd20886a13777a0d20e655dc"},
+    {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 birdseye = [
     {file = "birdseye-0.8.4.tar.gz", hash = "sha256:34fbf3a042f257e981cb0d4849d279457269d212851404b19bf9635af71e0701"},
@@ -1096,8 +1097,8 @@ pyparsing = [
     {file = "pyparsing-2.4.7.tar.gz", hash = "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1"},
 ]
 pyrogram = [
-    {file = "Pyrogram-1.0.6-py3-none-any.whl", hash = "sha256:8e20b9548db14ce483704fb7f9be18cba9a2f2da874a06c0d0c53808e1473400"},
-    {file = "Pyrogram-1.0.6.tar.gz", hash = "sha256:6656bb54ce4b135579c6f92a289dc2f86b4f2b9feb02338177bd38baea705e82"},
+    {file = "Pyrogram-1.0.7-py3-none-any.whl", hash = "sha256:bc8a5bd7fdbd56271b43561f5ea01cf7a983074d1ab799dabeb531fe279dcc6f"},
+    {file = "Pyrogram-1.0.7.tar.gz", hash = "sha256:95beff6eb1dbee38a96405a0d6600fda5ccbc8a9f29e693543f45b3a2ef0245b"},
 ]
 pysocks = [
     {file = "PySocks-1.7.1-py27-none-any.whl", hash = "sha256:08e69f092cc6dbe92a0fdd16eeb9b9ffbc13cadfe5ca4c7bd92ffb078b293299"},
