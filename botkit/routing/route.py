@@ -77,11 +77,15 @@ class RouteDefinition:
 
     @cached_property
     def description(self) -> str:
-        return "; ".join([x.description or "" for x in self.handler_by_update_type.values()])
+        return "; ".join(
+            [x.description or "" for x in self.handler_by_update_type.values()]
+        )
 
 
 def _create_pyrogram_handler(
-    callback: HandlerSignature, update_filter: UpdateFilterSignature, update_type: UpdateType
+    callback: HandlerSignature,
+    update_filter: UpdateFilterSignature,
+    update_type: UpdateType,
 ) -> Handler:
     assert callback is not None
 
@@ -102,4 +106,6 @@ def _create_pyrogram_handler(
         return RawUpdateHandler(callback=callback)
     else:
         # Should never happen
-        raise ValueError(f"Could not find a matching Pyrogram callback class for {update_type}.")
+        raise ValueError(
+            f"Could not find a matching Pyrogram callback class for {update_type}."
+        )

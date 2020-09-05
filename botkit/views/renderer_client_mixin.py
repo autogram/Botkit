@@ -63,7 +63,8 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
             )
         else:
             raise NotImplementedError(
-                f"No suitable `send_*` method found for rendered message '" f"{rendered}'."
+                f"No suitable `send_*` method found for rendered message '"
+                f"{rendered}'."
             )
 
     async def update_message_with_rendered(
@@ -150,17 +151,26 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
         )
 
     async def update_view(
-        self, peer: Union[int, str], message_id: Union[int, Message], view: InlineResultViewBase
+        self,
+        peer: Union[int, str],
+        message_id: Union[int, Message],
+        view: InlineResultViewBase,
     ) -> Message:
         rendered = view.render()
 
-        message_id = message_id.message_id if isinstance(message_id, Message) else int(message_id)
+        message_id = (
+            message_id.message_id
+            if isinstance(message_id, Message)
+            else int(message_id)
+        )
 
         return await self.update_message_with_rendered(
             peer=peer, message_id=message_id, rendered=rendered
         )
 
-    async def update_inline_view(self, inline_message_id: str, view: MessageViewBase) -> bool:
+    async def update_inline_view(
+        self, inline_message_id: str, view: MessageViewBase
+    ) -> bool:
         rendered = view.render()
 
         return await self.update_inline_message_with_rendered(

@@ -42,5 +42,7 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
                 caption.text("Deactivate" if info.is_active else "Activate")
                 caption.spc().text(info.name)
                 builder.rows[n + 1].action_button(
-                    caption.render(), "deactivate" if info.is_active else "activate", self.state,
+                    caption.render(),
+                    "deactivate" if info.is_active else "activate",
+                    self.state,
                 )

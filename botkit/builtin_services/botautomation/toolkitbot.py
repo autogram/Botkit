@@ -16,7 +16,7 @@ class CustomReactionsPostRequest:
 
 @base
 class ToolkitBot(BotAutomationBase):
-    username = '@toolkitbot'
+    username = "@toolkitbot"
 
     @dataclass
     class State(object):
@@ -26,7 +26,9 @@ class ToolkitBot(BotAutomationBase):
 
     # region Public methods
 
-    async def post_media_with_custom_reactions(self, request: CustomReactionsPostRequest):
+    async def post_media_with_custom_reactions(
+        self, request: CustomReactionsPostRequest
+    ):
         print("type of photo is:", type(request.media))
         await self.client.send_file(self.username, file=request.media)
 
@@ -36,7 +38,6 @@ class ToolkitBot(BotAutomationBase):
             await self.send_message("No Emojis!")
 
         print(self.msg.stringify())
-
 
         raise NotImplemented  # TODO
 

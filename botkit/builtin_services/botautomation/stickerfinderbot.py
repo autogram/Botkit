@@ -7,7 +7,7 @@ from typing import Dict, List
 
 @base
 class StickerFinderBot(BotAutomationBase):
-    __username__ = '@stfi_bot'
+    __username__ = "@stfi_bot"
 
     def __init__(self):
         super(StickerFinderBot, self).__init__()

@@ -33,7 +33,9 @@ from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.publish_expression import PublishActionExpressionMixin
 from botkit.routing.route_builder.route_collection import RouteCollection
 from botkit.routing.route_builder.types import IExpressionWithCallMethod, TView
-from botkit.routing.route_builder.webhook_action_expression import WebhookActionExpressionMixin
+from botkit.routing.route_builder.webhook_action_expression import (
+    WebhookActionExpressionMixin,
+)
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.types import TState
 from botkit.routing.update_types.updatetype import UpdateType
@@ -69,7 +71,10 @@ class RouteExpression:
 
 class StateGenerationExpression(Generic[M]):
     def __init__(
-        self, routes: RouteCollection, triggers: RouteTriggers, plan: ExecutionPlan,
+        self,
+        routes: RouteCollection,
+        triggers: RouteTriggers,
+        plan: ExecutionPlan,
     ):
         self._route_collection = routes
         self._triggers = triggers
@@ -102,7 +107,9 @@ class StateGenerationExpression(Generic[M]):
                 "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
                 self._route_collection.current_client,
             )
-        self._plan.set_view(view_or_view_type, "send").set_send_via(via).set_send_target(to)
+        self._plan.set_view(view_or_view_type, "send").set_send_via(
+            via
+        ).set_send_target(to)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -131,7 +138,10 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         return RouteExpression(self._route_collection, route)
 
     def send_view(
-        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+        self,
+        view_or_view_type,
+        to: SendTarget = SendTo.same_chat,
+        via: IClient = None,
     ):
         if via and not self._route_collection.current_client.is_user:
             raise ValueError(
@@ -139,7 +149,9 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
                 "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
                 self._route_collection.current_client,
             )
-        self._plan.set_view(view_or_view_type, "send").set_send_via(via).set_send_target(to)
+        self._plan.set_view(view_or_view_type, "send").set_send_via(
+            via
+        ).set_send_target(to)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -148,7 +160,9 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         self: "ActionExpression", reducer: ReducerSignature
     ) -> StateGenerationExpression[M]:
         self._plan.set_reducer(reducer)
-        return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
+        return StateGenerationExpression(
+            self._route_collection, self._triggers, self._plan
+        )
 
 
 class CommandExpression(WebhookActionExpressionMixin):
@@ -163,7 +177,9 @@ class CommandExpression(WebhookActionExpressionMixin):
         self._triggers = RouteTriggers(action=action, filters=None, condition=condition)
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
-        route = RouteDefinition(plan=ExecutionPlan().set_handler(handler), triggers=self._triggers)
+        route = RouteDefinition(
+            plan=ExecutionPlan().set_handler(handler), triggers=self._triggers
+        )
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
@@ -180,7 +196,8 @@ class PlayGameExpression:
         self._route_collection = routes
         self._triggers = RouteTriggers(
             filters=create(
-                lambda _, __, cbq: cbq.game_short_name == game_short_name, "PlayGameFilter"
+                lambda _, __, cbq: cbq.game_short_name == game_short_name,
+                "PlayGameFilter",
             ),
             action=None,
             condition=None,
@@ -207,7 +224,9 @@ class ConditionsExpression(IExpressionWithCallMethod):
     ):
         self._route_collection = routes
         self._plan = ExecutionPlan().set_remove_trigger(remove_trigger)
-        self._triggers = RouteTriggers(filters=filters, condition=condition, action=None)
+        self._triggers = RouteTriggers(
+            filters=filters, condition=condition, action=None
+        )
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
@@ -216,7 +235,10 @@ class ConditionsExpression(IExpressionWithCallMethod):
         return RouteExpression(self._route_collection, route)
 
     def send(
-        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+        self,
+        view_or_view_type,
+        to: SendTarget = SendTo.same_chat,
+        via: IClient = None,
     ) -> RouteExpression:
         if via and not self._route_collection.current_client.is_user:
             raise ValueError(
@@ -247,7 +269,9 @@ class ConditionsExpression(IExpressionWithCallMethod):
 
     def gather(self, state_generator: GathererSignature):
         self._plan.set_gatherer(state_generator).add_update_type(UpdateType.message)
-        return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
+        return StateGenerationExpression(
+            self._route_collection, self._triggers, self._plan
+        )
 
 
 @dataclass
@@ -266,10 +290,12 @@ class RouteBuilder:
         current_client: IClient = None,
         context: RouteBuilderContext = None,
     ):
-        self._route_collection: RouteCollection = RouteCollection() if routes is None else routes
-        self._current_client: Optional[
-            IClient
-        ] = current_client or self._route_collection.current_client or None
+        self._route_collection: RouteCollection = (
+            RouteCollection() if routes is None else routes
+        )
+        self._current_client: Optional[IClient] = (
+            current_client or self._route_collection.current_client or None
+        )
         self.context = context or RouteBuilderContext()
 
     def use(self, client: IClient) -> "RouteBuilder":
@@ -309,10 +335,14 @@ class RouteBuilder:
         action: Union[str, int],
         condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
     ) -> ActionExpression:
-        return ActionExpression(self._route_collection, action=action, condition=condition_func)
+        return ActionExpression(
+            self._route_collection, action=action, condition=condition_func
+        )
 
     def on_play_game(self, game_short_name: str) -> PlayGameExpression:
-        return PlayGameExpression(self._route_collection, game_short_name=game_short_name)
+        return PlayGameExpression(
+            self._route_collection, game_short_name=game_short_name
+        )
 
     def always_call(self, handler: HandlerSignature) -> RouteExpression:
         return ConditionsExpression(self._route_collection).call(handler)
@@ -340,18 +370,24 @@ class RouteBuilder:
     def state_machine(self, num_states: int) -> Iterable["StateRouteBuilder"]:
         ...
 
-    def state_machine(self, arg: Union[int, Iterable[str]]) -> Iterable["StateRouteBuilder"]:
+    def state_machine(
+        self, arg: Union[int, Iterable[str]]
+    ) -> Iterable["StateRouteBuilder"]:
         machine_guid = uuid4()
         if isinstance(arg, int):
             for i in range(arg):
                 yield StateRouteBuilder(machine_guid, i, self._route_collection)
         else:
             for i, name in enumerate(arg):
-                yield StateRouteBuilder(machine_guid, i, self._route_collection, name=name)
+                yield StateRouteBuilder(
+                    machine_guid, i, self._route_collection, name=name
+                )
 
 
 class StateRouteBuilder(RouteBuilder):
-    def __init__(self, machine_guid: UUID, index: int, routes: RouteCollection, name: str = None):
+    def __init__(
+        self, machine_guid: UUID, index: int, routes: RouteCollection, name: str = None
+    ):
         super().__init__(routes)
         self.state_guid = uuid4()
         self.machine_guid = machine_guid

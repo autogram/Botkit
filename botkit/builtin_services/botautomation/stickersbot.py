@@ -17,7 +17,11 @@ class StickersBot(BotAutomationBase):
 
     async def init_addsticker(self, sticker_pack: str):
         wait_event = self.conversation.wait_event(
-            NewMessage(incoming=True, chats=[self.__username__], pattern=r"^Alright! Now send .*"),
+            NewMessage(
+                incoming=True,
+                chats=[self.__username__],
+                pattern=r"^Alright! Now send .*",
+            ),
             timeout=10,
         )
         await self.conversation.send_message("/addsticker")

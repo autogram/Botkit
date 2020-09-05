@@ -36,10 +36,16 @@ class HotModuleReloadWorker:
         modules: List[Module] = list(modules)
         try:
             # module_files = self._get_module_dependencies(modules)
-            module_files: Dict[Module, Path] = {m: Path(m.__class__.__module__) for m in modules}
+            module_files: Dict[Module, Path] = {
+                m: Path(m.__class__.__module__) for m in modules
+            }
 
             user_module_names: List[str] = list(
-                (x for x in flatten(module_files.values()) if not str(x).startswith("botkit."))
+                (
+                    x
+                    for x in flatten(module_files.values())
+                    if not str(x).startswith("botkit.")
+                )
             )
 
             invalid: List[str] = []
@@ -75,7 +81,9 @@ class HotModuleReloadWorker:
             self.log.exception("Error in hot module reload worker.")
 
     @classmethod
-    def _get_module_dependencies(cls, modules: Iterable[Module]) -> Dict[Module, Set[str]]:
+    def _get_module_dependencies(
+        cls, modules: Iterable[Module]
+    ) -> Dict[Module, Set[str]]:
         module_files: Dict[Module, Set[str]] = {}
 
         for module in modules:

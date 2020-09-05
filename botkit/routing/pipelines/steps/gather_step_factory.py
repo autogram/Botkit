@@ -3,7 +3,10 @@ from typing import Set
 from unsync import Unfuture
 
 from botkit.routing.pipelines.factory_types import ICallbackStepFactory
-from botkit.routing.pipelines.gatherer import GathererSignature, GathererSignatureExamplesStr
+from botkit.routing.pipelines.gatherer import (
+    GathererSignature,
+    GathererSignatureExamplesStr,
+)
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger

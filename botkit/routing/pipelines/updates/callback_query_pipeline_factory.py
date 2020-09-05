@@ -3,11 +3,17 @@ from typing import Any, Union
 from pyrogram.types import CallbackQuery
 
 from botkit.libraries.annotations import HandlerSignature
-from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
-from botkit.routing.pipelines.steps.custom_handler_step_factory import CustomHandlerStepFactory
+from botkit.routing.pipelines.updates.update_pipeline_factory import (
+    UpdatePipelineFactory,
+)
+from botkit.routing.pipelines.steps.custom_handler_step_factory import (
+    CustomHandlerStepFactory,
+)
 from botkit.routing.pipelines.steps.gather_step_factory import GatherStepFactory
 from botkit.routing.pipelines.steps.reduce_step_factory import ReduceStepFactory
-from botkit.routing.pipelines.steps.render_view_step_factory import RenderViewStepFactory
+from botkit.routing.pipelines.steps.render_view_step_factory import (
+    RenderViewStepFactory,
+)
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import (
     CommitRenderedViewStepFactory,
 )
@@ -28,10 +34,16 @@ class CallbackQueryPipelineFactory(UpdatePipelineFactory):
     #     pass  # TODO: not game
 
     def create_unified_callback(self) -> HandlerSignature:
-        gather_initial_state, gather_async = GatherStepFactory.create_step(self.plan._gatherer)
-        mutate_previous_state, mutate_async = ReduceStepFactory.create_step(self.plan._reducer)
+        gather_initial_state, gather_async = GatherStepFactory.create_step(
+            self.plan._gatherer
+        )
+        mutate_previous_state, mutate_async = ReduceStepFactory.create_step(
+            self.plan._reducer
+        )
         render_view = RenderViewStepFactory.create_step(self.plan._view)
-        commit_rendered_view = CommitRenderedViewStepFactory.create_step(self.plan._view)
+        commit_rendered_view = CommitRenderedViewStepFactory.create_step(
+            self.plan._view
+        )
         handle, handle_async = CustomHandlerStepFactory.create_step(self.plan._handler)
 
         log = create_logger()
@@ -50,7 +62,9 @@ class CallbackQueryPipelineFactory(UpdatePipelineFactory):
                     next_state: TState = gather_initial_state()
             elif mutate_previous_state:
                 if mutate_async:
-                    next_state: TState = await mutate_previous_state(context.state, context)
+                    next_state: TState = await mutate_previous_state(
+                        context.state, context
+                    )
                 else:
                     next_state: TState = mutate_previous_state(context.state, context)
 

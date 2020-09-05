@@ -3,7 +3,9 @@ from typing import Dict, Type
 from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.updates import CallbackQueryPipelineFactory
 from botkit.routing.pipelines.updates import MessagePipelineFactory
-from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
+from botkit.routing.pipelines.updates.update_pipeline_factory import (
+    UpdatePipelineFactory,
+)
 from botkit.routing.update_types.updatetype import UpdateType
 
 

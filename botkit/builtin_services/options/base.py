@@ -108,7 +108,10 @@ class IOptionStore:
 
     @abstractmethod
     def subscribe_to_updates(
-        self, callback: Callable[[Option, Any], None], for_option: Option, on_startup: bool = False,
+        self,
+        callback: Callable[[Option, Any], None],
+        for_option: Option,
+        on_startup: bool = False,
     ) -> None:
         pass
 

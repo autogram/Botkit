@@ -8,4 +8,4 @@ class DialogflowConfig:
     project_id: str
     json_credentials_file: Path or str
 
-    KEY = 'dialogflow_config'
+    KEY = "dialogflow_config"

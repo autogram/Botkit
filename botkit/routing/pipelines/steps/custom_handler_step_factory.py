@@ -14,7 +14,9 @@ class HandleStepError(StepError[HandlerSignature]):
 
 
 class CustomHandlerStepFactory(
-    IStepFactory[TypedCallable[HandlerSignature], Optional[Callable[[Context], Awaitable[Any]]]]
+    IStepFactory[
+        TypedCallable[HandlerSignature], Optional[Callable[[Context], Awaitable[Any]]]
+    ]
 ):
     @classmethod
     def create_step(cls, handler):

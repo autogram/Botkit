@@ -2,11 +2,22 @@ from pyrogram.types import Message
 
 from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.steps._base import Continue, StepError
-from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
-from botkit.routing.pipelines.steps.custom_handler_step_factory import CustomHandlerStepFactory
-from botkit.routing.pipelines.steps.delete_trigger_step_factory import RemoveTriggerStepFactory
-from botkit.routing.pipelines.steps.gather_step_factory import GatherStepError, GatherStepFactory
-from botkit.routing.pipelines.steps.render_view_step_factory import RenderViewStepFactory
+from botkit.routing.pipelines.updates.update_pipeline_factory import (
+    UpdatePipelineFactory,
+)
+from botkit.routing.pipelines.steps.custom_handler_step_factory import (
+    CustomHandlerStepFactory,
+)
+from botkit.routing.pipelines.steps.delete_trigger_step_factory import (
+    RemoveTriggerStepFactory,
+)
+from botkit.routing.pipelines.steps.gather_step_factory import (
+    GatherStepError,
+    GatherStepFactory,
+)
+from botkit.routing.pipelines.steps.render_view_step_factory import (
+    RenderViewStepFactory,
+)
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import (
     CommitRenderedViewStepFactory,
 )
@@ -25,9 +36,13 @@ class MessagePipelineFactory(UpdatePipelineFactory):
             self.plan._reducer is None
         ), "Reducer was specified but that is an undefined state for a message handler."
 
-        gather_initial_state, gather_async = GatherStepFactory.create_step(self.plan._gatherer)
+        gather_initial_state, gather_async = GatherStepFactory.create_step(
+            self.plan._gatherer
+        )
         render_view = RenderViewStepFactory.create_step(self.plan._view)
-        commit_rendered_view = CommitRenderedViewStepFactory.create_step(self.plan._view)
+        commit_rendered_view = CommitRenderedViewStepFactory.create_step(
+            self.plan._view
+        )
         handle, handle_async = CustomHandlerStepFactory.create_step(self.plan._handler)
 
         # TODO: state transitions

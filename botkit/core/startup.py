@@ -48,7 +48,9 @@ class Startup(Application, ABC):
 
     async def __start_client(self, client):
         session_path = (
-            client.session_name if hasattr(client, "session_name") else client.session.filename
+            client.session_name
+            if hasattr(client, "session_name")
+            else client.session.filename
         )
 
         log.debug(f"Starting session " f"{session_path}...")
@@ -63,7 +65,9 @@ class Startup(Application, ABC):
         try:
             signals = [signal.SIGTERM, signal.SIGINT]
             for s in signals:
-                loop.add_signal_handler(s, lambda s=s: asyncio.create_task(self._shutdown(loop)))
+                loop.add_signal_handler(
+                    s, lambda s=s: asyncio.create_task(self._shutdown(loop))
+                )
         except NotImplementedError:
             pass  # Windows does not implement signals
 

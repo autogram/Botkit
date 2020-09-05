@@ -4,7 +4,9 @@ from pyrogram import Client
 from pyrogram.handlers.handler import Handler
 from typing_extensions import Literal
 
-from botkit.dispatching.callbackqueries.callbackactiondispatcher import CallbackActionDispatcher
+from botkit.dispatching.callbackqueries.callbackactiondispatcher import (
+    CallbackActionDispatcher,
+)
 from botkit.core.modules import Module
 from botkit.routing.route import RouteHandler
 from botkit.routing.update_types.updatetype import UpdateType
@@ -23,7 +25,9 @@ UPDATE_TYPE_HANDLING_SCOPE: Dict[UpdateType, Literal["global", "module"]] = {
 
 class BotkitDispatcher:
     def __init__(self):
-        self.callback_action_dispatchers: Dict[Client, CallbackActionDispatcher] = dict()
+        self.callback_action_dispatchers: Dict[
+            Client, CallbackActionDispatcher
+        ] = dict()
         self._inline_query_factory: Any = None
         self.module_handlers: Dict[int, Dict[Client, List[Handler]]] = dict()
 
@@ -79,7 +83,9 @@ class BotkitDispatcher:
             await self.add_handler(group_index, client, route_handler.pyrogram_handler)
 
         elif update_type == UpdateType.callback_query:
-            (await self._get_or_create_action_dispatcher(client)).add_action_route(route_handler)
+            (await self._get_or_create_action_dispatcher(client)).add_action_route(
+                route_handler
+            )
 
         elif update_type == UpdateType.inline_query:
             raise NotImplementedError("Cannot dispatch inline queries yet.")
@@ -102,7 +108,9 @@ class BotkitDispatcher:
                 try:
                     client.remove_handler(handler, group)
                 except Exception:
-                    self.log.exception(f"Could not remove handler {handler} from group {group}.")
+                    self.log.exception(
+                        f"Could not remove handler {handler} from group {group}."
+                    )
 
         del self.module_handlers[group]
 
@@ -121,7 +129,9 @@ class BotkitDispatcher:
     def is_registered(self, module: Module) -> bool:
         return module.group_index in self.module_handlers
 
-    async def _get_or_create_action_dispatcher(self, client) -> CallbackActionDispatcher:
+    async def _get_or_create_action_dispatcher(
+        self, client
+    ) -> CallbackActionDispatcher:
 
         if not (action_dispatcher := self.callback_action_dispatchers.get(client)):
             self.callback_action_dispatchers[client] = (

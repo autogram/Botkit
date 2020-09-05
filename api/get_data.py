@@ -21,6 +21,6 @@ def flt(m) -> bool:
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for m in inspect.getmembers(APIMethods, predicate=lambda m: flt(m)):
         print(format_method_sig(*m))

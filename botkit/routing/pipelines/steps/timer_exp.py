@@ -43,5 +43,7 @@ if __name__ == "__main__":
     N = 80000000
     print(f"Comparing durations for {N} repetitions...")
     # print("Normal execution took:", timeit(run_normal, number=N))
-    print("Walrus-equivalent thingy took:", timeit(run_with_walrus_equivalent, number=N))
+    print(
+        "Walrus-equivalent thingy took:", timeit(run_with_walrus_equivalent, number=N)
+    )
     print("Walrus execution took:", timeit(run_with_walrus, number=N))

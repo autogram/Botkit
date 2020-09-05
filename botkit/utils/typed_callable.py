@@ -49,7 +49,9 @@ class TypedCallable(Generic[T]):
 
     @cached_property
     def num_non_optional_params(self) -> int:
-        return sum((1 for p in self.signature.parameters.values() if p.default is p.empty))
+        return sum(
+            (1 for p in self.signature.parameters.values() if p.default is p.empty)
+        )
 
     @cached_property
     def name(self) -> str:

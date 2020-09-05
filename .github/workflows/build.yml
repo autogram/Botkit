@@ -1,9 +1,8 @@
 name: Build Botkit Master
-on: 
+on:
   push:
-    branches: 
-    - master
-
+    branches:
+      - master
 
 jobs:
   build:
@@ -38,20 +37,18 @@ jobs:
           key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
+
       - name: Poetry install
         run: poetry install --extras "redis hmr"
       # TODO: check for (and manually fix?) outdated lockfile
       - name: Show outdated packages
         run: poetry show --outdated
-      - name: Lint with flake8
         continue-on-error: true
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      # TODO: Run black checks
+
       # TODO: Run mypy checks
+      - name: Run pre-commit hooks
+        run: poetry run pre-commit run --all-files
+        continue-on-error: true
       - name: Test with pytest
         # TODO: Somehow report back test results into PR or commit:
         # - https://tryexceptpass.org/article/pytest-github-integration/

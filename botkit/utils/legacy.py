@@ -96,7 +96,6 @@ def get_image_dimensions(filename):
     return im.width, im.height
 
 
-
 def create_chrome_driver(download_dir, headless=True):
     chrome_path = "/usr/bin/google-chrome-beta"
     chromedriver_path = "/usr/bin/chromedriver"

@@ -5,4 +5,10 @@ from ...routing.route_builder.builder import RouteBuilder
 
 haps_disambiguate_module_eggs()
 
-__all__ = ["haps_disambiguate_module_eggs", "resolve_modules", "RouteBuilder", "module", "Module"]
+__all__ = [
+    "haps_disambiguate_module_eggs",
+    "resolve_modules",
+    "RouteBuilder",
+    "module",
+    "Module",
+]

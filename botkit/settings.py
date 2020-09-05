@@ -21,12 +21,12 @@ class _BotkitSettings:
 
     callback_manager_qualifier: Literal["memory", "redis"] = "memory"
     """
-    Qualifier key of the kind of callback manager to be used. Should be "memory" for an in-memory store (without 
+    Qualifier key of the kind of callback manager to be used. Should be "memory" for an in-memory store (without
     persistence) and "redis" if you have the `redis_collections` package installed.
-    
+
     If you want to use Redis, you will need to supply Botkit with a Redis client. This is done by exposing it to haps
     by using `@egg` and usually a `@scope(SINGLETON_SCOPE)`. The following example illustrates this:
-    
+
     ```
     from decouple import config
     from haps import SINGLETON_SCOPE, egg, scope

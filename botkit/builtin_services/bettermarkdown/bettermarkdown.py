@@ -138,13 +138,18 @@ class BlockGrammar(object):
         r'(?: +["(]([^\n]+)[")])? *(?:\n+|$)'
     )
     def_footnotes = re.compile(
-        r"^\[\^([^\]]+)\]: *(" r"[^\n]*(?:\n+|$)" r"(?: {1,}[^\n]*(?:\n+|$))*" r")"  # [^key]:
+        r"^\[\^([^\]]+)\]: *("
+        r"[^\n]*(?:\n+|$)"
+        r"(?: {1,}[^\n]*(?:\n+|$))*"
+        r")"  # [^key]:
     )
 
     newline = re.compile(r"^\n+")
     block_code = re.compile(r"^( {4}[^\n]+\n*)+")
     fences = re.compile(
-        r"^ *(`{3,}|~{3,}) *([^`\s]+)? *\n" r"([\s\S]+?)\s*" r"\1 *(?:\n+|$)"  # ```lang  # ```
+        r"^ *(`{3,}|~{3,}) *([^`\s]+)? *\n"
+        r"([\s\S]+?)\s*"
+        r"\1 *(?:\n+|$)"  # ```lang  # ```
     )
     hrule = re.compile(r"^ {0,3}[-*_](?: *[-*_]){2,} *(?:\n+|$)")
     heading = re.compile(r"^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)")
@@ -161,10 +166,15 @@ class BlockGrammar(object):
         r"(?! )"
         r"(?!\1(?:[*+-]|\d+\.) )\n*"
         r"|"
-        r"\s*$)" % (_pure_pattern(def_links), _pure_pattern(def_footnotes),)
+        r"\s*$)"
+        % (
+            _pure_pattern(def_links),
+            _pure_pattern(def_footnotes),
+        )
     )
     list_item = re.compile(
-        r"^(( *)(?:[*+-]|\d+\.) [^\n]*" r"(?:\n(?!\2(?:[*+-]|\d+\.) )[^\n]*)*)", flags=re.M
+        r"^(( *)(?:[*+-]|\d+\.) [^\n]*" r"(?:\n(?!\2(?:[*+-]|\d+\.) )[^\n]*)*)",
+        flags=re.M,
     )
     list_bullet = re.compile(r"^ *(?:[*+-]|\d+\.) +")
     paragraph = re.compile(
@@ -192,7 +202,9 @@ class BlockGrammar(object):
         )
     )
     table = re.compile(r"^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*")
-    nptable = re.compile(r"^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*")
+    nptable = re.compile(
+        r"^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*"
+    )
     text = re.compile(r"^[^\n]+")
 
 
@@ -298,23 +310,39 @@ class BlockLexer(object):
         # clean leading whitespace
         code = _block_code_leading_pattern.sub("", m.group(0))
         self.tokens.append(
-            {"type": "code", "lang": None, "text": code,}
+            {
+                "type": "code",
+                "lang": None,
+                "text": code,
+            }
         )
 
     def parse_fences(self, m):
         self.tokens.append(
-            {"type": "code", "lang": m.group(2), "text": m.group(3),}
+            {
+                "type": "code",
+                "lang": m.group(2),
+                "text": m.group(3),
+            }
         )
 
     def parse_heading(self, m):
         self.tokens.append(
-            {"type": "heading", "level": len(m.group(1)), "text": m.group(2),}
+            {
+                "type": "heading",
+                "level": len(m.group(1)),
+                "text": m.group(2),
+            }
         )
 
     def parse_lheading(self, m):
         """Parse setext heading."""
         self.tokens.append(
-            {"type": "heading", "level": 1 if m.group(2) == "=" else 2, "text": m.group(1),}
+            {
+                "type": "heading",
+                "level": 1 if m.group(2) == "=" else 2,
+                "text": m.group(1),
+            }
         )
 
     def parse_hrule(self, m):
@@ -323,7 +351,10 @@ class BlockLexer(object):
     def parse_list_block(self, m):
         bull = m.group(2)
         self.tokens.append(
-            {"type": "list_start", "numbered": "." in bull,}
+            {
+                "type": "list_start",
+                "numbered": "." in bull,
+            }
         )
         self._list_depth += 1
         if self._list_depth > self._max_recursive_depth:
@@ -404,7 +435,10 @@ class BlockLexer(object):
         self.def_footnotes[key] = 0
 
         self.tokens.append(
-            {"type": "footnote_start", "key": key,}
+            {
+                "type": "footnote_start",
+                "key": key,
+            }
         )
 
         text = m.group(2)
@@ -424,7 +458,10 @@ class BlockLexer(object):
         self.parse(text, self.footnote_rules)
 
         self.tokens.append(
-            {"type": "footnote_end", "key": key,}
+            {
+                "type": "footnote_end",
+                "key": key,
+            }
         )
 
     def parse_table(self, m):
@@ -489,7 +526,9 @@ class BlockLexer(object):
         else:
             attr = m.group(2)
             text = m.group(3)
-            self.tokens.append({"type": "open_html", "tag": tag, "extra": attr, "text": text})
+            self.tokens.append(
+                {"type": "open_html", "tag": tag, "extra": attr, "text": text}
+            )
 
     def parse_paragraph(self, m):
         ## text = m.group(1).rstrip('\group') - leave my linebreaks alone
@@ -509,7 +548,8 @@ class InlineGrammar(object):
         r"^(?:%s|%s|%s)"
         % (
             r"<!--[\s\S]*?-->",
-            r"<(\w+%s)((?:%s)*?)\sender*>([\sender\S]*?)<\/\1>" % (_valid_end, _valid_attr),
+            r"<(\w+%s)((?:%s)*?)\sender*>([\sender\S]*?)<\/\1>"
+            % (_valid_end, _valid_attr),
             r"<\w+%s(?:%s)*?\sender*\/?>" % (_valid_end, _valid_attr),
         )
     )
@@ -527,10 +567,14 @@ class InlineGrammar(object):
     nolink = re.compile(r"^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]")
     url = re.compile(r"""^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])""")
     double_emphasis = re.compile(
-        r"^_{2}([\s\S]+?)_{2}(?!_)" r"|" r"^\*{2}([\s\S]+?)\*{2}(?!\*)"  # __word__  # **word**
+        r"^_{2}([\s\S]+?)_{2}(?!_)"
+        r"|"
+        r"^\*{2}([\s\S]+?)\*{2}(?!\*)"  # __word__  # **word**
     )
     emphasis = re.compile(
-        r"^\b_((?:__|[^_])+?)_\b" r"|" r"^\*((?:\*\*|[^\*])+?)\*(?!\*)"  # _word_  # *word*
+        r"^\b_((?:__|[^_])+?)_\b"
+        r"|"
+        r"^\*((?:\*\*|[^\*])+?)\*(?!\*)"  # _word_  # *word*
     )
     code = re.compile(r"^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)")  # `code`
     linebreak = re.compile(r"^ {2,}\n(?!\s*$)")
@@ -744,8 +788,7 @@ class InlineLexer(object):
 
 
 class Renderer(object):
-    """The default HTML renderer for rendering Markdown.
-    """
+    """The default HTML renderer for rendering Markdown."""
 
     def __init__(self, **kwargs):
         self.options = kwargs
@@ -839,7 +882,9 @@ class Renderer(object):
         :param header: header part of the table.
         :param body: body part of the table.
         """
-        return ("<table>\n<thead>%sender</thead>\n" "<tbody>\n%sender</tbody>\n</table>\n") % (
+        return (
+            "<table>\n<thead>%sender</thead>\n" "<tbody>\n%sender</tbody>\n</table>\n"
+        ) % (
             header,
             body,
         )
@@ -981,7 +1026,8 @@ class Renderer(object):
         :param index: the index count of current footnote.
         """
         html = (
-            '<sup class="footnote-ref" id="fnref-%sender">' '<a href="#fn-%sender">%d</a></sup>'
+            '<sup class="footnote-ref" id="fnref-%sender">'
+            '<a href="#fn-%sender">%d</a></sup>'
         ) % (escape(key), escape(key), index)
         return html
 
@@ -1069,7 +1115,9 @@ class Markdown(object):
             return out
 
         footnotes = filter(lambda o: keys.get(o["key"]), self.footnotes)
-        self.footnotes = sorted(footnotes, key=lambda o: keys.get(o["key"]), reverse=True)
+        self.footnotes = sorted(
+            footnotes, key=lambda o: keys.get(o["key"]), reverse=True
+        )
 
         body = self.renderer.placeholder()
         while self.footnotes:
@@ -1124,7 +1172,9 @@ class Markdown(object):
 
     def output_heading(self):
         return self.renderer.header(
-            self.inline(self.token["text"]), self.token["level"], self.token["text"],
+            self.inline(self.token["text"]),
+            self.token["level"],
+            self.token["text"],
         )
 
     def output_code(self):

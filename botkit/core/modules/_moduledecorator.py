@@ -17,18 +17,36 @@ class ModuleDecorator(decorators.Decorator):
     def __call__(self, *args, **kwargs) -> Type[Module]:
         return super().__call__(*args, **kwargs)
 
-    def decorate_class(self, cls: Type[Module], *dec_args, **dec_kwargs) -> Type[Module]:
+    def decorate_class(
+        self, cls: Type[Module], *dec_args, **dec_kwargs
+    ) -> Type[Module]:
         if not issubclass(cls, Module):
-            raise TypeError(f"Can only use the @module decorator on classes that inherit from {Module.__name__}.")
-        egg.factories.append(Egg(type_=cls, qualifier=cls.__name__, egg_=cls, base_=Module, profile=None))
+            raise TypeError(
+                f"Can only use the @module decorator on classes that inherit from {Module.__name__}."
+            )
+        egg.factories.append(
+            Egg(type_=cls, qualifier=cls.__name__, egg_=cls, base_=Module, profile=None)
+        )
         return cls
 
     def decorate_func(
         self, func: Callable[[RouteBuilder], Any], name: str = None, *args, **dec_kwargs
     ) -> Type[Module]:
         class_name = name if name else format_module_name(func.__name__)
-        module_cls = type(class_name, (Module,), {"register": lambda self, routes: func(routes=routes)},)
-        egg.factories.append(Egg(type_=module_cls, qualifier=class_name, egg_=module_cls, base_=Module, profile=None,))
+        module_cls = type(
+            class_name,
+            (Module,),
+            {"register": lambda self, routes: func(routes=routes)},
+        )
+        egg.factories.append(
+            Egg(
+                type_=module_cls,
+                qualifier=class_name,
+                egg_=module_cls,
+                base_=Module,
+                profile=None,
+            )
+        )
         return func
 
 

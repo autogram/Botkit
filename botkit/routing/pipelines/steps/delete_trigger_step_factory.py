@@ -8,7 +8,9 @@ from botkit.views.botkit_context import Context
 
 
 class RemoveTriggerStepFactory(
-    IStepFactory[Optional[RemoveTrigger], Optional[Callable[[Context], Awaitable[None]]]]
+    IStepFactory[
+        Optional[RemoveTrigger], Optional[Callable[[Context], Awaitable[None]]]
+    ]
 ):
     @property
     def applicable_update_types(self) -> List[UpdateType]:

@@ -20,13 +20,18 @@ class IViewSender(ABC, Generic[Message]):
 
     @abstractmethod
     async def update_message_with_rendered(
-        self, peer: Union[int, str], message_id: int, rendered: RenderedMessageBase,
+        self,
+        peer: Union[int, str],
+        message_id: int,
+        rendered: RenderedMessageBase,
     ) -> Message:
         ...
 
     @abstractmethod
     async def update_inline_message_with_rendered(
-        self, inline_message_id: str, rendered: RenderedMessageBase,
+        self,
+        inline_message_id: str,
+        rendered: RenderedMessageBase,
     ) -> bool:
         ...
 
@@ -98,5 +103,7 @@ class IViewSender(ABC, Generic[Message]):
     async def update_inline_view(self, inline_message_id: str, view: MediaView) -> bool:
         ...
 
-    async def update_inline_view(self, inline_message_id: str, view: MessageViewBase) -> bool:
+    async def update_inline_view(
+        self, inline_message_id: str, view: MessageViewBase
+    ) -> bool:
         ...

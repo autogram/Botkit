@@ -6,7 +6,9 @@ from unittest.mock import MagicMock, Mock
 from pyrogram import filters
 from pyrogram.types import CallbackQuery
 
-from botkit.dispatching.callbackqueries.callbackactiondispatcher import CallbackActionDispatcher
+from botkit.dispatching.callbackqueries.callbackactiondispatcher import (
+    CallbackActionDispatcher,
+)
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.libraries.annotations import IClient
 from botkit.routing.route import RouteDefinition
@@ -31,7 +33,9 @@ def test_route_with_mutation_step_produces_valid_callback() -> None:
             assert context.payload == PAYLOAD
             self.value = context.payload
 
-    async def handle(client: IClient, callback_query: CallbackQuery, state: MyModel) -> str:
+    async def handle(
+        client: IClient, callback_query: CallbackQuery, state: MyModel
+    ) -> str:
         assert client is not None
         assert callback_query is not None
         assert state is not None
@@ -40,7 +44,9 @@ def test_route_with_mutation_step_produces_valid_callback() -> None:
     builder = RouteBuilder()
 
     builder.use(client)
-    builder.on_action(ACTION).mutate(MyModel.mutate_something_without_returning).then_call(handle)
+    builder.on_action(ACTION).mutate(
+        MyModel.mutate_something_without_returning
+    ).then_call(handle)
 
     routes: List[RouteDefinition] = builder._route_collection.routes_by_client[client]
     route = routes[0]
@@ -60,7 +66,11 @@ def test_route_with_mutation_step_produces_valid_callback() -> None:
     state = MyModel()
 
     action_context: Context = Context(
-        client=client, update=callback_query, state=state, action=ACTION, payload=PAYLOAD
+        client=client,
+        update=callback_query,
+        state=state,
+        action=ACTION,
+        payload=PAYLOAD,
     )
 
     result = asyncio.get_event_loop().run_until_complete(
@@ -79,7 +89,9 @@ def test_route_with_gather_step_produces_valid_callback() -> None:
     class MyModel:
         value: str = "before"
 
-    async def handle(client: IClient, callback_query: CallbackQuery, state: MyModel) -> MyModel:
+    async def handle(
+        client: IClient, callback_query: CallbackQuery, state: MyModel
+    ) -> MyModel:
         assert client is not None
         assert callback_query is not None
         assert state is not None
@@ -128,7 +140,9 @@ def test_full_with_dispatcher() -> None:
             assert context.payload == PAYLOAD
             self.value = context.payload
 
-    async def handle(client: IClient, callback_query: CallbackQuery, state: MyModel) -> str:
+    async def handle(
+        client: IClient, callback_query: CallbackQuery, state: MyModel
+    ) -> str:
         assert client is not None
         assert callback_query is not None
         assert state is not None
@@ -137,7 +151,9 @@ def test_full_with_dispatcher() -> None:
     builder = RouteBuilder()
 
     builder.use(client)
-    builder.on_action(ACTION).mutate(MyModel.mutate_something_without_returning).then_call(handle)
+    builder.on_action(ACTION).mutate(
+        MyModel.mutate_something_without_returning
+    ).then_call(handle)
 
     routes: List[RouteDefinition] = builder._route_collection.routes_by_client[client]
     route = routes[0]
@@ -173,7 +189,9 @@ def test_full_with_dispatcher() -> None:
     callback_action_dispatcher = CallbackActionDispatcher()
     dispatcher.callback_action_dispatchers[client] = callback_action_dispatcher
     dispatcher.add_handler = MagicMock()
-    dispatcher.add_route_for_update_type(0, client, UpdateType.callback_query, route_handler)
+    dispatcher.add_route_for_update_type(
+        0, client, UpdateType.callback_query, route_handler
+    )
     dispatcher.add_handler.assert_called_once_with(
         0, client, callback_action_dispatcher.pyrogram_handler
     )

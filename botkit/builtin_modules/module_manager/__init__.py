@@ -16,7 +16,9 @@ class ModuleManagerModule(Module):
     def __init__(self, user_client: IClient, bot_client: IClient):
         self.user_client = user_client
         self.bot_client = bot_client
-        self.companion = CompanionBotService(user_client=user_client, bot_client=bot_client)
+        self.companion = CompanionBotService(
+            user_client=user_client, bot_client=bot_client
+        )
 
     def register(self, routes: RouteBuilder):
         with routes.using(self.user_client):

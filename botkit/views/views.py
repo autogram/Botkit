@@ -128,7 +128,9 @@ class QuizView(ModelViewBase, IRegisterable, RenderMarkupBase):
         )
 
 
-def _render_message_markup(obj: Union[ModelViewBase, RenderMarkupBase]) -> RenderedMessageMarkup:
+def _render_message_markup(
+    obj: Union[ModelViewBase, RenderMarkupBase]
+) -> RenderedMessageMarkup:
     rendered = RenderedMessageMarkup()
 
     inspected_render = TypedCallable(obj.render_markup)

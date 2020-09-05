@@ -5,7 +5,9 @@ from typing import List
 def get_all_botkit_loggers() -> List[logging.Logger]:
     # noinspection PyUnresolvedReferences
     existing_loggers = [
-        logging.getLogger(name) for name in logging.root.manager.loggerDict if "botkit." in name
+        logging.getLogger(name)
+        for name in logging.root.manager.loggerDict
+        if "botkit." in name
     ]
     existing_loggers.append(logging.getLogger("botkit"))
     return existing_loggers

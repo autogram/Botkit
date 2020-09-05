@@ -14,6 +14,4 @@ class ActionExpressionBase(ABC):
         condition: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
     ):
         self._routes = routes
-        self._triggers = RouteTriggers(
-            action=action, filters=None, condition=condition
-        )
+        self._triggers = RouteTriggers(action=action, filters=None, condition=condition)

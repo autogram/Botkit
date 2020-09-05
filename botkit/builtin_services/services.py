@@ -27,6 +27,7 @@ class _ServiceDecorator(decorators.ClassDecorator):
     class MyService: ...
     ```
     """
+
     def decorate(self, cls: T, scope=SINGLETON_SCOPE, **kwargs) -> T:
         base(cls)
         egg(cls)

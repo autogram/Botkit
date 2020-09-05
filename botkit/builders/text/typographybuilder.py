@@ -81,13 +81,19 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
             self.list_item(text=i)
 
     @classmethod
-    def as_numbered_list_item(cls, text: str, n: int, use_emoji_numbers: bool = True) -> str:
+    def as_numbered_list_item(
+        cls, text: str, n: int, use_emoji_numbers: bool = True
+    ) -> str:
         if use_emoji_numbers:
             return f"{cls.as_number_emoji(n)} {text}"
         return f"{n}. {text}"
 
     def numbered_list_item(
-        self, text: str, n: int, end: Optional[str] = None, use_emoji_numbers: bool = True
+        self,
+        text: str,
+        n: int,
+        end: Optional[str] = None,
+        use_emoji_numbers: bool = True,
     ):
         return self._append_with_end(
             self.as_numbered_list_item(text, n, use_emoji_numbers), end

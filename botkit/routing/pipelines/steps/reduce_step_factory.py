@@ -24,11 +24,15 @@ class ReduceStepFactory(ICallbackStepFactory[ReducerSignature]):
 
             async def mutate_previous_state_async(previous_state, context):
                 reducer_args = (
-                    (previous_state,) if reducer.num_parameters == 1 else (previous_state, context)
+                    (previous_state,)
+                    if reducer.num_parameters == 1
+                    else (previous_state, context)
                 )
 
                 try:
-                    log.debug(f"Mutating state asynchronously using reducer {reducer.name}")
+                    log.debug(
+                        f"Mutating state asynchronously using reducer {reducer.name}"
+                    )
                     new_state = await reducer.func(*reducer_args)
                 except Exception as e:
                     raise ReduceStepError(e)
@@ -42,7 +46,9 @@ class ReduceStepFactory(ICallbackStepFactory[ReducerSignature]):
 
             def mutate_previous_state(previous_state, context):
                 reducer_args = (
-                    (previous_state,) if reducer.num_parameters == 1 else (previous_state, context)
+                    (previous_state,)
+                    if reducer.num_parameters == 1
+                    else (previous_state, context)
                 )
 
                 try:

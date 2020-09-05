@@ -10,7 +10,9 @@ class TelegramEntityBuilder(BaseTextBuilder):
     @classmethod
     def as_command(cls, name: str, to_lower: bool = False):
         name = name.lstrip("/")
-        name = strutils.slugify(name, delim="", lower=to_lower, ascii=True).decode("utf-8")
+        name = strutils.slugify(name, delim="", lower=to_lower, ascii=True).decode(
+            "utf-8"
+        )
         return f"/{name}"
 
     def command(self, name: str, to_lower: bool = False, end: Optional[str] = " "):

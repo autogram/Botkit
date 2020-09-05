@@ -5,7 +5,7 @@ from telethon.tl.custom import InlineResults
 
 @base
 class WorkingDictBotController(BotAutomationBase):
-    username = '@WorkingDictBot'
+    username = "@WorkingDictBot"
 
     async def fetch_word_definition(self, word: str) -> InlineResults:
         return await self.send_inline_query(word)

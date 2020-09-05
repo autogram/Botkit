@@ -21,7 +21,9 @@ def make_valid_handler_variations(update_type: object) -> List[Callable]:
     async def no_client_annotation(client, x: update_type):
         pass
 
-    async def with_additional_args(client, message: update_type, additional_arg: int = None):
+    async def with_additional_args(
+        client, message: update_type, additional_arg: int = None
+    ):
         pass
 
     async def more_args_inbetween(client, something, sth_else, message: update_type):
@@ -30,7 +32,14 @@ def make_valid_handler_variations(update_type: object) -> List[Callable]:
     def sync(client, message: update_type):
         pass
 
-    return [pure, pure_pyro, no_client_annotation, with_additional_args, more_args_inbetween, sync]
+    return [
+        pure,
+        pure_pyro,
+        no_client_annotation,
+        with_additional_args,
+        more_args_inbetween,
+        sync,
+    ]
 
 
 def test_message_handler_can_be_determined() -> None:

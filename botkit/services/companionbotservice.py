@@ -69,9 +69,13 @@ class CompanionBotService:
                 thumb_url=None,
             )
 
-            await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=0)
+            await self.bot_client.answer_inline_query(
+                query.id, results=[result], cache_time=0
+            )
 
-        inline_id_filter = create(lambda _, __, ilq: ilq.query == query_text, "QueryFilter")
+        inline_id_filter = create(
+            lambda _, __, ilq: ilq.query == query_text, "QueryFilter"
+        )
 
         group = -99
         dispatcher = self.bot_client.dispatcher
@@ -87,7 +91,9 @@ class CompanionBotService:
                 bot_username, query_text
             )
             if not bot_results:
-                raise RuntimeError("Could not fetch any inline query results from companionbot.")
+                raise RuntimeError(
+                    "Could not fetch any inline query results from companionbot."
+                )
 
             # Send result as user
             return await self.user_client.send_inline_bot_result(
@@ -148,9 +154,13 @@ class CompanionBotService:
                 raise NotImplementedError(f"Sending {rendered} is not yet possible.")
 
             # noinspection PyTypeChecker
-            await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=1)
+            await self.bot_client.answer_inline_query(
+                query.id, results=[result], cache_time=1
+            )
 
-        inline_id_filter = create(lambda _, __, ilq: ilq.query == query_text, "QueryFilter")
+        inline_id_filter = create(
+            lambda _, __, ilq: ilq.query == query_text, "QueryFilter"
+        )
 
         handler = InlineQueryHandler(answer_inline_query, inline_id_filter)
 
@@ -196,7 +206,11 @@ class CompanionBotService:
     ) -> Message:
         rendered: RenderedMessage = view.render()
         return await self.send_rendered_message_via(
-            chat_id=chat_id, rendered=rendered, reply_to=reply_to, silent=silent, hide_via=hide_via
+            chat_id=chat_id,
+            rendered=rendered,
+            reply_to=reply_to,
+            silent=silent,
+            hide_via=hide_via,
         )
 
     @asynccontextmanager
@@ -249,7 +263,9 @@ class CompanionBotService:
             await message.delete()
 
         async with self.add_handler(
-            MessageHandler(record_message, filters=filters.photo & filters.chat(user_id))
+            MessageHandler(
+                record_message, filters=filters.photo & filters.chat(user_id)
+            )
         ):
             await self.user_client.send_photo(bot_id, photo=photo)
             await recorded_msg.wait()

@@ -7,7 +7,9 @@ from botkit.settings import botkit_settings
 
 
 def create_logger(
-    sub_logger_name: str = None, override_level: Any = None, use_standard_format: bool = True,
+    sub_logger_name: str = None,
+    override_level: Any = None,
+    use_standard_format: bool = True,
 ):
     level = override_level or botkit_settings.log_level
 

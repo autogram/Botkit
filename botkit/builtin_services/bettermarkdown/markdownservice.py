@@ -4,16 +4,21 @@ from haps import base, egg, Inject
 
 from botkit.builtin_services.bettermarkdown.aliases import INLINE
 from botkit.builtin_services.bettermarkdown.bettermarkdown import Renderer
-from botkit.builtin_services.bettermarkdown.bettermarkdownlexer import BetterMarkdownLexer
+from botkit.builtin_services.bettermarkdown.bettermarkdownlexer import (
+    BetterMarkdownLexer,
+)
 from botkit.builtin_services.options.base import ToggleOption, IOptionStore
 
 
 @base
 class IMarkdownService(ABC):
-    MARKDOWN_OPTION = ToggleOption('markdown', "Markdown", on_by_default=True, aliases=['md'])
+    MARKDOWN_OPTION = ToggleOption(
+        "markdown", "Markdown", on_by_default=True, aliases=["md"]
+    )
 
     @abstractmethod
-    def parse_html(self, text: str) -> str: pass
+    def parse_html(self, text: str) -> str:
+        pass
 
 
 @egg
@@ -31,6 +36,6 @@ class MarkdownService(IMarkdownService):
         return markdown(text).strip()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     s = MarkdownService()
-    print(s.parse_html('man...'))
+    print(s.parse_html("man..."))

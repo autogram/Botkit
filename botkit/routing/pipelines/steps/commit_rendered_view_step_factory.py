@@ -16,7 +16,9 @@ class CommitRenderedViewStepError(StepError):
     pass
 
 
-_EvaluatedSendTarget = namedtuple("_EvaluatedSendTarget", ["peer_id", "reply_to_msg_id"])
+_EvaluatedSendTarget = namedtuple(
+    "_EvaluatedSendTarget", ["peer_id", "reply_to_msg_id"]
+)
 
 
 class CommitRenderedViewStepFactory(
@@ -51,7 +53,9 @@ class CommitRenderedViewStepFactory(
                         log.debug(
                             f"Sending rendered message via bot client to {target.peer_id}{reply_log}"
                         )
-                        companion = CompanionBotService(context.client, view_params.send_via)
+                        companion = CompanionBotService(
+                            context.client, view_params.send_via
+                        )
                         await companion.send_rendered_message_via(
                             target.peer_id,
                             rendered=context.rendered_message,
@@ -73,7 +77,9 @@ class CommitRenderedViewStepFactory(
 
             async def update_view(context: Context):
                 if (
-                    inline_message_id := getattr(context.update, "inline_message_id", None)
+                    inline_message_id := getattr(
+                        context.update, "inline_message_id", None
+                    )
                 ) is not None:
                     try:
                         return await context.client.update_inline_message_with_rendered(
@@ -99,15 +105,21 @@ class CommitRenderedViewStepFactory(
                     chat_id = context.user_id
                     message_id = context.message_id
 
-                log.debug(f"Updating inline message in chat {chat_id} with rendered content")
+                log.debug(
+                    f"Updating inline message in chat {chat_id} with rendered content"
+                )
                 return await context.client.update_message_with_rendered(
-                    peer=chat_id, message_id=message_id, rendered=context.rendered_message
+                    peer=chat_id,
+                    message_id=message_id,
+                    rendered=context.rendered_message,
                 )
 
             return update_view
 
 
-def evaluate_send_target(send_target: SendTarget, context: Context) -> _EvaluatedSendTarget:
+def evaluate_send_target(
+    send_target: SendTarget, context: Context
+) -> _EvaluatedSendTarget:
     assert send_target is not None
 
     if callable(send_target):
@@ -119,7 +131,10 @@ def evaluate_send_target(send_target: SendTarget, context: Context) -> _Evaluate
 
     if static_send_target == SendTo.self or static_send_target == SendTo.self.name:
         return _EvaluatedSendTarget("me", None)
-    if static_send_target == SendTo.same_chat or static_send_target == SendTo.same_chat.name:
+    if (
+        static_send_target == SendTo.same_chat
+        or static_send_target == SendTo.same_chat.name
+    ):
         return _EvaluatedSendTarget(context.chat_id, None)
     if (
         static_send_target == SendTo.same_chat_quote

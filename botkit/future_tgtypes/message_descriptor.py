@@ -32,7 +32,9 @@ class MessageDescriptor(BaseModel):
             return cls.from_message(update)
         elif isinstance(update, _CallbackQueryUpdate) and update.inline_message_id:
             return MessageDescriptor(
-                chat_id=None, message_id=update.inline_message_id, is_inline=True,
+                chat_id=None,
+                message_id=update.inline_message_id,
+                is_inline=True,
             )
         raise ValueError(f"Could not extract a message location from update: {update}")
 

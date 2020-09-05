@@ -13,10 +13,7 @@ class VoiceRecognitionClient:
     def convert_audio_ffmpeg(in_file, out_file):
         if os.path.exists(out_file):
             os.remove(out_file)
-        ff = ffmpy.FFmpeg(
-            inputs={in_file: None},
-            outputs={out_file: None}
-        )
+        ff = ffmpy.FFmpeg(inputs={in_file: None}, outputs={out_file: None})
         ff.run(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return out_file
 

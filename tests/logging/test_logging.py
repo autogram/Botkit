@@ -77,7 +77,9 @@ def test_botkit_logzero_sub_logger_logs_in_debug(caplog):
         assert caplog.record_tuples == []
 
 
-def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creation(caplog):
+def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creation(
+    caplog,
+):
     botkit_settings.log_level = logging.INFO
     with caplog.at_level(logging.INFO):
         sub_log = create_logger("sub")

@@ -2,7 +2,10 @@ from haps import Container, Egg
 from pyrogram.types import InlineKeyboardButton
 
 from botkit.builders.inlinemenubuilder import InlineMenuBuilder
-from botkit.persistence.callback_manager import ICallbackManager, MemoryDictCallbackManager
+from botkit.persistence.callback_manager import (
+    ICallbackManager,
+    MemoryDictCallbackManager,
+)
 from botkit.persistence.callback_manager._simple import lookup_callback
 from botkit.settings import botkit_settings
 

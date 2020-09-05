@@ -18,7 +18,8 @@ class ModuleInfo(BaseModel):
         return ModuleInfo(
             name=module.get_name(),
             route_descriptions=[
-                m.description for m in flatten(module.route_collection.routes_by_client.values())
+                m.description
+                for m in flatten(module.route_collection.routes_by_client.values())
             ],
             module_state=loader.get_module_status(module),
         )

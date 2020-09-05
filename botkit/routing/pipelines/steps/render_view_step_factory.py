@@ -8,7 +8,10 @@ from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.views.botkit_context import Context
-from botkit.views.functional_views import quacks_like_view_render_func, render_functional_view
+from botkit.views.functional_views import (
+    quacks_like_view_render_func,
+    render_functional_view,
+)
 from botkit.views.rendered_messages import RenderedMessageBase
 from botkit.views.views import MessageViewBase
 

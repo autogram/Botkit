@@ -27,4 +27,3 @@ class MemoryDictCallbackManager(ICallbackManager):
 
     def remove_outdated(self, days: int = 7):
         pass
-

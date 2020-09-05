@@ -9,6 +9,7 @@ class MessageUnderstanding:
     """
     Dataclass for an incoming utterance, enriched with NLU information.
     """
+
     text: str
     language_code: str
     intent: str

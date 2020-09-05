@@ -8,8 +8,14 @@ from typing_extensions import Literal
 
 from botkit.core.components import Component
 from botkit.libraries.annotations import HandlerSignature
-from botkit.routing.pipelines.gatherer import GathererSignature, GathererSignatureExamplesStr
-from botkit.routing.pipelines.reducer import ReducerSignature, ReducerSignatureExamplesStr
+from botkit.routing.pipelines.gatherer import (
+    GathererSignature,
+    GathererSignatureExamplesStr,
+)
+from botkit.routing.pipelines.reducer import (
+    ReducerSignature,
+    ReducerSignatureExamplesStr,
+)
 from botkit.routing.route_builder.types import TView
 from botkit.routing.update_types.update_type_inference import infer_update_types
 from botkit.routing.update_types.updatetype import UpdateType
@@ -31,7 +37,9 @@ class SendTo(Enum):
 
 ChatTarget = Union[SendTo, int, str]
 
-SendTargetFuncSignature = Callable[[Context], Union[ChatTarget, Tuple[ChatTarget, Optional[int]]]]
+SendTargetFuncSignature = Callable[
+    [Context], Union[ChatTarget, Tuple[ChatTarget, Optional[int]]]
+]
 SendTargetFuncSignatureExamplesStr = """
 def _(ctx: Context) -> SendTo: ...
 def _(ctx: Context) -> Union[int, str]: ...
@@ -67,7 +75,9 @@ class ExecutionPlan:
         self._remove_trigger_setting: Optional[RemoveTrigger] = None
         self._state_transition: Optional[UUID] = None  # TODO: implement
 
-    def set_gatherer(self, state_generator: Optional[GathererSignature]) -> "ExecutionPlan":
+    def set_gatherer(
+        self, state_generator: Optional[GathererSignature]
+    ) -> "ExecutionPlan":
         if self._reducer:
             raise ValueError("Route cannot have both a gatherer and a reduce step.")
 
@@ -119,7 +129,9 @@ class ExecutionPlan:
         inferred_update_types = infer_update_types(self._handler)
 
         if not inferred_update_types:
-            raise ValueError(f"Could not infer update types from the callback {handler}.")
+            raise ValueError(
+                f"Could not infer update types from the callback {handler}."
+            )
 
         self._set_update_types_exclusive(
             inferred_update_types,
@@ -155,7 +167,9 @@ class ExecutionPlan:
 
         if command == "send":
             # TODO: Allow specifying the send target
-            self._view = ViewParameters(command=command, view=view, send_target=SendTo.same_chat)
+            self._view = ViewParameters(
+                command=command, view=view, send_target=SendTo.same_chat
+            )
         elif command == "update":
             self._view = ViewParameters(command=command, view=view)
         else:
@@ -206,13 +220,17 @@ class ExecutionPlan:
     def _set_update_types_exclusive(
         self, desired_types: Set[UpdateType], error_cb: Callable[[Set[str]], Exception]
     ) -> None:
-        if invalid_elems := {t.name for t in self._update_types if t not in desired_types}:
+        if invalid_elems := {
+            t.name for t in self._update_types if t not in desired_types
+        }:
             raise error_cb(invalid_elems)
         self._update_types = desired_types
 
     def set_remove_trigger(self, remove_trigger: Union[RemoveTrigger, bool, None]):
         if isinstance(remove_trigger, bool):
-            self._remove_trigger_setting = RemoveTrigger.only_for_me if remove_trigger else None
+            self._remove_trigger_setting = (
+                RemoveTrigger.only_for_me if remove_trigger else None
+            )
         else:
             # enum or None
             self._remove_trigger_setting = remove_trigger

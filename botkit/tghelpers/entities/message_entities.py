@@ -32,7 +32,9 @@ def parse_entity(entity: MessageEntity, message_text: str) -> str:
         return message_text[entity.offset : entity.offset + entity.length]
     else:
         entity_text = message_text.encode("utf-16-le")
-        entity_text = entity_text[entity.offset * 2 : (entity.offset + entity.length) * 2]
+        entity_text = entity_text[
+            entity.offset * 2 : (entity.offset + entity.length) * 2
+        ]
 
         return entity_text.decode("utf-16-le")
 
@@ -60,7 +62,8 @@ def parse_entities(
 
 def create_entity_filter(type_: MessageEntityType) -> Filter:
     return create(
-        lambda _, __, m: any(parse_entities(m, type_)) if m.entities else False, type_.upper(),
+        lambda _, __, m: any(parse_entities(m, type_)) if m.entities else False,
+        type_.upper(),
     )
 
 

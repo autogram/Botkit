@@ -62,7 +62,11 @@ class BotAutomationBase(object):
     client: IUserClient = Inject()
     lookup: ILookupService = Inject()
 
-    def __init__(self, default_timeout=10, total_timeout=60,) -> None:
+    def __init__(
+        self,
+        default_timeout=10,
+        total_timeout=60,
+    ) -> None:
         self.timeout = default_timeout
         self.total_timeout = total_timeout
         self.msg: Message = None
@@ -97,7 +101,9 @@ class BotAutomationBase(object):
         return default
 
     async def send_message(self, text: str, **conversation_kwargs):
-        return await self._communicate(lambda conv: conv.send_message(text), **conversation_kwargs)
+        return await self._communicate(
+            lambda conv: conv.send_message(text), **conversation_kwargs
+        )
 
     async def send_file(self, file: Any, caption: str = None, **conversation_kwargs):
         return await self._communicate(
@@ -121,7 +127,9 @@ class BotAutomationBase(object):
     async def send_inline_query(self, query: str) -> InlineResults:
         return await self.client.inline_query(self.username, query)
 
-    async def _communicate(self, func: Callable[[Conversation], Any], **kwargs) -> Message:
+    async def _communicate(
+        self, func: Callable[[Conversation], Any], **kwargs
+    ) -> Message:
         """
         Sends user_message and fetches a response
         TODO: fetch multiple responses like in tgintegration
