@@ -89,9 +89,11 @@ class Startup(Application, ABC):
         log.info("Ready.")
 
     async def _shutdown(self, loop: AbstractEventLoop):
+        log.info("Shutting down...")
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         [task.cancel() for task in tasks]
         log.info(f"Cancelling {len(tasks)} running or outstanding tasks")
         await asyncio.gather(*tasks)
         await self.on_shutdown()
+        log.info("Graceful shutdown complete. Goodbye")
         loop.stop()
