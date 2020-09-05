@@ -86,11 +86,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: junit/test-results-${{ matrix.python-version }}.xml
           log_level: DEBUG
-
-  report:
-    runs-on: ubuntu-18.04
-    needs: build
-    steps:
       - name: Report result via Telegram
         uses: appleboy/telegram-action@master
         with:
