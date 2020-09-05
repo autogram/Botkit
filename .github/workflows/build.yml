@@ -65,13 +65,6 @@ jobs:
           name: codecov-umbrella # optional
           fail_ci_if_error: true # optional (default = false)
         if: ${{ always() }}
-      - name: Publish test results to Codeclimate
-        uses: paambaati/codeclimate-action@v2.6.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_REPORTER_ID }}
-        with:
-          coverageLocations: coverage.xml
-        if: ${{ always() }}
       - name: XUnit Viewer
         id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1
