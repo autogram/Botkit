@@ -1,16 +1,16 @@
 import asyncio
-import importlib.util
 import importlib
+import importlib.util
 import inspect
 import os
 import re
+import sys
 from asyncio import Future
 from asyncio.exceptions import CancelledError
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, Iterable, List, Optional, Set
 
-import sys
 from boltons.iterutils import flatten
 from watchgod import RegExpWatcher, awatch
 
@@ -39,7 +39,7 @@ class HotModuleReloadWorker:
             module_files: Dict[Module, Path] = {m: Path(m.__class__.__module__) for m in modules}
 
             user_module_names: List[str] = list(
-                (x for x in flatten(module_files.values()) if not x.startswith("botkit."))
+                (x for x in flatten(module_files.values()) if not str(x).startswith("botkit."))
             )
 
             invalid: List[str] = []
