@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
-from typing import Literal, Optional
+from logging import Handler
+from typing import List, Literal, Optional
 
 from logzero import LogFormatter
 
@@ -50,6 +51,8 @@ class _BotkitSettings:
     log_formatter = LogFormatter(
         fmt="%(color)s[%(levelname)1.1s %(asctime)s %(name)s:%(lineno)d]%(end_color)s %(message)s"
     )
+
+    additional_log_handlers: List[Handler] = None
 
     @property
     def log_level(self) -> int:

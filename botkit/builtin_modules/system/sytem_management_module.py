@@ -42,9 +42,7 @@ class ToggleSystemStateCommand(Command):
 class SystemManagementModule(Module):
     module_loader: ModuleLoader = Inject()
 
-    def __init__(
-        self, user_client: IClient, bot_client: Optional[IClient] = None
-    ) -> None:
+    def __init__(self, user_client: IClient, bot_client: Optional[IClient] = None) -> None:
         self.user_client = user_client
         self.bot_client = bot_client
 
@@ -57,9 +55,7 @@ class SystemManagementModule(Module):
     def register(self, routes: RouteBuilder):
         command_bus.register(_ToggleSystemStateCommandHandler(self))
 
-        restart_command = filters.command("r", prefixes=[".", "#"]) | filters.command(
-            "restart"
-        )
+        restart_command = filters.command("r", prefixes=[".", "#"]) | filters.command("restart")
         only_owner = filters.user(routes.context.load_result.user_client_id)
 
         with routes.using(self.user_client):
@@ -74,8 +70,7 @@ class SystemManagementModule(Module):
 
             (
                 routes.on(
-                    filters.command(["log", "logging", "level", "loglevel"])
-                    & only_owner,
+                    filters.command(["log", "logging", "level", "loglevel"]) & only_owner,
                     remove_trigger=True,
                 )
                 # TODO: We could do without the gather step completely as LogSettings can be
@@ -111,9 +106,7 @@ class SystemManagementModule(Module):
         await asyncio.sleep(2)
         command_bus.execute(
             ToggleSystemStateCommand(
-                new_state="unpause",
-                triggered_by="user",
-                reason_phrase="Starting back up.",
+                new_state="unpause", triggered_by="user", reason_phrase="Starting back up.",
             )
         )
 
@@ -134,11 +127,9 @@ class SystemManagementModule(Module):
             and not isinstance(x, type(self))
         ]
         self.log.info(
-            f"Pausing modules:\n"
-            + "\n".join([m.get_name() for m in loaded_modules])
-            + "\n..."
+            f"Pausing modules:\n" + "\n".join([m.get_name() for m in loaded_modules]) + "\n..."
         )
-        tasks = [self.module_loader.unregister_module(m) for m in loaded_modules]
+        tasks = [self.module_loader.deactivate_module(m) for m in loaded_modules]
         await asyncio.gather(*tasks, return_exceptions=True)
         self.system_paused = True
         self.paused_modules = loaded_modules
@@ -232,10 +223,7 @@ def log_settings_view(state: LogSettingsRepository, builder: ViewBuilder) -> Non
         # https://fsymbols.com/signs/arrow/
         caption = f"➤ {name}" if level == state.current_level else name
         builder.menu.rows[n].action_button(
-            caption,
-            "select_log_level",
-            level,
-            notification=f"Global log level set to {name}.",
+            caption, "select_log_level", level, notification=f"Global log level set to {name}.",
         )
 
     builder.menu.rows[99].action_button("Done ✅", "done")

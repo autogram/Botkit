@@ -16,9 +16,7 @@ class ModuleManagerModule(Module):
     def __init__(self, user_client: IClient, bot_client: IClient):
         self.user_client = user_client
         self.bot_client = bot_client
-        self.companion = CompanionBotService(
-            user_client=user_client, bot_client=bot_client
-        )
+        self.companion = CompanionBotService(user_client=user_client, bot_client=bot_client)
 
     def register(self, routes: RouteBuilder):
         with routes.using(self.user_client):
@@ -71,6 +69,6 @@ class ModuleManagerModule(Module):
         module_to_disable = module_info.page_items[0]
         module_name = module_to_disable.name
         module = self.module_loader.get_module_by_name(module_name)
-        await self.module_loader.unregister_module(module)
+        await self.module_loader.deactivate_module(module)
         module_to_disable.module_state = self.module_loader.get_module_status(module)
         return module_info

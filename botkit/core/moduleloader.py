@@ -48,9 +48,7 @@ class ModuleLoader:
         discovered_modules: List[Module] = Configuration().get_var("modules")
 
         self.__module_statuses: Dict[Module, ModuleStatus] = {
-            m: ModuleStatus.disabled
-            if m.get_name() in DISABLED_MODULES
-            else ModuleStatus.inactive
+            m: ModuleStatus.disabled if m.get_name() in DISABLED_MODULES else ModuleStatus.inactive
             for m in discovered_modules
         }
 
@@ -62,9 +60,7 @@ class ModuleLoader:
 
     @property
     def active_modules(self) -> Iterable[Module]:
-        return (
-            m for m, s in self.__module_statuses.items() if s == ModuleStatus.active
-        )
+        return (m for m, s in self.__module_statuses.items() if s == ModuleStatus.active)
 
     def add_module_without_activation(self, module: Module) -> None:
         self.__module_statuses[module] = ModuleStatus.inactive
@@ -125,9 +121,7 @@ class ModuleLoader:
 
             await self.dispatcher.add_module_routes(module)
         except Exception as e:
-            log.exception(
-                f"Could not build module routes for module {module.get_name()}."
-            )
+            log.exception(f"Could not build module routes for module {module.get_name()}.")
             await rollback()
             raise e
 
@@ -137,13 +131,11 @@ class ModuleLoader:
     def build_module_routes(
         route_builder_class: Type[RouteBuilder], module: Module, load_result: Any = None
     ) -> RouteCollection:
-        route_builder = route_builder_class(
-            context=RouteBuilderContext(load_result=load_result)
-        )
+        route_builder = route_builder_class(context=RouteBuilderContext(load_result=load_result))
         module.register(route_builder)
         return route_builder._route_collection
 
-    async def unregister_module(self, module: Module):
+    async def deactivate_module(self, module: Module):
         if self.get_module_status(module) != ModuleStatus.active:
             raise ValueError("Cannot unregister as the module is not loaded.")
 
@@ -157,9 +149,7 @@ class ModuleLoader:
         try:
             await self.dispatcher.remove_module_routes(module)
         except:
-            self.log.exception(
-                f"Could not remove routes of module {module.get_name()}."
-            )
+            self.log.exception(f"Could not remove routes of module {module.get_name()}.")
 
         self.__module_statuses[module] = ModuleStatus.inactive
 
