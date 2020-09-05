@@ -30,7 +30,8 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ matrix.os }}-poetry${{ matrix.poetry-version }}-python${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+#          key: ${{ matrix.os }}-poetry${{ matrix.poetry-version }}-python${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: ${{ matrix.os }}-poetry${{ matrix.poetry-version }}-python${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-poetry${{ matrix.poetry-version }}-python${{ matrix.python-version }}
 
