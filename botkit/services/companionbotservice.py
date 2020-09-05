@@ -1,6 +1,7 @@
 import traceback
 from asyncio import Event
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from uuid import uuid4
 
 from haps import INSTANCE_SCOPE, SINGLETON_SCOPE, base, inject, scope
@@ -113,6 +114,9 @@ class CompanionBotService:
     ) -> Message:
         bot_username = (await self.bot_client.get_me()).username
 
+        # TODO:
+        # - add class for query_text and possible exception (like on bottom of file)
+        # - raise early when exception is detected in this method
         query_text = str(uuid4())
 
         async def answer_inline_query(client: IClient, query: InlineQuery):

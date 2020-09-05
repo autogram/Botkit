@@ -17,7 +17,7 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
                 builder.text("Routes: ")
 
                 for r in m.route_descriptions:
-                    builder.br().bullet()
+                    builder.br().list_item("")
 
                     if m.is_active:
                         builder.text(r)
@@ -42,7 +42,5 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
                 caption.text("Deactivate" if info.is_active else "Activate")
                 caption.spc().text(info.name)
                 builder.rows[n + 1].action_button(
-                    caption.render(),
-                    "deactivate" if info.is_active else "activate",
-                    self.state,
+                    caption.render(), "deactivate" if info.is_active else "activate", self.state,
                 )

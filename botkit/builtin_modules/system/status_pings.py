@@ -12,9 +12,7 @@ from typing import cast
 from pyrogram.types import Message
 from typing_extensions import AsyncGenerator
 
-from botkit.builtin_modules.system.sytem_management_module import (
-    ToggleSystemStateCommand,
-)
+from botkit.builtin_modules.system.sytem_management_module import ToggleSystemStateCommand
 from botkit.builtin_services.eventing import command_bus
 
 
@@ -51,9 +49,7 @@ class StatusPings:
                 queried_ping: Optional[Ping] = await self.query_most_recent_ping()
 
                 other_detected = (
-                    self.other_instance_detected(
-                        queried_ping, own_environment=self.environment
-                    )
+                    self.other_instance_detected(queried_ping, own_environment=self.environment)
                     if queried_ping
                     else False
                 )
@@ -75,9 +71,7 @@ class StatusPings:
                 )
                 return
             if other_detected:
-                if self.has_higher_priority(
-                    queried_ping.env, compare_to=self.environment
-                ):
+                if self.has_higher_priority(queried_ping.env, compare_to=self.environment):
                     command = ToggleSystemStateCommand(
                         new_state="pause",
                         triggered_by=self.__class__.__name__,
@@ -145,10 +139,9 @@ class StatusPings:
 
     async def query_most_recent_ping(self) -> Optional[Ping]:
         found = None
-        async for m in cast(
-            AsyncGenerator[Message, None],
-            self.client.iter_history(self.log_chat, limit=10),
-        ):
+        async for m in self.client.iter_history(self.log_chat, limit=100):
+            if not m or not m.text:
+                continue
             if not m.text.startswith("{"):
                 continue
             try:
@@ -189,16 +182,12 @@ class StatusPings:
         )
 
     async def _send_ping(self, force_resend: bool = False):
-        self.last_sent_ping = Ping(
-            env=self.environment, ping_time=datetime.now(tz=pytz.UTC)
-        )
+        self.last_sent_ping = Ping(env=self.environment, ping_time=datetime.now(tz=pytz.UTC))
 
         if self.last_ping_msg and not force_resend:
             try:
                 self.last_ping_msg = await self.client.edit_message_text(
-                    self.log_chat,
-                    self.last_ping_msg.message_id,
-                    self.last_sent_ping.json(),
+                    self.log_chat, self.last_ping_msg.message_id, self.last_sent_ping.json(),
                 )
                 return
             except:

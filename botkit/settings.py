@@ -1,9 +1,10 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from logging import Handler
 from typing import List, Literal, Optional
 
 from logzero import LogFormatter
+from pydantic import Field
 
 from botkit.utils.botkit_logging.lookup import set_botkit_log_level
 
@@ -52,7 +53,7 @@ class _BotkitSettings:
         fmt="%(color)s[%(levelname)1.1s %(asctime)s %(name)s:%(lineno)d]%(end_color)s %(message)s"
     )
 
-    additional_log_handlers: List[Handler] = None
+    additional_log_handlers: List[Handler] = field(default_factory=list)
 
     @property
     def log_level(self) -> int:
