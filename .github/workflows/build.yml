@@ -69,6 +69,8 @@ jobs:
       - name: XUnit Viewer
         id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1
+        with:
+          results: junit/
         if: ${{ always() }}
       - name: Attach the report
         uses: actions/upload-artifact@v1
