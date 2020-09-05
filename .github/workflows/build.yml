@@ -22,11 +22,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      # - name: Run image
-      #   uses: abatilo/actions-poetry@v2.0.0
-      #   with:
-      #     poetry-version: ${{ matrix.poetry-version }}
-      - name: "Install poetry"
+      - name: "Install Poetry"
         uses: Gr1N/setup-poetry@v3
         with:
           poetry-version: ${{ matrix.poetry-version }}
@@ -52,7 +48,7 @@ jobs:
       - name: Test with pytest
         # TODO: Somehow report back test results into PR or commit:
         # - https://tryexceptpass.org/article/pytest-github-integration/
-        run: poetry run pytest tests/ --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=com --cov-report=xml --cov-report=html
+        run: poetry run pytest tests/ --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=botkit --cov-report=xml --cov-report=html
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
         with:
@@ -64,7 +60,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          file: ./coverage.xml # optional
+          file: coverage.xml
           flags: pytest # optional
           name: codecov-umbrella # optional
           fail_ci_if_error: true # optional (default = false)
@@ -74,7 +70,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: <code_climate_reporter_id>
         with:
-          coverageLocations: ./coverage.xml
+          coverageLocations: coverage.xml
         if: ${{ always() }}
 
   report:
