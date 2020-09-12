@@ -9,7 +9,7 @@ from botkit.routing.pipelines.filters import UpdateFilterSignature
 ActionIdTypes = Union[int, str]
 
 
-@dataclass(frozen=True)
+@dataclass()
 class RouteTriggers:
     filters: Optional[Filter] = None
     action: Optional[ActionIdTypes] = None

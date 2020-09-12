@@ -11,6 +11,7 @@ from pyrogram.types import CallbackQuery, Update
 from botkit.persistence.callback_manager import CallbackActionContext, ICallbackManager
 from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.triggers import ActionIdTypes
+from botkit.routing.update_types.updatetype import UpdateType
 from botkit.settings import botkit_settings
 from botkit.types.client import IClient
 from botkit.views.botkit_context import Context
@@ -45,15 +46,9 @@ class CallbackActionDispatcher:
 
     @staticmethod
     def check(client: IClient, update: Update, route: RouteDefinition):
-        return (
-            route.triggers.filters(client, update)
-            if callable(route.triggers.filters)
-            else True
-        )
+        return route.triggers.filters(client, update) if callable(route.triggers.filters) else True
 
-    async def handle(
-        self, client: IClient, callback_query: CallbackQuery
-    ) -> Union[bool, Any]:
+    async def handle(self, client: IClient, callback_query: CallbackQuery) -> Union[bool, Any]:
         cb_ctx: Optional[CallbackActionContext] = await self._get_context_or_respond(
             callback_query
         )
@@ -66,7 +61,8 @@ class CallbackActionDispatcher:
         context: Context = Context(
             client=client,
             update=callback_query,
-            state=cb_ctx.state,
+            update_type=UpdateType.callback_query,
+            view_state=cb_ctx.state,
             action=cb_ctx.action,
             payload=cb_ctx.payload,
         )
@@ -76,23 +72,17 @@ class CallbackActionDispatcher:
             if cb_ctx.notification:
                 # Answer asynchronously, no need to wait.
                 asyncio.ensure_future(
-                    callback_query.answer(
-                        cb_ctx.notification, show_alert=cb_ctx.show_alert
-                    )
+                    callback_query.answer(cb_ctx.notification, show_alert=cb_ctx.show_alert)
                 )
             return result
         except:
             log.exception(f"A handler failed: {route.description}")
-            await callback_query.answer(
-                text="Sorry, something went wrong.", show_alert=False
-            )
+            await callback_query.answer(text="Sorry, something went wrong.", show_alert=False)
             return False
 
     @cached_property
     def callback_manager(self) -> ICallbackManager:
-        return Container().get_object(
-            ICallbackManager, botkit_settings.callback_manager_qualifier
-        )
+        return Container().get_object(ICallbackManager, botkit_settings.callback_manager_qualifier)
 
     async def _get_context_or_respond(
         self, callback_query: CallbackQuery
@@ -103,8 +93,7 @@ class CallbackActionDispatcher:
             log.error("Could not find a callback query context.")
             if self.handle_errors:
                 await callback_query.answer(
-                    text=self.bot_restarted_error_message,
-                    show_alert=self.alert_on_error,
+                    text=self.bot_restarted_error_message, show_alert=self.alert_on_error,
                 )
             return None
 
@@ -112,8 +101,7 @@ class CallbackActionDispatcher:
             log.error("No route registered for callback query.")
             if self.handle_errors:
                 await callback_query.answer(
-                    text=self.no_action_found_error_message,
-                    show_alert=self.alert_on_error,
+                    text=self.no_action_found_error_message, show_alert=self.alert_on_error,
                 )
             return None
 

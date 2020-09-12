@@ -11,7 +11,7 @@ from botkit.views.base import (
     ModelViewBase,
     RenderMarkupBase,
 )
-from botkit.views.types import TState
+from botkit.views.types import TViewState
 from botkit.views.rendered_messages import (
     RenderedMessage,
     RenderedMessageMarkup,
@@ -20,7 +20,7 @@ from botkit.views.rendered_messages import (
 )
 
 
-class MessageViewBase(InlineResultViewBase[TState], RenderMarkupBase):
+class MessageViewBase(InlineResultViewBase[TViewState], RenderMarkupBase):
     def render(self) -> RenderedMessage:
         rendered = super(MessageViewBase, self).render()
 
@@ -31,7 +31,7 @@ class MessageViewBase(InlineResultViewBase[TState], RenderMarkupBase):
         return rendered
 
 
-class TextView(MessageViewBase[TState], RenderMarkupBase):
+class TextView(MessageViewBase[TViewState], RenderMarkupBase):
     @abstractmethod
     def render_body(self, builder: HtmlBuilder) -> None:
         pass
@@ -48,8 +48,8 @@ class TextView(MessageViewBase[TState], RenderMarkupBase):
         return rendered
 
 
-class MediaView(MessageViewBase[TState]):
-    def __init__(self, state: TState):
+class MediaView(MessageViewBase[TViewState]):
+    def __init__(self, state: TViewState):
         super().__init__(state)
 
     @abstractmethod
@@ -71,7 +71,7 @@ class MediaView(MessageViewBase[TState]):
         return rendered
 
 
-class StickerView(MessageViewBase[TState]):
+class StickerView(MessageViewBase[TViewState]):
     @abstractmethod
     def get_sticker(self) -> str:
         pass
@@ -86,8 +86,8 @@ class PollBuilder:
     pass
 
 
-class PollView(ModelViewBase[TState], IRegisterable, RenderMarkupBase):
-    def __init__(self, state: TState):
+class PollView(ModelViewBase[TViewState], IRegisterable, RenderMarkupBase):
+    def __init__(self, state: TViewState):
         raise NotImplementedError("Only QuizView is implemented so far")
         super().__init__(state)
 

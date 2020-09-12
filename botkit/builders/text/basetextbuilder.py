@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Any, Optional
 
 
@@ -43,6 +44,7 @@ class BaseTextBuilder:
             return text + str(end)
 
     def render(self) -> str:
-        if not self.parts:
+        result = "".join(self.parts)
+        if not result or result.isspace():
             return "\xad"  # zero-width char
-        return "".join(self.parts)
+        return result

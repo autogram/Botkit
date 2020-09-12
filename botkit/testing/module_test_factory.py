@@ -1,10 +1,8 @@
 from typing import Any, List, Type
 
-from app.modules.josxa_private.movie_stamps import MovieStampsModule
 from botkit.core.modules import Module
 from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.routing.route_builder.types import RouteCollection
 from botkit.views.renderer_client_mixin import PyroRendererClientMixin
 
 # TODO: implement

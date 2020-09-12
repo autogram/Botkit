@@ -1,16 +1,23 @@
-from abc import ABCMeta, abstractmethod
-import dateutil.parser
+from abc import ABC, ABCMeta, abstractmethod
 from datetime import datetime
 from pprint import pprint
 from typing import Dict
 
-from dialogflow_v2 import SessionsClient
-from dialogflow_v2.proto.session_pb2 import (
-    DetectIntentResponse,
-    QueryInput,
-    QueryResult,
-    TextInput,
-)
+try:
+    from dialogflow_v2 import SessionsClient
+    from dialogflow_v2.proto.session_pb2 import (
+        DetectIntentResponse,
+        QueryInput,
+        QueryResult,
+        TextInput,
+    )
+except:
+    SessionsClient = None
+    DetectIntentResponse = None
+    QueryInput = None
+    QueryResult = None
+    TextInput = None
+
 from haps import SINGLETON_SCOPE, base, egg, scope
 from haps.config import Config
 
@@ -65,8 +72,7 @@ class DialogflowService(INLUService):
             intent=result.intent.display_name,
             parameters=self._normalize_parameters(result.parameters),
             contexts=result.output_contexts,
-            confidence=result.speech_recognition_confidence
-            or result.intent_detection_confidence,
+            confidence=result.speech_recognition_confidence or result.intent_detection_confidence,
             date=datetime.now(),
         )
 

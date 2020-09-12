@@ -2,12 +2,13 @@ from typing import Set
 
 from unsync import Unfuture
 
-from botkit.routing.pipelines.factory_types import ICallbackStepFactory
+from botkit.routing.pipelines.factory_types import ICallbackStepFactory, MaybeAsyncPipelineStep
 from botkit.routing.pipelines.gatherer import (
     GathererSignature,
     GathererSignatureExamplesStr,
 )
 from botkit.routing.pipelines.steps._base import StepError
+from botkit.routing.pipelines.steps.helpers.state_generators import update_view_state_if_applicable
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.utils.typed_callable import TypedCallable
@@ -31,9 +32,11 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
         }
 
     @classmethod
-    def create_step(cls, gatherer: TypedCallable[GathererSignature]):
+    def create_step(
+        cls, gatherer: TypedCallable[GathererSignature]
+    ) -> MaybeAsyncPipelineStep[GathererSignature]:
         if gatherer is None:
-            return None, None
+            return (None, None)
 
         if gatherer.num_non_optional_params == 0:
             requires_context = False
@@ -46,6 +49,7 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
             )
 
         log = create_logger("gatherer")
+
         is_coroutine = gatherer.is_coroutine
 
         if is_coroutine:
@@ -61,7 +65,12 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
                     if isinstance(result, Unfuture):
                         result = result.result()
 
+                    if update_view_state_if_applicable(result, context):
+                        log.debug("Initial state gathered")
+                    else:
+                        log.warning(f"No initial state has been gathered by {gatherer.name}")
                     return result
+
                 except Exception as e:
                     raise GatherStepError(e)
 
@@ -80,6 +89,10 @@ class GatherStepFactory(ICallbackStepFactory[GathererSignature]):
                     if isinstance(result, Unfuture):
                         result = result.result()
 
+                    if update_view_state_if_applicable(result, context):
+                        log.debug("Initial state gathered")
+                    else:
+                        log.warning(f"No initial state has been gathered by {gatherer.name}")
                     return result
                 except Exception as e:
                     raise GatherStepError(e)

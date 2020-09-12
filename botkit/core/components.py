@@ -5,7 +5,7 @@ from typing import Generic, Optional, TYPE_CHECKING, TypeVar
 
 from logzero import setup_logger
 
-from botkit.routing.types import TState
+from botkit.routing.types import TViewState
 from botkit.settings import botkit_settings
 from botkit.views.botkit_context import Context
 
@@ -18,8 +18,10 @@ else:
 # TODO: make sure components get properly destroyed/garbage collected when they're not needed anymore
 # TODO: components can only have parameterless constructor..???
 
+TCompState = TypeVar("TCompState")
 
-class Component(Generic[TState], ABC):
+
+class Component(Generic[TViewState, TCompState], ABC):
     _logger: Optional[Logger]
 
     @abstractmethod

@@ -15,6 +15,11 @@ User = TypeVar("User", bound=_IdentifiableUser)
 class IClient(IViewSender[Message], ABC, Generic[Message, User]):
     @property
     @abstractmethod
+    def me_user_id(self) -> int:
+        ...
+
+    @property
+    @abstractmethod
     def is_bot(self) -> bool:
         ...
 

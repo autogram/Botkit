@@ -5,7 +5,8 @@ import inspect
 import logging
 from buslane.commands import CommandBus, Command, CommandHandler
 from buslane.events import EventBus, EventHandler, Event
-from botkit.builtin_services.services import service
+
+from botkit.core.services import service
 
 
 @service

@@ -11,7 +11,7 @@ egg.factories: List[Egg]
 
 def haps_disambiguate_module_eggs() -> List[Egg]:
     """
-    # Make all modules unambiguous to haps by settings its qualifier to the class name
+    Make all modules unambiguous to haps by settings its qualifier to the class name
     """
     eggs: List[Egg] = [m for m in egg.factories if m.base_ is Module]
 

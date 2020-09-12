@@ -11,7 +11,7 @@ from pyrogram.types import ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from botkit.builders.inlinemenubuilder import InlineMenuBuilder
 from botkit.builders.metabuilder import MetaBuilder
 from botkit.views.rendered_messages import RenderedMessage
-from botkit.views.types import TState
+from botkit.views.types import TViewState
 
 if TYPE_CHECKING:
     from botkit.routing.route_builder.builder import RouteBuilder as _RouteBuilder
@@ -25,21 +25,19 @@ class IRegisterable(ABC):
         pass
 
 
-class ModelViewBase(Generic[TState], ABC):
-    def __init__(self, state: TState):
+class ModelViewBase(Generic[TViewState], ABC):
+    def __init__(self, state: TViewState):
         self.state = state
 
 
-class InlineResultViewBase(ModelViewBase, IRegisterable, Generic[TState], ABC):
+class InlineResultViewBase(ModelViewBase, IRegisterable, Generic[TViewState], ABC):
     def assemble_metadata(self, meta: MetaBuilder):
         pass
 
     def render(self) -> RenderedMessage:
         meta_builder = MetaBuilder()
         self.assemble_metadata(meta_builder)
-        return RenderedMessage(
-            title=meta_builder.title, description=meta_builder.description
-        )
+        return RenderedMessage(title=meta_builder.title, description=meta_builder.description)
 
 
 class RenderMarkupBase:  # not an interface as the methods need to exist
@@ -48,9 +46,7 @@ class RenderMarkupBase:  # not an interface as the methods need to exist
         pass
 
     @overload
-    def render_markup(
-        self,
-    ) -> Union[ReplyKeyboardMarkup, ForceReply, ReplyKeyboardRemove]:
+    def render_markup(self,) -> Union[ReplyKeyboardMarkup, ForceReply, ReplyKeyboardRemove]:
         pass
 
     def render_markup(self, *args):

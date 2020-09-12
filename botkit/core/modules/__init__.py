@@ -1,6 +1,8 @@
 from ._di import haps_disambiguate_module_eggs, resolve_modules
 from ._module import Module
 from ._moduledecorator import module
+from .module_loader import ModuleLoader
+from .module_status import ModuleStatus
 from ...routing.route_builder.builder import RouteBuilder
 
 haps_disambiguate_module_eggs()
@@ -11,4 +13,6 @@ __all__ = [
     "RouteBuilder",
     "module",
     "Module",
+    "ModuleLoader",
+    "ModuleStatus",
 ]

@@ -27,9 +27,7 @@ class InlineMenuRowBuilder:
     @cached_property
     def callback_manager(self) -> ICallbackManager:
         # TODO: measure how long this property access takes
-        return Container().get_object(
-            ICallbackManager, botkit_settings.callback_manager_qualifier
-        )
+        return Container().get_object(ICallbackManager, botkit_settings.callback_manager_qualifier)
 
     @property
     def is_empty(self):
@@ -41,9 +39,7 @@ class InlineMenuRowBuilder:
         in_context: IInlineModeContext = DefaultInlineModeContext(),
         current_chat: bool = True,
     ) -> "InlineMenuRowBuilder":
-        button = buttons.switch_inline_button(
-            caption, in_context, current_chat=current_chat
-        )
+        button = buttons.switch_inline_button(caption, in_context, current_chat=current_chat)
         self.buttons.append(button)
         return self
 
@@ -124,7 +120,7 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
         return [x for x in self._rows.values() if not x.is_empty]
 
 
-class InlineMenuBuilder(object):
+class InlineMenuBuilder:
     def __init__(self, state: Optional[Any]):
         self._state = state
         self._rows = InlineMenuRowsCollection(state=self._state)

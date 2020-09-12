@@ -17,6 +17,7 @@ from boltons.iterutils import flatten
 from watchgod import RegExpWatcher, awatch
 
 from botkit.core.modules._module import Module
+from botkit.core.services import service
 from botkit.utils.botkit_logging.setup import create_logger
 
 
@@ -46,6 +47,7 @@ class _ModuleDepsInfo:
         return _ModuleDepsInfo(module=module, file_path=file_path, python_module=py_module)
 
 
+@service
 class HotModuleReloadWorker:
     def __init__(self):
         self._worker_future: Optional[Future] = None
@@ -111,9 +113,13 @@ class HotModuleReloadWorker:
             ):
                 for change in changes:
                     update_type, file_changed = cast(tuple, change)
-                    module_to_reload = next(
-                        (x for x in module_infos if file_changed == x.file_path), None
-                    )
+
+                    if not (
+                        module_to_reload := next(
+                            (x for x in module_infos if file_changed == x.file_path), None
+                        )
+                    ):
+                        continue
 
                     try:
                         # TODO: check module_activator.py
@@ -122,10 +128,9 @@ class HotModuleReloadWorker:
                     except:
                         self.log.error(f"Could not load {module_to_reload.display_name}")
         except CancelledError:
-            self.log.exception("HMR worker cancelled.")
-            return
+            pass
         except:
-            self.log.exception("Error in hot module reload worker.")
+            self.log.exception("Error in HMR worker.")
 
     @classmethod
     def _get_module_dependencies(cls, modules: Iterable[Module]) -> Dict[Module, Set[str]]:

@@ -54,6 +54,13 @@ class _HtmlTextBuilder(BaseTextBuilder):
     def as_bold(cls, text: str, end="", if_: bool = True) -> str:
         return cls._apply_end(cls._wrap_and_escape(text, "b", if_), end)
 
+    def underline(self, text: str, end="", if_: bool = True):
+        return self._append_with_end(self._wrap_and_escape(text, "u", if_), end)
+
+    @classmethod
+    def as_underline(cls, text: str, end="", if_: bool = True) -> str:
+        return cls._apply_end(cls._wrap_and_escape(text, "u", if_), end)
+
     @classmethod
     def as_mono(cls, text: str, end="", if_: bool = True) -> str:
         return cls.as_code(text, end, if_)

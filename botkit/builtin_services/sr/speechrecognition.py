@@ -1,8 +1,12 @@
 import os
 import subprocess
 
-import ffmpy
-import speech_recognition as sr
+try:
+    import ffmpy
+    import speech_recognition as sr
+except ImportError:
+    ffmpy = None
+    sr = None
 
 
 class VoiceRecognitionClient:

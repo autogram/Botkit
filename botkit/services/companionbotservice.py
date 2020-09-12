@@ -1,27 +1,26 @@
 import traceback
 from asyncio import Event
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
+from typing import AsyncIterator, Generic, Optional, TypeVar, Union
 from uuid import uuid4
 
-from haps import INSTANCE_SCOPE, SINGLETON_SCOPE, base, inject, scope
+from haps import SINGLETON_SCOPE, base, scope
 from logzero import logger as log
 from pyrogram import filters
 from pyrogram.filters import create
-from pyrogram.handlers import InlineQueryHandler, MessageHandler
+from pyrogram.handlers import ChosenInlineResultHandler, InlineQueryHandler, MessageHandler
 from pyrogram.handlers.handler import Handler
 from pyrogram.raw.base.messages import BotResults
 from pyrogram.types import (
+    ChosenInlineResult,
     InlineQuery,
     InlineQueryResultArticle,
+    InlineQueryResultPhoto,
     InputTextMessageContent,
     Message,
-    InlineQueryResultPhoto,
     Photo,
 )
-from typing import Union, Optional, AsyncIterator
 
-from botkit.builtin_services.services import service
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 from botkit.types.client import IClient
 from botkit.views.base import InlineResultViewBase
@@ -111,7 +110,7 @@ class CompanionBotService:
         reply_to=None,
         silent: bool = False,
         hide_via: bool = False,
-    ) -> Message:
+    ) -> ChosenInlineResult:
         bot_username = (await self.bot_client.get_me()).username
 
         # TODO:
@@ -178,15 +177,25 @@ class CompanionBotService:
                     print("Returning!!")
                     return
 
-                # Send result as user
-                return await self.user_client.send_inline_bot_result(
-                    chat_id,
-                    query_id=bot_results.query_id,
-                    result_id=bot_results.results[0].id,
-                    disable_notification=silent,
-                    reply_to_message_id=reply_to,
-                    hide_via=hide_via,
-                )
+                recorded_inline_result = RecordedResponseContainer()
+
+                async def inline_result_chosen(_, chosen_result: ChosenInlineResult):
+                    recorded_inline_result.set_value(chosen_result)
+
+                chosen_result_handler = ChosenInlineResultHandler(inline_result_chosen)
+                async with self.add_handler(chosen_result_handler):
+                    # Send result as user
+                    await self.user_client.send_inline_bot_result(
+                        chat_id,
+                        query_id=bot_results.query_id,
+                        result_id=bot_results.results[0].id,
+                        disable_notification=silent,
+                        reply_to_message_id=reply_to,
+                        hide_via=hide_via,
+                    )
+                    await recorded_inline_result.wait()
+
+                return recorded_inline_result.value
             except (AttributeError, TimeoutError):
                 log.error("Bot did not respond.")
 
@@ -223,7 +232,7 @@ class CompanionBotService:
             self.bot_client.remove_handler(handler, group)
 
     async def transfer_message(self, user_message: Message) -> Message:
-        recorded_msg = RecordedMessageContainer()
+        recorded_msg = RecordedResponseContainer()
 
         async def record_message(_, message: Message):
             recorded_msg.set_value(message)
@@ -245,10 +254,10 @@ class CompanionBotService:
             )
             await recorded_msg.wait()
 
-        return recorded_msg.recorded_message
+        return recorded_msg._recorded
 
     async def make_photo_known(self, photo: str) -> Photo:
-        recorded_msg = RecordedMessageContainer()
+        recorded_msg = RecordedResponseContainer()
         user_id = (await self.user_client.get_me()).id
         bot_id = (await self.bot_client.get_me()).id
 
@@ -262,18 +271,25 @@ class CompanionBotService:
             await self.user_client.send_photo(bot_id, photo=photo)
             await recorded_msg.wait()
 
-        return recorded_msg.recorded_message.photo
+        return recorded_msg._recorded.photo
 
 
-class RecordedMessageContainer:
+T = TypeVar("T")
+
+
+class RecordedResponseContainer(Generic[T]):
     def __init__(self):
-        self.recorded_message: Optional[Message] = None
+        self._recorded: Optional[T] = None
         self.message_received_event = Event()
 
-    def set_value(self, message: Message):
-        if self.recorded_message is not None:
+    @property
+    def value(self) -> T:
+        return self._recorded
+
+    def set_value(self, message: T):
+        if self._recorded is not None:
             return
-        self.recorded_message = message
+        self._recorded = message
         self.message_received_event.set()
 
     async def wait(self):

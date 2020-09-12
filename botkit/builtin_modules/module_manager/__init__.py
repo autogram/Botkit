@@ -1,8 +1,7 @@
 from haps import Inject
 from pyrogram.filters import command
 
-from botkit.core.moduleloader import ModuleLoader
-from botkit.core.modules import Module
+from botkit.core.modules import Module, ModuleLoader
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.services.companionbotservice import CompanionBotService
 from .paged_module_view import PagedModuleView

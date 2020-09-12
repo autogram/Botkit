@@ -61,7 +61,7 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
     @classmethod
     def as_cta(cls, text):
         """ Call-to-action """
-        return cls.as_bold(cls.as_action_hint(text))
+        return cls.as_underline(cls.as_action_hint(text))
 
     def cta(self, call_to_action: str, end: Optional[str] = "\n"):
         self._append_with_end(self.as_cta(call_to_action), end)
@@ -79,21 +79,16 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
     def list(self, items: Iterable[str]):
         for i in items:
             self.list_item(text=i)
+        return self
 
     @classmethod
-    def as_numbered_list_item(
-        cls, text: str, n: int, use_emoji_numbers: bool = True
-    ) -> str:
+    def as_numbered_list_item(cls, text: str, n: int, use_emoji_numbers: bool = True) -> str:
         if use_emoji_numbers:
             return f"{cls.as_number_emoji(n)} {text}"
         return f"{n}. {text}"
 
     def numbered_list_item(
-        self,
-        text: str,
-        n: int,
-        end: Optional[str] = None,
-        use_emoji_numbers: bool = True,
+        self, text: str, n: int, end: Optional[str] = None, use_emoji_numbers: bool = True,
     ):
         return self._append_with_end(
             self.as_numbered_list_item(text, n, use_emoji_numbers), end
@@ -102,5 +97,6 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
     def numbered_list(self, items: Iterable[str], use_emoji_numbers: bool = True):
         for n, i in enumerate(items):
             self.numbered_list_item(text=i, n=n, use_emoji_numbers=use_emoji_numbers)
+        return self
 
     # endregion

@@ -4,10 +4,12 @@ from enum import Enum, auto
 from typing import Callable, Optional, Set, Tuple, Type, Union
 from uuid import UUID
 
+from pydantic import validator
 from typing_extensions import Literal
 
 from botkit.core.components import Component
 from botkit.libraries.annotations import HandlerSignature
+from botkit.routing.pipelines.collector import CollectorSignature
 from botkit.routing.pipelines.gatherer import (
     GathererSignature,
     GathererSignatureExamplesStr,
@@ -24,6 +26,9 @@ from botkit.utils.typed_callable import TypedCallable
 from botkit.views.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature
 from botkit.views.views import MessageViewBase
+
+
+# region Send targets
 
 
 class SendTo(Enum):
@@ -46,17 +51,47 @@ def _(ctx: Context) -> Tuple[SendTo, int]: ...
 """
 SendTarget = Union[ChatTarget, SendTargetFuncSignature]
 
+# endregion
+
+# region Update targets
+
+
+class UpdateAt(Enum):
+    this = auto()
+    replied_to = auto()
+
+
+# TODO
+EditTargetExamplesStr = """
+"""
+SendTarget = Union[ChatTarget, SendTargetFuncSignature]
+
+# endregion
+
+
 ViewCommandLiteral = Literal["send", "update"]
 
 
 @dataclass
 class ViewParameters:
     command: ViewCommandLiteral
+
+    # TODO: This should not be a part of this class!
     view: Union[Type[MessageViewBase], MessageViewBase, ViewRenderFuncSignature]
+
     send_via: Optional[IClient] = None
 
     # TODO: Make this a list of items?
     send_target: Optional[SendTarget] = SendTo.same_chat
+
+    @validator("send_target")
+    def validate_send_target(cls, _):
+        if cls.command == "update":
+            raise NotImplementedError(
+                "I am not sure what should happen when trying to *update* an existing view with "
+                "a specific `send_target` (which might be different from that of the existing message). "
+                "If you have a valid use case for this, please open a GitHub issue!"
+            )
 
 
 class RemoveTrigger(Enum):
@@ -74,6 +109,7 @@ class ExecutionPlan:
         self._update_types: Set[UpdateType] = set()
         self._remove_trigger_setting: Optional[RemoveTrigger] = None
         self._state_transition: Optional[UUID] = None  # TODO: implement
+        self._collector: Optional[TypedCallable[CollectorSignature]] = None
 
     def set_gatherer(self, state_generator: Optional[GathererSignature]) -> "ExecutionPlan":
         if self._reducer:
@@ -84,7 +120,7 @@ class ExecutionPlan:
 
         # TODO: test
         # if inspect.isclass(state_generator):
-        #     gatherer = TypedCallable(func=lambda: state_generator())
+        #     gatherer = TypedCallable(step_func=lambda: state_generator())
         # else:
         gatherer = TypedCallable(func=state_generator)
 
@@ -97,16 +133,19 @@ class ExecutionPlan:
         return self
 
     def set_reducer(self, mutation_func: Optional[ReducerSignature]) -> "ExecutionPlan":
-        if self._gatherer:
-            raise ValueError("Route cannot have both a handler and a gatherer step.")
-
-        self._set_update_types_exclusive(
-            {UpdateType.callback_query},
-            lambda invalid_elems: NotImplementedError(
-                "Reducers / state mutations can only be added to callback "
-                f"queries (for now), but the plan is to use {invalid_elems}."
-            ),
-        )
+        # if (
+        #     UpdateType.message not in self._update_types
+        #     and UpdateType.callback_query not in self._update_types
+        # ):
+        #     raise ValueError("Route")
+        #
+        # self._set_update_types_exclusive(
+        #     {UpdateType.callback_query},
+        #     lambda invalid_elems: NotImplementedError(
+        #         "Reducers / view_state mutations can only be added to callback "
+        #         f"queries (for now), but the plan is to use {invalid_elems}."
+        #     ),
+        # )
 
         if mutation_func is None:
             self._reducer = None
@@ -120,6 +159,21 @@ class ExecutionPlan:
             )
 
         self._reducer = handler
+        return self
+
+    def set_collector(self, collector_func: Optional[CollectorSignature]) -> "ExecutionPlan":
+        if collector_func is None:
+            self._collector = None
+            return self
+
+        collector = TypedCallable(func=collector_func)
+
+        if collector.num_parameters != 1:
+            raise ValueError(
+                f"Collector must be a function or coroutine with a single parameter `Context`."
+            )
+
+        self._collector = collector
         return self
 
     def set_handler(self, handler: HandlerSignature) -> "ExecutionPlan":
@@ -139,6 +193,8 @@ class ExecutionPlan:
         return self
 
     def set_handling_component(self, component: Component) -> "ExecutionPlan":
+        if self._handling_component:
+            raise ValueError("There can only be one component in a given route.")
         self._handling_component = component
         return self
 
@@ -196,13 +252,6 @@ class ExecutionPlan:
     def set_send_target(self, send_target: SendTarget) -> "ExecutionPlan":
         if not self._view:
             raise ValueError("A view should be set before specifying a send target.")
-
-        if self._view.command == "update":
-            raise NotImplementedError(
-                "I am not sure what should happen when trying to *update* an existing view with "
-                "a specific `send_target` (which might be different from that of the existing message). "
-                "If you have a valid use case for this, please open a GitHub issue!"
-            )
 
         self._view.send_target = send_target
         return self

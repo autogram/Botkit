@@ -1,5 +1,3 @@
-from urllib.parse import urlencode
-
 from botkit.builders.text.telegram_entity_builder import TelegramEntityBuilder
 from botkit.builders.text.typographybuilder import TypographyBuilder
 

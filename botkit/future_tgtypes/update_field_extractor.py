@@ -7,6 +7,7 @@ import pyrogram.types
 from pyrogram.types import Update
 
 from botkit.future_tgtypes.chat import Chat
+from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
 from botkit.future_tgtypes.message import Message
 from botkit.future_tgtypes.message_descriptor import MessageDescriptor
 from botkit.tghelpers.entities.message_entities import ParsedEntity, parse_entities
@@ -21,6 +22,10 @@ class UpdateFieldExtractor:  # TODO: implement properly
         if isinstance(self.update, pyrogram.types.Message):
             return self.update.chat
         return None
+
+    @property
+    def chat_descriptor(self) -> Optional[ChatDescriptor]:
+        return ChatDescriptor.from_update(self.update)
 
     @property
     def user(self) -> Optional[Chat]:
@@ -42,9 +47,7 @@ class UpdateFieldExtractor:  # TODO: implement properly
 
     @property
     def message_id(self) -> Optional[Union[int, str]]:
-        return (
-            descriptor.message_id if (descriptor := self.message_descriptor) else None
-        )
+        return descriptor.message_id if (descriptor := self.message_descriptor) else None
 
     @property
     def message_text(self) -> Optional[str]:
@@ -62,6 +65,8 @@ class UpdateFieldExtractor:  # TODO: implement properly
     @property
     def command_args(self) -> Optional[List[str]]:
         if hasattr(self.update, "command"):  # Pyrogram
+            if len(self.update.command) == 1:
+                return []
             return self.update.command[1:]
 
     @property
@@ -76,6 +81,13 @@ class UpdateFieldExtractor:  # TODO: implement properly
         # TODO: turn into protocols
         if isinstance(self.update, pyrogram.types.Message):
             return self.update.reply_to_message
+
+    @property
+    def replied_to_message_text(self) -> Optional[str]:
+        if isinstance(self.update, pyrogram.types.Message):
+            if replied_to := self.update.reply_to_message:
+                return replied_to.text
+        return None
 
     @property
     def replied_to_message_id(self) -> Optional[int]:

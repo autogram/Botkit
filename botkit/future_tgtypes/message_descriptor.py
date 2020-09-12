@@ -1,15 +1,17 @@
-from typing import Optional, Protocol, Union, runtime_checkable
+from typing import Literal, Optional, Protocol, Union, runtime_checkable
 
 from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
 
 
-class _Chat(Protocol):
+class Chat(Protocol):
     id: int
+    type: Literal["private", "bot", "group", "supergroup", "channel"]
 
 
 @runtime_checkable
 class _MessageUpdate(Protocol):
-    chat: _Chat
+    chat: Chat
     message_id: int
 
 
@@ -18,7 +20,8 @@ class _CallbackQueryUpdate(Protocol):
     inline_message_id: str
 
 
-class MessageDescriptor(BaseModel):
+@dataclass(frozen=True)
+class MessageDescriptor:
     chat_id: Optional[Union[int, str]]  # will be None for inline messages
     message_id: Union[int, str]
     is_inline: bool
@@ -32,9 +35,7 @@ class MessageDescriptor(BaseModel):
             return cls.from_message(update)
         elif isinstance(update, _CallbackQueryUpdate) and update.inline_message_id:
             return MessageDescriptor(
-                chat_id=None,
-                message_id=update.inline_message_id,
-                is_inline=True,
+                chat_id=None, message_id=update.inline_message_id, is_inline=True,
             )
         raise ValueError(f"Could not extract a message location from update: {update}")
 

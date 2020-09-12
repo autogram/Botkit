@@ -11,12 +11,12 @@ from pydantic import BaseModel, Field
 
 from botkit.dispatching.callbackqueries.types import CallbackActionType
 
-TState = TypeVar("TState")
+TViewState = TypeVar("TViewState")
 
 
-class CallbackActionContext(BaseModel, Generic[TState]):
+class CallbackActionContext(BaseModel, Generic[TViewState]):
     action: CallbackActionType
-    state: TState
+    state: TViewState
     created: datetime = Field(default_factory=datetime.utcnow)
     notification: Optional[str]
     show_alert: bool = False

@@ -2,4 +2,4 @@ from typing import Protocol
 
 
 class User(Protocol):
-    pass
+    id: int

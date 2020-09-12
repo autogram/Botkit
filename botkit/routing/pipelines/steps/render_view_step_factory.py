@@ -48,14 +48,14 @@ class RenderViewStepFactory(
 
             try:
                 if is_view_render_func:
-                    return render_functional_view(view_params.view, context.state)
+                    return render_functional_view(view_params.view, context.view_state)
 
                 elif create_view_instance_dynamically:
-                    view_instance = view_params.view(context.state)
+                    view_instance = view_params.view(context.view_state)
 
-                    if context.state is None:
+                    if context.view_state is None:
                         # First try to instantiate the view, then warn if that succeeded without an exception despite
-                        # a `None`-state.
+                        # a `None`-view_state.
                         warnings.warn(
                             f"`None` state is being passed to view {view_params.view}. Check your state generation "
                             f"and/or mutations."

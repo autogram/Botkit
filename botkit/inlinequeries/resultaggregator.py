@@ -1,7 +1,8 @@
 from typing import Iterable
 
-from pyrogram import InlineQuery
+from pyrogram.types import InlineQuery
 
+from botkit.inlinequeries.inlineresultcontainer import InlineResultContainer
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 
 
@@ -11,8 +12,5 @@ async def aggregate_results(
 
     container = InlineResultContainer(inline_query)
     for generator in generators:
-        match_result = generator.matches(inline_query)
-        if match_result:
-            await generator.generate(container, inline_query, match_result)
-            break
+        await generator.generate(container, "user_input")
     return container

@@ -17,7 +17,7 @@ from pyrogram.handlers.handler import Handler
 from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
-from botkit.routing.pipelines.updates.others import PIPELINE_FACTORIES
+from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
 from botkit.routing.triggers import ActionIdTypes, RouteTriggers
 from botkit.routing.update_types.updatetype import UpdateType
 
@@ -63,11 +63,11 @@ class RouteDefinition:
 
         results = {}
         for update_type in update_types:
-            factory = PIPELINE_FACTORIES[update_type](self.triggers, self.plan)
+            factory = UpdatePipelineFactory(self.triggers, self.plan, update_type)
             results[update_type] = RouteHandler(
                 update_type=update_type,
                 filter=factory.create_update_filter(),
-                callback=factory.create_unified_callback(),
+                callback=factory.build_callback(),
                 description=factory.get_description(),
                 scope="module",  # TODO implement
                 action_id=self.triggers.action,
@@ -77,15 +77,11 @@ class RouteDefinition:
 
     @cached_property
     def description(self) -> str:
-        return "; ".join(
-            [x.description or "" for x in self.handler_by_update_type.values()]
-        )
+        return "; ".join([x.description or "" for x in self.handler_by_update_type.values()])
 
 
 def _create_pyrogram_handler(
-    callback: HandlerSignature,
-    update_filter: UpdateFilterSignature,
-    update_type: UpdateType,
+    callback: HandlerSignature, update_filter: UpdateFilterSignature, update_type: UpdateType,
 ) -> Handler:
     assert callback is not None
 
@@ -106,6 +102,4 @@ def _create_pyrogram_handler(
         return RawUpdateHandler(callback=callback)
     else:
         # Should never happen
-        raise ValueError(
-            f"Could not find a matching Pyrogram callback class for {update_type}."
-        )
+        raise ValueError(f"Could not find a matching Pyrogram callback class for {update_type}.")

@@ -11,7 +11,7 @@ from botkit.routing.route_builder.action_expression_base import ActionExpression
 # client = AsyncClient()
 
 
-# async def execute_request(url: str, method: Literal["POST", "GET"], state: Any, payload: Any):
+# async def execute_request(url: str, method: Literal["POST", "GET"], view_state: Any, payload: Any):
 #     await client.request(method, url, data=data)
 
 

@@ -10,12 +10,12 @@ from typing import Optional, List, Any, Literal
 
 from botkit.builders import ViewBuilder
 from botkit.builtin_modules.system.system_tests import notests
+from botkit.core.modules import ModuleLoader, ModuleStatus
 from botkit.libraries.annotations import IClient
 from botkit.persistence.callback_manager import (
     RedisCallbackManager,
     ICallbackManager,
 )
-from botkit.core.moduleloader import ModuleLoader, ModuleStatus
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
 from botkit.routing.pipelines.execution_plan import SendTo
@@ -67,6 +67,8 @@ class SystemManagementModule(Module):
             routes.on(filters.command(["on", "unpause"]) & only_owner).call(
                 self.handle_unpause_command
             )
+
+            routes.on(filters.command("error") & only_owner).call(raise_error)
 
             (
                 routes.on(
@@ -209,9 +211,7 @@ def log_settings_view(state: LogSettingsRepository, builder: ViewBuilder) -> Non
         builder.html.br()
         .cta(f"Configure {botkit_settings.application_name} logging", end=None)
         .spc()
-        .mono("[")
         .command("loglevel", end=None)
-        .mono("]")
         .para()
         .text("Current log level:")
         .spc()
@@ -227,3 +227,7 @@ def log_settings_view(state: LogSettingsRepository, builder: ViewBuilder) -> Non
         )
 
     builder.menu.rows[99].action_button("Done ✅", "done")
+
+
+async def raise_error(_, message: Message):
+    raise Exception("This is a test exception to test logging")

@@ -24,12 +24,10 @@ def quacks_like_view_render_func(obj: Any) -> bool:
     return True
 
 
-def render_functional_view(
-    view_func: Callable, state: Optional[Any]
-) -> RenderedMessage:
+def render_functional_view(view_func: Callable, state: Optional[Any]) -> RenderedMessage:
     # TODO: Decide if htis is a good idea
-    # if state is None:
-    #     raise ValueError("No state was specified, cannot render.")
+    # if view_state is None:
+    #     raise ValueError("No view_state was specified, cannot render.")
 
     # # TODO: (see paraminjector/TODO.md)
     # # TODO: Handle reply keyboards
@@ -45,31 +43,31 @@ def render_functional_view(
     return builder.render()
 
 
-TState = TypeVar("TState", bound=type)
+TViewState = TypeVar("TViewState", bound=type)
 
 # X = TypeVar("X", contravariant=True)
 # class ViewFuncSignature(Protocol[X]):
 # @overload
-# def __call__(self, state: X, builder: HtmlBuilder):
+# def __call__(self, view_state: X, builder: HtmlBuilder):
 #     pass
 #
 # @overload
-# def __call__(self, state: X, builder: HtmlBuilder, menu: InlineMenuBuilder):
+# def __call__(self, view_state: X, builder: HtmlBuilder, menu: InlineMenuBuilder):
 #     pass
 #
 # @overload
-# def __call__(self, state: X, menu: InlineMenuBuilder):
+# def __call__(self, view_state: X, menu: InlineMenuBuilder):
 #     pass
 #
 # @overload
-# def __call__(self, state: X, builder: HtmlBuilder, markup: ReplyMarkupBuilder):
+# def __call__(self, view_state: X, builder: HtmlBuilder, markup: ReplyMarkupBuilder):
 #     pass
 #
 # def __call__(self, *args, **kwargs):
 #     pass
 
 
-ViewRenderFuncSignature = Callable[[TState, ViewBuilder], Optional[Any]]
+ViewRenderFuncSignature = Callable[[TViewState, ViewBuilder], Optional[Any]]
 
 
 class _ViewDecorator(FuncDecorator):

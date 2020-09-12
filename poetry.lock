@@ -816,7 +816,6 @@ redis = ["redis-collections"]
 
 [metadata]
 content-hash = "ea14b1b10f78bbf74de349b03b12bdf64d2d43c98c0cb5cb3d0dbd58f91d9fa6"
-lock-version = "1.0"
 python-versions = "^3.8"
 
 [metadata.files]

@@ -13,10 +13,8 @@ class HandleStepError(StepError[HandlerSignature]):
     pass
 
 
-class CustomHandlerStepFactory(
-    IStepFactory[
-        TypedCallable[HandlerSignature], Optional[Callable[[Context], Awaitable[Any]]]
-    ]
+class CallStepFactory(
+    IStepFactory[TypedCallable[HandlerSignature], Optional[Callable[[Context], Awaitable[Any]]]]
 ):
     @classmethod
     def create_step(cls, handler):
@@ -27,7 +25,7 @@ class CustomHandlerStepFactory(
 
         if is_coroutine:
 
-            async def handle_async(update, context):
+            async def call_async(update, context):
                 # TODO: Use paraminjector library to make all args optional
                 args = (
                     (context.client, update, context)
@@ -50,10 +48,10 @@ class CustomHandlerStepFactory(
 
                 return result
 
-            return handle_async, is_coroutine
+            return call_async, is_coroutine
         else:
 
-            def handle(update, context):
+            def call(update, context):
                 # TODO: Use paraminjector library to make all args optional
                 args = (
                     (context.client, update, context)
@@ -76,4 +74,4 @@ class CustomHandlerStepFactory(
 
                 return result
 
-            return handle, is_coroutine
+            return call, is_coroutine

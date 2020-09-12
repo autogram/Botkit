@@ -1,10 +1,24 @@
-from enum import Enum
+from enum import Enum, auto
+
+from boltons.typeutils import classproperty
 
 
 class UpdateType(Enum):
-    raw = 0
-    message = 1
-    callback_query = 2
-    inline_query = 3
-    poll = 4
-    user_status = 5
+    raw = auto()
+    message = auto()
+    callback_query = auto()
+    inline_query = auto()
+    poll = auto()
+    user_status = auto()
+
+    # noinspection PyMethodParameters
+    @classproperty
+    def all(cls):
+        return [
+            cls.raw,
+            cls.message,
+            cls.callback_query,
+            cls.inline_query,
+            cls.poll,
+            cls.user_status,
+        ]

@@ -21,10 +21,19 @@ class StepError(Exception, Generic[T]):
         return isinstance(self.inner_exception, Continue)
 
 
-class Continue(Exception):
+class Break(Exception):
     """
     Can be raised in intermediate steps of the pipeline in order to cancel the execution silently.
     """
 
     def __init__(self, reason: str = None):
         self.reason = reason
+
+
+class Continue(Break):
+    """
+    Can be raised in intermediate steps of the pipeline in order to cancel the execution silently.
+    """
+
+    def __init__(self, reason: str = None):
+        super(Continue, self).__init__(reason=reason)
