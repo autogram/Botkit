@@ -10,7 +10,7 @@ class _HtmlTextBuilder(BaseTextBuilder):
     # region internals
 
     @staticmethod
-    def escape_html(text: str) -> str:
+    def as_escaped_html(text: str) -> str:
         if text is None:
             raise ValueError("Trying to append None value.")
         text = str(text)
@@ -29,16 +29,16 @@ class _HtmlTextBuilder(BaseTextBuilder):
 
     @classmethod
     def _wrap_and_escape(cls, text: str, tag: str, if_: bool = True) -> str:
-        return cls._wrap_html(cls.escape_html(text), tag, if_)
+        return cls._wrap_html(cls.as_escaped_html(text), tag, if_)
 
     # endregion internals
 
     def text(self, text: str, end=""):
-        return self._append_with_end(self.escape_html(text), end)
+        return self._append_with_end(self.as_escaped_html(text), end)
 
     @classmethod
     def as_text(cls, text: str, end="") -> str:
-        return cls._apply_end(cls.escape_html(text), end)
+        return cls._apply_end(cls.as_escaped_html(text), end)
 
     def italic(self, text: str, end="", if_: bool = True):
         return self._append_with_end(self._wrap_and_escape(text, "i", if_), end)
@@ -99,9 +99,9 @@ class _HtmlTextBuilder(BaseTextBuilder):
 
     @classmethod
     def as_link(cls, text: str, href: str, end="") -> str:
-        html = f'<a href="{cls.escape_html(href)}">{cls.escape_html(text)}</a>'
+        html = f'<a href="{cls.as_escaped_html(href)}">{cls.as_escaped_html(text)}</a>'
         return cls._apply_end(html, end)
 
     def link(self, text: str, href: str, end=""):
-        html = f'<a href="{href}">{self.escape_html(text)}</a>'
+        html = f'<a href="{href}">{self.as_escaped_html(text)}</a>'
         return self._append_with_end(html, end)

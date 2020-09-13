@@ -1,9 +1,12 @@
 from pprint import pprint
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar
+
+TState = TypeVar("TState")
 
 
 class BaseTextBuilder:
-    def __init__(self):
+    def __init__(self, state: TState = None):  # TODO: make non-optional
+        self.state = state
         self.parts = []
 
     def raw(self, text: str, end=""):

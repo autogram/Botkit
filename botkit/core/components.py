@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import Generic, Optional, TYPE_CHECKING, TypeVar
+from typing import Any, Generic, Optional, TYPE_CHECKING, Type, TypeVar
 
 from logzero import setup_logger
 
@@ -23,6 +23,12 @@ TCompState = TypeVar("TCompState")
 
 class Component(Generic[TViewState, TCompState], ABC):
     _logger: Optional[Logger]
+    _is_registered: str
+
+    def __new__(cls, *args, **kwargs) -> Any:
+        instance: Component = super().__new__(cls, *args, **kwargs)
+        instance._is_registered = False
+        return instance
 
     @abstractmethod
     def register(self, routes: RouteBuilder):

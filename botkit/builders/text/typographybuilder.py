@@ -22,9 +22,13 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
         self.para()
         return self
 
+    def h2(self, title: str):
+        self._append(f"<b><u>{self.as_escaped_html(title)}</u></b>")
+        self.br()
+        return self
+
     def h3(self, title: str):
-        self.bold(title.upper(), end=".")
-        self.para()
+        self.bold(title.upper(), end=" — ")
         return self
 
     def headline(self, title: str, level: int):

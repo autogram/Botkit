@@ -6,7 +6,9 @@ from unittest.mock import MagicMock, Mock
 from pyrogram import filters
 from pyrogram.types import CallbackQuery
 
-from botkit.dispatching.callbackqueries.callbackactiondispatcher import CallbackActionDispatcher
+from botkit.dispatching.callbackqueries.callbackactiondispatcher import (
+    CallbackQueryActionDispatcher,
+)
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.libraries.annotations import IClient
 from botkit.routing.route import RouteDefinition
@@ -170,8 +172,8 @@ def test_full_with_dispatcher() -> None:
         assert state.value == PAYLOAD
 
     dispatcher = BotkitDispatcher()
-    callback_action_dispatcher = CallbackActionDispatcher()
-    dispatcher.callback_action_dispatchers[client] = callback_action_dispatcher
+    callback_action_dispatcher = CallbackQueryActionDispatcher()
+    dispatcher.callback_query_action_dispatchers[client] = callback_action_dispatcher
     dispatcher.add_handler = MagicMock()
     dispatcher.add_route_for_update_type(0, client, UpdateType.callback_query, route_handler)
     dispatcher.add_handler.assert_called_once_with(

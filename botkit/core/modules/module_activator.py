@@ -29,6 +29,11 @@ class ModuleActivator:
         ] = botkit_settings.route_builder_class or RouteBuilder
 
     async def activate_module_async(self, module: Module) -> ModuleStatus:
+
+        # TODO: This should probably also activate components, but it's a little unclear what should happen
+        # when an instance of a component appears to be added to multiple modules. Should it be unloaded when
+        # *any* of the utilizing modules fails?
+
         assert module.index is not None
 
         async def rollback():
@@ -60,15 +65,27 @@ class ModuleActivator:
 
         return ModuleStatus.active
 
-    @staticmethod
+    @classmethod
     def build_module_routes(
-        route_builder_class: Type[RouteBuilder], module: Module, load_result: Any = None
+        cls, route_builder_class: Type[RouteBuilder], module: Module, load_result: Any = None
     ) -> RouteCollection:
         route_builder = route_builder_class(context=RouteBuilderContext(load_result=load_result))
         module.register(route_builder)
-        return route_builder._route_collection
+        route_collection = route_builder._route_collection
+        cls._register_components(route_builder, route_collection)
+        return route_collection
+
+    @classmethod
+    def _register_components(cls, route_builder: RouteBuilder, collection: RouteCollection):
+        for client, components in collection.components_by_client.items():
+            for comp in components:
+                if not comp._is_registered:
+                    comp.register(route_builder)
+                    comp._is_registered = True
 
     async def deactivate_module_async(self, module: Module):
+        # TODO: Somehow find out which components to deactivate!
+
         if self.get_module_status(module) != ModuleStatus.active:
             raise ValueError("Cannot unregister as the module is not loaded.")
 

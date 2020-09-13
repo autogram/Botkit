@@ -8,7 +8,7 @@ from typing import (
 
 from pyrogram.types import ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
-from botkit.builders.inlinemenubuilder import InlineMenuBuilder
+from botkit.builders.menubuilder import MenuBuilder
 from botkit.builders.metabuilder import MetaBuilder
 from botkit.views.rendered_messages import RenderedMessage
 from botkit.views.types import TViewState
@@ -42,7 +42,7 @@ class InlineResultViewBase(ModelViewBase, IRegisterable, Generic[TViewState], AB
 
 class RenderMarkupBase:  # not an interface as the methods need to exist
     @overload
-    def render_markup(self, menu: InlineMenuBuilder):
+    def render_markup(self, menu: MenuBuilder):
         pass
 
     @overload

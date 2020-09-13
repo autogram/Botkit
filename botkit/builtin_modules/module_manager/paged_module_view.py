@@ -1,5 +1,5 @@
 from botkit.builders.htmlbuilder import HtmlBuilder
-from botkit.builders.inlinemenubuilder import InlineMenuBuilder
+from botkit.builders.menubuilder import MenuBuilder
 from .view_models import ModuleInfosCollectionModel, ModuleInlineContext
 from botkit.views.views import TextView
 
@@ -26,7 +26,7 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
             else:
                 builder.text("No routes.")
 
-    def render_markup(self, builder: InlineMenuBuilder) -> None:
+    def render_markup(self, builder: MenuBuilder) -> None:
         row_builder = builder.rows[99]
         if self.state.has_previous_page:
             row_builder.action_button("⬅️", "page_back", self.state)

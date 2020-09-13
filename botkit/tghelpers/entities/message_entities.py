@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import sys
 from pyrogram.filters import Filter, create
@@ -26,15 +26,13 @@ MessageEntityType = Literal[
 ]
 
 
-def parse_entity(entity: MessageEntity, message_text: str) -> str:
+def parse_entity_text(entity: MessageEntity, message_text: str) -> str:
     # Is it a narrow build, if so we don't need to convert
     if sys.maxunicode == 0xFFFF:
         return message_text[entity.offset : entity.offset + entity.length]
     else:
         entity_text = message_text.encode("utf-16-le")
-        entity_text = entity_text[
-            entity.offset * 2 : (entity.offset + entity.length) * 2
-        ]
+        entity_text = entity_text[entity.offset * 2 : (entity.offset + entity.length) * 2]
 
         return entity_text.decode("utf-16-le")
 
@@ -54,7 +52,7 @@ def parse_entities(
         types = [types]
 
     return [
-        ParsedEntity(entity=entity, text=parse_entity(entity, message.text))
+        ParsedEntity(entity=entity, text=parse_entity_text(entity, message.text))
         for entity in message.entities
         if entity.type in types
     ]
@@ -62,10 +60,10 @@ def parse_entities(
 
 def create_entity_filter(type_: MessageEntityType) -> Filter:
     return create(
-        lambda _, __, m: any(parse_entities(m, type_)) if m.entities else False,
-        type_.upper(),
+        lambda _, __, m: any(parse_entities(m, type_)) if m.entities else False, type_.upper(),
     )
 
 
 class EntityFilters:
     url = create_entity_filter("url")
+    text_link = create_entity_filter("text_link")

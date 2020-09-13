@@ -3,7 +3,7 @@ import warnings
 from typing import Any, Dict, List, Set, Type
 
 import pyrogram
-from more_itertools import flatten
+from boltons.iterutils import flatten
 
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable

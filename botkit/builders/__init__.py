@@ -1,19 +1,27 @@
 from typing import Any
 
+from haps import Container
+
 from .htmlbuilder import HtmlBuilder
-from .inlinemenubuilder import InlineMenuBuilder
+from .menubuilder import MenuBuilder
 from .metabuilder import MetaBuilder
+from ..persistence.callback_manager import ICallbackManager
+from ..settings import botkit_settings
 from ..views.rendered_messages import RenderedMessage, RenderedTextMessage
 
 
 class ViewBuilder:
     html: HtmlBuilder
-    menu: InlineMenuBuilder
+    menu: MenuBuilder
     meta: MetaBuilder
 
-    def __init__(self, state: Any):
-        self.html = HtmlBuilder()
-        self.menu = InlineMenuBuilder(state)
+    def __init__(self, state: Any, callback_manager: ICallbackManager = None):
+        if callback_manager is None:
+            callback_manager = Container().get_object(
+                ICallbackManager, botkit_settings.callback_manager_qualifier
+            )
+        self.html = HtmlBuilder(state)
+        self.menu = MenuBuilder(state, callback_manager)
         self.meta = MetaBuilder()
 
     @property

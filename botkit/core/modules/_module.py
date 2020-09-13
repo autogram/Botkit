@@ -22,9 +22,9 @@ class Module:
 
     def __new__(cls, *args, **kwargs) -> Any:
         Module._index_counter += 1
-        c = super().__new__(cls)
-        c.index = Module._index_counter
-        return c
+        instance = super().__new__(cls)
+        instance.index = Module._index_counter
+        return instance
 
     @abstractmethod
     def register(self, routes: RouteBuilder):
@@ -52,11 +52,3 @@ class Module:
             )
         # noinspection Mypy
         return self._logger
-
-
-_current_module_index = 0
-
-
-def get_next_module_index() -> int:
-    _current_module_index += 1
-    return _current_module_index

@@ -103,9 +103,6 @@ class HotModuleReloadWorker:
             joined_paths = "|".join(map(re.escape, files_to_watch))
             joined_paths_reg = re.compile(f"({joined_paths})")
 
-            print("Common base dir:", common_base_dir)
-            print("Re files:", joined_paths)
-
             async for changes in awatch(
                 common_base_dir,
                 watcher_cls=RegExpWatcher,

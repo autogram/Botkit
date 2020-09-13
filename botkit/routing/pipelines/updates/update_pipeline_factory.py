@@ -109,7 +109,7 @@ class UpdatePipelineFactory:
                         ("Continuing" if isinstance(e.inner_exception, Continue) else "Breaking")
                         + " execution"
                         + (
-                            " because " + reason[0].lower() + reason[1:].upper()
+                            " because " + reason[0].lower() + reason[1:]
                             if (reason := e.inner_exception.reason)
                             else ""
                         )

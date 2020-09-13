@@ -10,7 +10,11 @@ from botkit.future_tgtypes.chat import Chat
 from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
 from botkit.future_tgtypes.message import Message
 from botkit.future_tgtypes.message_descriptor import MessageDescriptor
-from botkit.tghelpers.entities.message_entities import ParsedEntity, parse_entities
+from botkit.tghelpers.entities.message_entities import (
+    MessageEntityType,
+    ParsedEntity,
+    parse_entities,
+)
 
 
 @dataclass
@@ -103,6 +107,16 @@ class UpdateFieldExtractor:  # TODO: implement properly
         try:
             # noinspection PydanticTypeChecker
             return parse_entities(self.update)
+        except Exception as ex:
+            traceback.print_exc(ex)
+            return []
+
+    def filter_entities(
+        self, only: Union[List[MessageEntityType], MessageEntityType]
+    ) -> List[ParsedEntity]:
+        try:
+            # noinspection PydanticTypeChecker
+            return parse_entities(self.update, types=only)
         except Exception as ex:
             traceback.print_exc(ex)
             return []

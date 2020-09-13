@@ -12,14 +12,14 @@ else:
 
 
 if TYPE_CHECKING:
-    from botkit.routing.route_builder.route_collection import RouteCollection
+    from botkit.routing.route_builder.route_collection import RouteCollection as _RouteCollection
 else:
-    RouteCollection = None
+    _RouteCollection = None
 
 
 class IExpressionWithCallMethod(Protocol):
     _triggers: RouteTriggers
-    _route_collection: "RouteCollection"
+    _route_collection: "_RouteCollection"
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
         pass

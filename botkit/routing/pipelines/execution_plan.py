@@ -1,9 +1,10 @@
 import inspect
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Callable, Optional, Set, Tuple, Type, Union
+from typing import Callable, Iterable, Optional, Set, Tuple, Type, Union
 from uuid import UUID
 
+from boltons.iterutils import is_collection
 from pydantic import validator
 from typing_extensions import Literal
 
@@ -113,7 +114,7 @@ class ExecutionPlan:
 
     def set_gatherer(self, state_generator: Optional[GathererSignature]) -> "ExecutionPlan":
         if self._reducer:
-            raise ValueError("Route cannot have both a gatherer and a reduce step.")
+            raise ValueError("Route cannot have both a gatherer after a reduce step.")
 
         if state_generator is None:
             return self
@@ -133,6 +134,8 @@ class ExecutionPlan:
         return self
 
     def set_reducer(self, mutation_func: Optional[ReducerSignature]) -> "ExecutionPlan":
+        # TODO: allow multiple reducers
+
         # if (
         #     UpdateType.message not in self._update_types
         #     and UpdateType.callback_query not in self._update_types
@@ -208,7 +211,7 @@ class ExecutionPlan:
         the `RouteBuilder`.
         """
         if not self._update_types:
-            self.add_update_type(UpdateType.message)
+            self.add_update_types(UpdateType.message)
         if self._view is not None:
             raise ValueError(
                 "View is already set. Not sure what to do with this, most likely a bug. Contact @JosXa."
@@ -256,8 +259,14 @@ class ExecutionPlan:
         self._view.send_target = send_target
         return self
 
-    def add_update_type(self, update_type: UpdateType) -> "ExecutionPlan":
-        self._update_types.add(update_type)
+    def add_update_types(
+        self, update_types: Union[UpdateType, Iterable[UpdateType]]
+    ) -> "ExecutionPlan":
+        if is_collection(update_types):
+            for udt in update_types:
+                self._update_types.add(udt)
+        else:
+            self._update_types.add(update_types)
         return self
 
     def _set_update_types_exclusive(
@@ -267,10 +276,12 @@ class ExecutionPlan:
             raise error_cb(invalid_elems)
         self._update_types = desired_types
 
-    def set_remove_trigger(self, remove_trigger: Union[RemoveTrigger, bool, None]):
-        if isinstance(remove_trigger, bool):
-            self._remove_trigger_setting = RemoveTrigger.only_for_me if remove_trigger else None
+    def set_remove_trigger(self, remove_trigger_strategy: Union[RemoveTrigger, bool, None]):
+        if isinstance(remove_trigger_strategy, bool):
+            self._remove_trigger_setting = (
+                RemoveTrigger.only_for_me if remove_trigger_strategy else None
+            )
         else:
             # enum or None
-            self._remove_trigger_setting = remove_trigger
+            self._remove_trigger_setting = remove_trigger_strategy
         return self

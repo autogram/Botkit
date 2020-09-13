@@ -1,5 +1,5 @@
 from uuid import UUID, uuid4
-from typing import Union, Optional
+from typing import Literal, Union, Optional
 from abc import abstractmethod
 from haps import base
 from abc import ABC
@@ -9,7 +9,8 @@ from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
-from botkit.dispatching.callbackqueries.types import CallbackActionType
+from botkit.dispatching.types import CallbackActionType
+from botkit.routing.update_types.updatetype import UpdateType
 
 TViewState = TypeVar("TViewState")
 
@@ -17,10 +18,14 @@ TViewState = TypeVar("TViewState")
 class CallbackActionContext(BaseModel, Generic[TViewState]):
     action: CallbackActionType
     state: TViewState
+    triggered_by: Literal["button", "command"]
     created: datetime = Field(default_factory=datetime.utcnow)
     notification: Optional[str]
     show_alert: bool = False
     payload: Optional[Any] = None
+
+
+TRIGGERED_BY_UPDATE_TYPES = {"button": UpdateType.callback_query, "command": UpdateType.message}
 
 
 @base

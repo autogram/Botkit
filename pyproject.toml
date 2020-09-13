@@ -45,6 +45,7 @@ boltons = "*"
 pytz = "2020.1"
 redis-collections = { version = "^0.8.1", optional = true }
 watchgod = { version = "^0.6", optional = true }
+ensure = "^1.0.0"
 
 [tool.poetry.extras]
 redis = ["redis-collections"]

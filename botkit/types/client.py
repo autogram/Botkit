@@ -4,12 +4,12 @@ from typing import Any, Generic, Iterable, Protocol, TypeVar, Union
 from botkit.views.sender_interface import IViewSender, Message
 
 
-class _IdentifiableUser(Protocol):
+class IdentifiableUser(Protocol):
     id: int
     username: str
 
 
-User = TypeVar("User", bound=_IdentifiableUser)
+User = TypeVar("User", bound=IdentifiableUser)
 
 
 class IClient(IViewSender[Message], ABC, Generic[Message, User]):
@@ -29,7 +29,7 @@ class IClient(IViewSender[Message], ABC, Generic[Message, User]):
         ...
 
     @abstractmethod
-    async def get_me(self) -> _IdentifiableUser:
+    async def get_me(self) -> IdentifiableUser:
         ...
 
     # @abstractmethod

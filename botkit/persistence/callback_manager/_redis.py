@@ -82,11 +82,10 @@ class RedisCallbackManager(ICallbackManager):
     def create_callback(self, context: CallbackActionContext) -> str:
         id_ = generate_id()
         self.callbacks[id_] = context.dict()
-        # self.callbacks.sync()
         return id_
 
     def lookup_callback(self, id_: Union[str, UUID]) -> Optional[CallbackActionContext]:
-        context: Optional[Dict] = self.callbacks.get(str(id_))
+        context: Optional[Dict] = self.callbacks.get(str(id_).strip())
         if context is None:
             return None
         return CallbackActionContext(**context)

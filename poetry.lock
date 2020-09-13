@@ -200,6 +200,17 @@ python-versions = "*"
 version = "0.3.1"
 
 [[package]]
+category = "main"
+description = "Literate BDD assertions in Python with no magic"
+name = "ensure"
+optional = false
+python-versions = "*"
+version = "1.0.0"
+
+[package.dependencies]
+six = ">=1.9.0"
+
+[[package]]
 category = "dev"
 description = "A platform independent file lock."
 name = "filelock"
@@ -671,7 +682,7 @@ security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python 2 and 3 compatibility utilities"
 name = "six"
 optional = false
@@ -815,7 +826,7 @@ hmr = ["watchgod"]
 redis = ["redis-collections"]
 
 [metadata]
-content-hash = "ea14b1b10f78bbf74de349b03b12bdf64d2d43c98c0cb5cb3d0dbd58f91d9fa6"
+content-hash = "51d46afab7fece2cecea868e5076d438d2a1858dd05a3937fac594c6fbeaf3e9"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -922,6 +933,10 @@ decorators = [
 distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
     {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},
+]
+ensure = [
+    {file = "ensure-1.0.0-py2.py3-none-any.whl", hash = "sha256:e8ee163a949a7b5ba3f0e2c6b1d20fe603864bb4ae034a219047547989c59ea3"},
+    {file = "ensure-1.0.0.tar.gz", hash = "sha256:61ef7a640914c317ab18026f05618d84004465614c1854264b3c63b2c81a64e7"},
 ]
 filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},

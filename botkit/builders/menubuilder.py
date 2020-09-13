@@ -1,33 +1,35 @@
 from typing import Any, Collection, Dict, Iterator, List, Optional, Union
 
-from cached_property import cached_property
 from haps import Container
 from pyrogram.types import InlineKeyboardButton
 
-from botkit.uncategorized import buttons
+from botkit.inlinequeries.contexts import DefaultInlineModeContext, IInlineModeContext
 from botkit.persistence.callback_manager import (
     CallbackActionContext,
     ICallbackManager,
 )
-from botkit.inlinequeries.contexts import DefaultInlineModeContext, IInlineModeContext
+from botkit.routing.triggers import ActionIdTypes
 from botkit.settings import botkit_settings
+from botkit.uncategorized import buttons
 from botkit.utils.sentinel import NotSet, Sentinel
 
 
 # noinspection PyIncorrectDocstring
 class InlineMenuRowBuilder:
-    def __init__(self, state: Optional[Any], override_buttons: List[Any] = None):
+    def __init__(
+        self,
+        state: Optional[Any],
+        callback_manager: ICallbackManager,
+        *,
+        override_buttons: List[Any] = None,
+    ):
         if override_buttons:
             self.buttons = override_buttons
         else:
             self.buttons: List[InlineKeyboardButton] = []
 
-        self.state = state
-
-    @cached_property
-    def callback_manager(self) -> ICallbackManager:
-        # TODO: measure how long this property access takes
-        return Container().get_object(ICallbackManager, botkit_settings.callback_manager_qualifier)
+        self._callback_manager = callback_manager
+        self._state = state
 
     @property
     def is_empty(self):
@@ -46,7 +48,7 @@ class InlineMenuRowBuilder:
     def action_button(
         self,
         caption: str,
-        action: Any,
+        action: ActionIdTypes,
         payload: Any = None,
         notification: Union[str, None, Sentinel] = NotSet,
         show_alert: bool = False,
@@ -57,43 +59,35 @@ class InlineMenuRowBuilder:
         :param show_alert: Whether to show the `notification` as an alert. Only applicable if `notification` is not
         None.
         """
-        button = InlineKeyboardButton(
-            caption,
-            self.callback_manager.create_callback(
-                CallbackActionContext(
-                    action=action,
-                    state=self.state,
-                    payload=payload,
-                    notification=caption if notification is NotSet else notification,
-                    show_alert=show_alert,
-                )
-            ),
+        cb = CallbackActionContext(
+            action=action,
+            state=self._state,
+            triggered_by="button",
+            payload=payload,
+            notification=caption if notification is NotSet else notification,
+            show_alert=show_alert,
         )
+        callback_id = self._callback_manager.create_callback(cb)
+        button = InlineKeyboardButton(caption, callback_id)
         self.buttons.append(button)
         return self
 
-    # def mutate_button_test(  # TODO
-    #     self,
-    #     caption: str,
-    #     on_click: ReducerSignature,
-    #     notification: Union[str, None, Sentinel] = NotSet,
-    #     show_alert: bool = False,
-    # ) -> "_InlineMenuRowBuilder":
-    #     """
-    #     :param notification: Defaulting to the caption text, this is the message to be shown at the top of the user's
-    #     screen on button press. Pass `None` to disable.
-    #     :param show_alert: Whether to show the `notification` as an alert. Only applicable if `notification` is not
-    #     None.
-    #     """
-    #     raise NotImplementedError()
-
 
 class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
-    def __init__(self, state: Optional[Any], override_rows: List[List[Any]] = None):
+    def __init__(
+        self,
+        state: Optional[Any],
+        callback_manager: ICallbackManager,
+        *,
+        override_rows: List[List[Any]] = None,
+    ):
         self._state = state
+        self._callback_manager = callback_manager
         if override_rows:
             self._rows = {
-                n: InlineMenuRowBuilder(state=self._state, override_buttons=x)
+                n: InlineMenuRowBuilder(
+                    state=self._state, callback_manager=callback_manager, override_buttons=x
+                )
                 for n, x in enumerate(override_rows)
             }
         else:
@@ -114,16 +108,24 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
             index = len(self._rows) - 2 - index
         else:
             index = index
-        return self._rows.setdefault(index, InlineMenuRowBuilder(state=self._state))
+        return self._rows.setdefault(
+            index, InlineMenuRowBuilder(state=self._state, callback_manager=self._callback_manager)
+        )
 
     def _get_nonempty_rows(self) -> List[InlineMenuRowBuilder]:
         return [x for x in self._rows.values() if not x.is_empty]
 
 
-class InlineMenuBuilder:
-    def __init__(self, state: Optional[Any]):
+class MenuBuilder:
+    def __init__(self, state: Optional[Any], callback_manager: ICallbackManager = None):
+        self._callback_manager = callback_manager or Container().get_object(
+            ICallbackManager, botkit_settings.callback_manager_qualifier
+        )
+
         self._state = state
-        self._rows = InlineMenuRowsCollection(state=self._state)
+        self._rows = InlineMenuRowsCollection(
+            state=self._state, callback_manager=self._callback_manager
+        )
 
         self.force_reply = False
 
@@ -131,7 +133,7 @@ class InlineMenuBuilder:
     def is_dirty(self) -> bool:
         return bool(self._rows._get_nonempty_rows()) or self.force_reply
 
-    def add_rows(self, rows: Collection[InlineKeyboardButton]) -> "InlineMenuBuilder":
+    def add_rows(self, rows: Collection[InlineKeyboardButton]) -> "MenuBuilder":
         # TODO: should also take a row builder
         pass  # TODO: implement
 
@@ -147,4 +149,6 @@ class InlineMenuBuilder:
 
     @rows.setter
     def rows(self, value):
-        self._rows = InlineMenuRowsCollection(state=self._state, override_rows=value)
+        self._rows = InlineMenuRowsCollection(
+            state=self._state, callback_manager=self._callback_manager, override_rows=value
+        )

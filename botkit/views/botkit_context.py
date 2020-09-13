@@ -2,7 +2,7 @@ from collections.abc import MutableMapping
 from dataclasses import dataclass, field
 from typing import Any, Dict, Generic, Iterator, Optional, TypeVar, Union
 
-from botkit.dispatching.callbackqueries.types import CallbackActionType
+from botkit.dispatching.types import CallbackActionType
 from botkit.future_tgtypes.update_field_extractor import UpdateFieldExtractor
 from .rendered_messages import RenderedMessage
 from ..future_tgtypes.chat_descriptor import ChatDescriptor

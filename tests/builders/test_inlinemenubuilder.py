@@ -1,7 +1,7 @@
 from haps import Container, Egg
 from pyrogram.types import InlineKeyboardButton
 
-from botkit.builders.inlinemenubuilder import InlineMenuBuilder
+from botkit.builders.menubuilder import MenuBuilder
 from botkit.persistence.callback_manager import (
     ICallbackManager,
     MemoryDictCallbackManager,
@@ -22,7 +22,7 @@ Container.configure(
 
 
 def test_add_button__is_available():
-    builder = InlineMenuBuilder({"my": "choices"})
+    builder = MenuBuilder({"my": "choices"})
 
     builder.rows[0].switch_inline_button("test")
 
@@ -33,7 +33,7 @@ def test_add_button__is_available():
 
 
 def test_add_buttons_to_rows__structure_is_correct():
-    builder = InlineMenuBuilder({"my": "choices"})
+    builder = MenuBuilder({"my": "choices"})
 
     builder.rows[1].switch_inline_button("row1_col0").switch_inline_button("row1_col1")
     builder.rows[1].switch_inline_button("row1_col2")
@@ -51,7 +51,7 @@ def test_add_buttons_to_rows__structure_is_correct():
 
 def test_buttons_retain_state_and_payload():
     state = {"my": "choices"}
-    builder = InlineMenuBuilder(state)
+    builder = MenuBuilder(state)
     b = builder.rows[1].action_button("caption", "test_action", payload="test_payload")
 
     keyboard = builder.render()

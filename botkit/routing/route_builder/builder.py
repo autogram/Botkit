@@ -68,9 +68,11 @@ class RouteExpression:
         self._route.plan.set_collector(func)
         return self
 
-    # @property  # TODO: in order to implement this, it needs a list of callbacks (in a "Plan"?)
-    # def then(self) -> "RouteBuilder":
-    #     return RouteBuilder(routes=self._route_collection)
+    def and_remove_trigger(
+        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+    ) -> "RouteExpression":
+        self._route.plan.set_remove_trigger(strategy)
+        return self
 
 
 class StateGenerationExpression(Generic[M]):
@@ -119,6 +121,12 @@ class StateGenerationExpression(Generic[M]):
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
+    def remove_trigger(
+        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+    ) -> "StateGenerationExpression[M]":
+        self._plan.set_remove_trigger(strategy)
+        return self
+
 
 TViewBase = TypeVar("TViewBase", bound=InlineResultViewBase, covariant=True)
 
@@ -133,8 +141,7 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         super().__init__(routes, action, condition)
         self._route_collection = routes
         self._triggers = RouteTriggers(action=action, filters=None, condition=condition)
-
-        self._plan = ExecutionPlan().add_update_type(UpdateType.callback_query)
+        self._plan = ExecutionPlan().add_update_types(UpdateType.callback_query)
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
@@ -159,8 +166,15 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
     def mutate(
         self: "ActionExpression", reducer: ReducerSignature
     ) -> StateGenerationExpression[M]:
+        # TODO: Allow multiple reducers
         self._plan.set_reducer(reducer)
         return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
+
+    def remove_trigger(
+        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+    ) -> "ActionExpression":
+        self._plan.set_remove_trigger(strategy)
+        return self
 
 
 class CommandExpression(WebhookActionExpressionMixin):
@@ -215,10 +229,9 @@ class ConditionsExpression(IExpressionWithCallMethod):
         routes: RouteCollection,
         filters: Filter = None,
         condition: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
-        remove_trigger: Union[RemoveTrigger, bool, None] = False,
     ):
         self._route_collection = routes
-        self._plan = ExecutionPlan().set_remove_trigger(remove_trigger)
+        self._plan = ExecutionPlan()
         self._triggers = RouteTriggers(filters=filters, condition=condition, action=None)
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
@@ -240,7 +253,7 @@ class ConditionsExpression(IExpressionWithCallMethod):
             self._plan.set_view(view_or_view_type, "send")
             .set_send_via(via)
             .set_send_target(to)
-            .add_update_type(UpdateType.message)
+            .add_update_types(UpdateType.message)
         )
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
@@ -258,8 +271,14 @@ class ConditionsExpression(IExpressionWithCallMethod):
         # return RouteExpression(self._route_collection, route)
 
     def gather(self, state_generator: GathererSignature):
-        self._plan.set_gatherer(state_generator).add_update_type(UpdateType.message)
+        self._plan.set_gatherer(state_generator).add_update_types(UpdateType.message)
         return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
+
+    def remove_trigger(
+        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+    ) -> "ConditionsExpression":
+        self._plan.set_remove_trigger(strategy)
+        return self
 
 
 @dataclass
@@ -309,13 +328,9 @@ class RouteBuilder:
         self,
         filters: Optional[Filter],
         condition_func: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
-        remove_trigger: Union[RemoveTrigger, bool, None] = None,
     ) -> ConditionsExpression:
         return ConditionsExpression(
-            self._route_collection,
-            filters=filters,
-            condition=condition_func,
-            remove_trigger=remove_trigger,
+            self._route_collection, filters=filters, condition=condition_func,
         )
 
     # def on_trigger(
@@ -346,10 +361,6 @@ class RouteBuilder:
     def add_handler(self, handler: Handler):
         raise NotImplemented()
         # self._route_collection.add_for_current_client(Route())
-
-    def register_component(self, component: Type["Component"]):
-        component.register(self)
-        return self
 
     @overload
     def state_machine(self, states: Iterable[str]) -> Iterable["StateRouteBuilder"]:

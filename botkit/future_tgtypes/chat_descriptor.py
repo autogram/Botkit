@@ -27,12 +27,10 @@ class ChatDescriptor:
             # Add own client user ID into the mix
             peers = tuple(sorted((me_id, user.id)))
             desc = ChatDescriptor(type=type_, peers=peers)
-            print(me_id, desc)
-            return
+            return desc
         if type_ == "bot":
             peers = tuple(sorted((chat_id, user.id)))
             desc = ChatDescriptor(type=type_, peers=peers)
-            print(me_id, desc)
-            return
+            return desc
 
         return ChatDescriptor(type=type_, peers=chat_id)

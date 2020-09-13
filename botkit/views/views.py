@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Any, Union, cast
 
 from botkit.builders.htmlbuilder import HtmlBuilder
-from botkit.builders.inlinemenubuilder import InlineMenuBuilder
+from botkit.builders.menubuilder import MenuBuilder
 from botkit.builders.quizbuilder import QuizBuilder
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import (
@@ -18,6 +18,8 @@ from botkit.views.rendered_messages import (
     RenderedPollMessage,
     RenderedTextMessage,
 )
+
+# TODO: Now that also HTML views require state it gets harder and harder to justify having these classes...
 
 
 class MessageViewBase(InlineResultViewBase[TViewState], RenderMarkupBase):
@@ -128,9 +130,7 @@ class QuizView(ModelViewBase, IRegisterable, RenderMarkupBase):
         )
 
 
-def _render_message_markup(
-    obj: Union[ModelViewBase, RenderMarkupBase]
-) -> RenderedMessageMarkup:
+def _render_message_markup(obj: Union[ModelViewBase, RenderMarkupBase]) -> RenderedMessageMarkup:
     rendered = RenderedMessageMarkup()
 
     inspected_render = TypedCallable(obj.render_markup)
@@ -139,7 +139,7 @@ def _render_message_markup(
         raise ValueError(f"Too many parameters for {inspected_render.name}")
 
     elif inspected_render.num_parameters == 1:
-        menu_builder = InlineMenuBuilder(obj.state)
+        menu_builder = MenuBuilder(obj.state, None)
         obj.render_markup(menu_builder)
         buttons = menu_builder.render()
         if not buttons or not buttons[0]:

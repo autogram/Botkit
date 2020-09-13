@@ -28,7 +28,6 @@ class InitializeContextStep(IPipelineStep):
     async def __call__(self, client: IClient, update: Any, context: Optional[Context]) -> Context:
         if not context:
             context = self.create_new_context(client, update)
-            self.log.debug("New context created")
         else:
             self.log.debug("Passing on existing context")
 

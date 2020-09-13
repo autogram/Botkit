@@ -1,9 +1,47 @@
-from typing import Dict, List, Optional
+from collections import defaultdict
+from typing import Dict, Iterable, List, Optional
 
 from pyrogram.filters import Filter
 
+from botkit.core.components import Component
 from botkit.routing.route import RouteDefinition
 from botkit.types.client import IClient
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Generic,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    AbstractSet,
+    Hashable,
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Sequence,
+    AsyncIterator,
+    AsyncIterable,
+    Coroutine,
+    Collection,
+    AsyncGenerator,
+    Deque,
+    Dict,
+    List,
+    Set,
+    FrozenSet,
+    NamedTuple,
+    Generator,
+    cast,
+    overload,
+    TYPE_CHECKING,
+)
+from typing_extensions import TypedDict
 
 
 class RouteCollection:
@@ -30,3 +68,14 @@ class RouteCollection:
             return
 
         route.triggers.filters = route_filters & self.default_filters
+
+    @property
+    def components_by_client(self) -> Dict[IClient, List[Component]]:
+        results: Dict[IClient, List[Component]] = dict()
+
+        for client, client_routes in self.routes_by_client.items():
+            for route in client_routes:
+                if component := route.plan._handling_component:
+                    results.setdefault(client, list()).append(component)
+
+        return results

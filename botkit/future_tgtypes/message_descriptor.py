@@ -2,6 +2,11 @@ from typing import Literal, Optional, Protocol, Union, runtime_checkable
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
+from pyrogram.handlers import RawUpdateHandler
+
+from botkit.utils.botkit_logging.setup import create_logger
+
+log = create_logger()
 
 
 class Chat(Protocol):
@@ -37,7 +42,7 @@ class MessageDescriptor:
             return MessageDescriptor(
                 chat_id=None, message_id=update.inline_message_id, is_inline=True,
             )
-        raise ValueError(f"Could not extract a message location from update: {update}")
+        log.error(f"Could not extract a message location from update.")
 
     @classmethod
     def from_message(cls, message: _MessageUpdate):

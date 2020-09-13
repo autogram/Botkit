@@ -1,16 +1,18 @@
 import asyncio
-from typing import Coroutine, Dict, Iterable, List, Optional
+from typing import Callable, Coroutine, Dict, Iterable, List, Optional
 
 from haps import Inject
 from haps.config import Configuration
 
 from botkit.builtin_services.options.base import IOptionStore
+from botkit.core.services import service
+from botkit.utils.botkit_logging.setup import create_logger
 from ._module import Module
 from .hmr import HotModuleReloadWorker
 from .module_activator import ModuleActivator
 from .module_status import ModuleStatus
-from botkit.core.services import service
-from botkit.utils.botkit_logging.setup import create_logger
+
+log = create_logger("module_loader")
 
 DISABLED_MODULES = [
     "GameModule",
@@ -31,7 +33,7 @@ class ModuleLoader:
     _hmr_worker: HotModuleReloadWorker = Inject()
 
     def __init__(self) -> None:
-        self.log = create_logger()
+        self.log = create_logger("module_loader")
 
         discovered_modules: List[Module] = Configuration().get_var("modules")
         self.log.debug(f"{len(discovered_modules)} modules discovered.")
@@ -87,3 +89,41 @@ class ModuleLoader:
 
     def get_module_status(self, module: Module) -> ModuleStatus:
         return self.__module_statuses[module]
+
+
+# def run_validation_experiment(modules: Iterable[Module]):
+#     render_funcs = get_view_renderers(modules)
+#
+#     for view in render_funcs:
+#         try:
+#             print("=" * 120)
+#             print(inspect.getsource(view)[:600])
+#             mocked_state = MagicMock()
+#             mocked_state.__iter__.return_value = [mocked_state, mocked_state]
+#             cbm = MemoryDictCallbackManager()
+#
+#             if quacks_like_view_render_func(view):
+#                 rendered = render_functional_view(view, mocked_state, cbm)
+#             else:
+#                 continue
+#                 rendered = view(mocked_state).render()
+#
+#             if rendered.inline_buttons:
+#                 buttons = list(flatten(map(flatten, rendered.inline_buttons)))
+#             else:
+#                 buttons = []
+#             callbacks = [cbm.lookup_callback(x.callback_data) for x in buttons]
+#             print(callbacks)
+#         except:
+#             log.exception("lala", stacklevel=1)
+
+
+def get_view_renderers(modules: Iterable[Module]) -> Iterable[Callable]:
+    for m in modules:
+        if not m.route_collection:
+            continue
+        for routes in m.route_collection.routes_by_client.values():
+            for route in routes:
+                if not route.plan._view:
+                    continue
+                yield route.plan._view.view

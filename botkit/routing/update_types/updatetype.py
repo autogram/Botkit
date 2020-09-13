@@ -10,6 +10,7 @@ class UpdateType(Enum):
     inline_query = auto()
     poll = auto()
     user_status = auto()
+    command = auto()
 
     # noinspection PyMethodParameters
     @classproperty

@@ -9,6 +9,7 @@ from typing import (
 from decorators import FuncDecorator
 
 from botkit.builders import ViewBuilder
+from botkit.persistence.callback_manager import ICallbackManager
 from botkit.views.rendered_messages import RenderedMessage
 
 T = TypeVar("T")
@@ -24,7 +25,9 @@ def quacks_like_view_render_func(obj: Any) -> bool:
     return True
 
 
-def render_functional_view(view_func: Callable, state: Optional[Any]) -> RenderedMessage:
+def render_functional_view(
+    view_func: Callable, state: Optional[Any], callback_manager: ICallbackManager = None
+) -> RenderedMessage:
     # TODO: Decide if htis is a good idea
     # if view_state is None:
     #     raise ValueError("No view_state was specified, cannot render.")
@@ -37,7 +40,7 @@ def render_functional_view(view_func: Callable, state: Optional[Any]) -> Rendere
     #     view_func, {type(builder): builder, type(menu): menu, type(meta): meta,},
     # )
 
-    builder = ViewBuilder(state)
+    builder = ViewBuilder(state, callback_manager)
     view_func(state, builder)
 
     return builder.render()

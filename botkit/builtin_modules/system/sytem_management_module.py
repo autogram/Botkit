@@ -71,13 +71,12 @@ class SystemManagementModule(Module):
             routes.on(filters.command("error") & only_owner).call(raise_error)
 
             (
-                routes.on(
-                    filters.command(["log", "logging", "level", "loglevel"]) & only_owner,
-                    remove_trigger=True,
-                )
+                routes.on(filters.command(["log", "logging", "level", "loglevel"]) & only_owner,)
                 # TODO: We could do without the gather step completely as LogSettings can be
                 # replaced with functions
-                .gather(LogSettingsRepository).then_send(
+                .gather(LogSettingsRepository)
+                .remove_trigger()
+                .then_send(
                     log_settings_view,
                     via=self.bot_client or None,
                     to=SendTo.same_chat_quote_replied_to,

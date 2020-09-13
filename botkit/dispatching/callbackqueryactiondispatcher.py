@@ -17,7 +17,7 @@ from botkit.types.client import IClient
 from botkit.views.botkit_context import Context
 
 
-class CallbackActionDispatcher:
+class CallbackQueryActionDispatcher:
     def __init__(self, handle_errors: bool = True, alert_on_error: bool = True):
         self._action_routes: Dict[ActionIdTypes, RouteHandler] = dict()
 
@@ -35,6 +35,10 @@ class CallbackActionDispatcher:
 
     def add_action_route(self, route: RouteHandler):
         assert route.action_id is not None
+
+        if route.action_id in self._action_routes:
+            raise ValueError(f"Action ID {route.action_id} is not unique.")
+
         self._action_routes[route.action_id] = route
 
     @property
@@ -44,10 +48,6 @@ class CallbackActionDispatcher:
         )
         return CallbackQueryHandler(self.handle, filters=~game_callback_filter)
 
-    @staticmethod
-    def check(client: IClient, update: Update, route: RouteDefinition):
-        return route.triggers.filters(client, update) if callable(route.triggers.filters) else True
-
     async def handle(self, client: IClient, callback_query: CallbackQuery) -> Union[bool, Any]:
         cb_ctx: Optional[CallbackActionContext] = await self._get_context_or_respond(
             callback_query
@@ -56,7 +56,6 @@ class CallbackActionDispatcher:
             return False
 
         route = self._action_routes[cb_ctx.action]
-        print(route)
 
         context: Context = Context(
             client=client,
