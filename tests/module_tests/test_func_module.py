@@ -84,7 +84,7 @@ def test_func_decorator_missing_route_builder_fails(get_single_module):
     print(ex.value)
 
 
-def test_load_args_can_be_passed():
-    @module("TestModule", load="test", unload=)
-    def my_module(routes: RouteBuilder):
-        pass
+# def test_load_args_can_be_passed():
+#     @module("TestModule", load="test", unload=)
+#     def my_module(routes: RouteBuilder):
+#         pass

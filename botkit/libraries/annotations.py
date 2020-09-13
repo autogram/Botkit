@@ -1,7 +1,7 @@
 from typing import Any, Iterable, Optional, TYPE_CHECKING, TypeVar, Union
 from typing import Awaitable, Callable, Union
 
-from botkit.persistence.callback_manager import CallbackActionContext
+from botkit.persistence.callback_store import CallbackActionContext
 
 from botkit.libraries._checks import is_installed
 from botkit.views.botkit_context import Context

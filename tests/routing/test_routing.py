@@ -6,9 +6,7 @@ from unittest.mock import MagicMock, Mock
 from pyrogram import filters
 from pyrogram.types import CallbackQuery
 
-from botkit.dispatching.callbackqueries.callbackactiondispatcher import (
-    CallbackQueryActionDispatcher,
-)
+from botkit.dispatching.callbackqueryactiondispatcher import CallbackQueryActionDispatcher
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.libraries.annotations import IClient
 from botkit.routing.route import RouteDefinition

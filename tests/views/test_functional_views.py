@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from botkit.builders import ViewBuilder
-from botkit.persistence import callback_manager
+from botkit.persistence import callback_store
 from botkit.views.functional_views import render_functional_view, view
 from botkit.views.rendered_messages import RenderedTextMessage
 
@@ -29,7 +29,7 @@ def full_view_experiment(state: Model, builder: ViewBuilder):
 
 
 def test_full_view_can_be_rendered(di):
-    di(callback_manager)
+    di(callback_store)
     rendered = render_functional_view(full_view_experiment, Model())
     assert isinstance(rendered, RenderedTextMessage)
     assert rendered.text == "Henlo my <b>bestest</b> <code>fren</code>"

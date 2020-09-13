@@ -7,7 +7,7 @@ from pyrogram import filters
 from pyrogram.handlers import MessageHandler
 from pyrogram.types import Message
 
-from botkit.persistence.callback_manager import ICallbackManager
+from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.route import RouteHandler
 from botkit.routing.triggers import ActionIdTypes
 from botkit.routing.update_types.updatetype import UpdateType
@@ -58,5 +58,5 @@ class DeepLinkStartActionDispatcher:
         return await route.callback(client, message, context)
 
     @cached_property
-    def callback_manager(self) -> ICallbackManager:
-        return Container().get_object(ICallbackManager, botkit_settings.callback_manager_qualifier)
+    def callback_manager(self) -> ICallbackStore:
+        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)

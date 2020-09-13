@@ -34,10 +34,10 @@ class InitializeContextStep(IPipelineStep):
         await self.data_store.fill_context_data(context)
 
         if context.message_state:
-            self.log.debug(f"Carrying message_data of type {type(context.message_state)}")
+            self.log.debug(f"Carrying message_state of type {type(context.message_state)}")
         if context.user_state:
-            self.log.debug(f"Carrying user_data of type {type(context.user_state)}")
+            self.log.debug(f"Carrying user_state of type {type(context.user_state)}")
         if context.chat_state:
-            self.log.debug(f"Carrying chat_data of type {type(context.chat_state)}")
+            self.log.debug(f"Carrying chat_state of type {type(context.chat_state)}")
 
         return context

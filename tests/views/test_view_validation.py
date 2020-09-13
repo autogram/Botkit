@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from boltons.iterutils import flatten
 
 from botkit.builders import ViewBuilder
-from botkit.persistence import callback_manager
+from botkit.persistence import callback_store
 from botkit.views.functional_views import render_functional_view
 
 
@@ -17,7 +17,7 @@ def render_shit(state: Any, builder: ViewBuilder) -> None:
 
 
 def test_experiment(di):
-    di(callback_manager)
+    di(callback_store)
     print(inspect.getsource(render_shit))
     mocked_state = MagicMock()
     mocked_state.__iter__.return_value = [mocked_state, mocked_state]

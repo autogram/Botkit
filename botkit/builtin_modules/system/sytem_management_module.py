@@ -12,9 +12,9 @@ from botkit.builders import ViewBuilder
 from botkit.builtin_modules.system.system_tests import notests
 from botkit.core.modules import ModuleLoader, ModuleStatus
 from botkit.libraries.annotations import IClient
-from botkit.persistence.callback_manager import (
+from botkit.persistence.callback_store import (
     RedisCallbackManager,
-    ICallbackManager,
+    ICallbackStore,
 )
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
@@ -72,9 +72,7 @@ class SystemManagementModule(Module):
 
             (
                 routes.on(filters.command(["log", "logging", "level", "loglevel"]) & only_owner,)
-                # TODO: We could do without the gather step completely as LogSettings can be
-                # replaced with functions
-                .gather(LogSettingsRepository)
+                .gather(LogSettings)
                 .remove_trigger()
                 .then_send(
                     log_settings_view,
@@ -87,7 +85,7 @@ class SystemManagementModule(Module):
             with routes.using(self.bot_client):
                 (
                     routes.on_action("select_log_level")
-                    .mutate(LogSettingsRepository.set_global_botkit_log_level)
+                    .mutate(LogSettings.set_global_botkit_log_level)
                     .then_update(log_settings_view)
                 )
                 # TODO: find nice abstraction
@@ -137,7 +135,7 @@ class SystemManagementModule(Module):
 
         try:
             callback_manager: RedisCallbackManager = Container().get_object(
-                ICallbackManager, "redis"
+                ICallbackStore, "redis"
             )
             callback_manager.callbacks.sync()
             self.log.info("Callbacks synced.")
@@ -185,7 +183,7 @@ class _ToggleSystemStateCommandHandler(CommandHandler[ToggleSystemStateCommand])
 
 
 @dataclass  # TODO: don't gather this
-class LogSettingsRepository:
+class LogSettings:
     ALL_LEVELS = {
         logging.DEBUG: "Debug",
         logging.INFO: "Info",
@@ -205,7 +203,7 @@ class LogSettingsRepository:
         return self.ALL_LEVELS.get(level, "Unknown")
 
 
-def log_settings_view(state: LogSettingsRepository, builder: ViewBuilder) -> None:
+def log_settings_view(state: LogSettings, builder: ViewBuilder) -> None:
     (
         builder.html.br()
         .cta(f"Configure {botkit_settings.application_name} logging", end=None)
