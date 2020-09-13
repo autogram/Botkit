@@ -86,9 +86,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: junit/test-results-${{ matrix.python-version }}.xml
           log_level: DEBUG
-      - name: Report result via Telegram
-        uses: appleboy/telegram-action@master
-        with:
-          to: 62056065
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          args: The ${{ github.event_name }} workflow has completed.
