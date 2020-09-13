@@ -5,7 +5,7 @@ from haps import Container
 from .htmlbuilder import HtmlBuilder
 from .menubuilder import MenuBuilder
 from .metabuilder import MetaBuilder
-from ..persistence.callback_store import ICallbackStore
+from ..persistence.callback_store import CallbackStoreBase
 from ..settings import botkit_settings
 from ..views.rendered_messages import RenderedMessage, RenderedTextMessage
 
@@ -15,10 +15,10 @@ class ViewBuilder:
     menu: MenuBuilder
     meta: MetaBuilder
 
-    def __init__(self, state: Any, callback_manager: ICallbackStore = None):
+    def __init__(self, state: Any, callback_manager: CallbackStoreBase = None):
         if callback_manager is None:
             callback_manager = Container().get_object(
-                ICallbackStore, botkit_settings.callback_manager_qualifier
+                CallbackStoreBase, botkit_settings.callback_manager_qualifier
             )
         self.html = HtmlBuilder(state)
         self.menu = MenuBuilder(state, callback_manager)

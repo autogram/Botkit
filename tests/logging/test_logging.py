@@ -22,30 +22,30 @@ def reset_botkit_logger_before_every_test():
     yield
 
 
-def test_botkit_default_log_level_is_info(caplog):
+def test_botkit_default_log_level_is_notset(caplog):
     log = create_logger()
-    assert log.level == logging.INFO
+    assert log.level == logging.NOTSET
 
 
 def test_botkit_logzero_can_log_when_level_set_before_creation(caplog):
     botkit_settings.log_level = logging.DEBUG
 
-    log = create_logger()
+    log = create_logger("test_logging")
     log.addHandler(caplog.handler)
 
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
-        assert caplog.record_tuples == [("botkit", 10, "debug")]
+        assert caplog.record_tuples == [("botkit.test_logging", 10, "debug")]
 
 
 def test_botkit_logzero_can_log_when_level_set_after_creation(caplog):
-    log = create_logger()
+    log = create_logger("test_logging")
     log.addHandler(caplog.handler)
 
     botkit_settings.log_level = logging.DEBUG
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
-        assert caplog.record_tuples == [("botkit", 10, "debug")]
+        assert caplog.record_tuples == [("botkit.test_logging", 10, "debug")]
 
 
 def test_botkit_logzero_sub_logger_can_log_when_level_set_before_creation(caplog):
@@ -77,9 +77,7 @@ def test_botkit_logzero_sub_logger_logs_in_debug(caplog):
         assert caplog.record_tuples == []
 
 
-def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creation(
-    caplog,
-):
+def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creation(caplog,):
     botkit_settings.log_level = logging.INFO
     with caplog.at_level(logging.INFO):
         sub_log = create_logger("sub")

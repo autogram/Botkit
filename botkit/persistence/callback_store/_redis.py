@@ -14,7 +14,7 @@ from redis import Redis
 from redis_collections import Dict as RedisDict, LRUDict
 
 from ._base import (
-    ICallbackStore,
+    CallbackStoreBase,
     generate_id,
 )
 from ._base import CallbackActionContext
@@ -31,7 +31,7 @@ class RedisClientUnavailableException(Exception):
 
 @egg("redis")
 @scope(SINGLETON_SCOPE)
-def create_redis_callback_manager() -> ICallbackStore:
+def create_redis_callback_manager() -> CallbackStoreBase:
     try:
         redis = Container().get_object(Redis)
     except Exception as e:
@@ -45,7 +45,7 @@ def create_redis_callback_manager() -> ICallbackStore:
     return redis_cbm
 
 
-class RedisCallbackManager(ICallbackStore):
+class RedisCallbackManager(CallbackStoreBase):
     """
     # TODO: Try use json instead of pickled dicts? https://github.com/honzajavorek/redis-collections/issues/122
     # TODO: Force pydantic models?

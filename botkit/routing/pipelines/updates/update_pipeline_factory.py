@@ -1,7 +1,10 @@
 import inspect
-from typing import Any, Optional, Union
+from typing import Any, Union
+
+from haps import Container
 
 from botkit.libraries import HandlerSignature
+from botkit.persistence.data_store import DataStoreBase
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.pipelines.steps._base import Continue, StepError
@@ -16,9 +19,7 @@ from botkit.routing.pipelines.steps.invoke_component_step_factory import InvokeC
 from botkit.routing.pipelines.steps.reduce_step_factory import ReduceStepFactory
 from botkit.routing.pipelines.steps.remove_trigger_step_factory import RemoveTriggerStepFactory
 from botkit.routing.pipelines.steps.render_view_step_factory import RenderViewStepFactory
-from botkit.routing.pipelines.steps.synchronize_context_step import SynchronizeContextStep
 from botkit.routing.triggers import RouteTriggers
-from botkit.routing.types import TViewState
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
@@ -26,10 +27,11 @@ from botkit.views.botkit_context import Context
 
 
 class UpdatePipelineFactory:
-    synchronize_context_step = SynchronizeContextStep()
-
     def __init__(self, triggers: RouteTriggers, plan: ExecutionPlan, for_update_type: UpdateType):
-        self.initialize_context_step = InitializeContextStep(for_update_type)
+        self.data_store: DataStoreBase = Container().get_object(DataStoreBase)
+        self.initialize_context_step = InitializeContextStep(
+            for_update_type, data_store=self.data_store
+        )
         self.triggers = triggers
         self.plan = plan
         self.update_type = for_update_type
@@ -50,7 +52,6 @@ class UpdatePipelineFactory:
         delete_trigger_message_async = RemoveTriggerStepFactory.create_step(
             self.plan._remove_trigger_setting
         )
-        synchronize_context_async = self.synchronize_context_step
         postprocess_data, postprocess_data_async = CollectStepFactory.create_step(
             self.plan._collector
         )
@@ -65,6 +66,7 @@ class UpdatePipelineFactory:
         ) -> Union[bool, Any]:
 
             context = await initialize_context_async(client, update, context)
+            handle_result: Any = None
 
             try:
                 if gather_initial_state:
@@ -120,7 +122,9 @@ class UpdatePipelineFactory:
             if delete_trigger_message_async is not None:
                 await delete_trigger_message_async(context)
 
-            await synchronize_context_async(context)
+            await self.data_store.synchronize_context_data(context)
+
+            return handle_result
 
         return handle_update
 

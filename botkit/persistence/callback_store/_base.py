@@ -29,7 +29,7 @@ TRIGGERED_BY_UPDATE_TYPES = {"button": UpdateType.callback_query, "command": Upd
 
 
 @base
-class ICallbackStore(ABC):
+class CallbackStoreBase(ABC):
     @abstractmethod
     def create_callback(self, context: CallbackActionContext) -> str:
         ...

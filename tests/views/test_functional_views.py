@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from botkit.builders import ViewBuilder
 from botkit.persistence import callback_store
+from botkit.persistence.callback_store import MemoryDictCallbackManager
 from botkit.views.functional_views import render_functional_view, view
 from botkit.views.rendered_messages import RenderedTextMessage
 
@@ -28,9 +29,8 @@ def full_view_experiment(state: Model, builder: ViewBuilder):
     builder.meta.title = TITLE
 
 
-def test_full_view_can_be_rendered(di):
-    di(callback_store)
-    rendered = render_functional_view(full_view_experiment, Model())
+def test_full_view_can_be_rendered():
+    rendered = render_functional_view(full_view_experiment, Model(), MemoryDictCallbackManager())
     assert isinstance(rendered, RenderedTextMessage)
     assert rendered.text == "Henlo my <b>bestest</b> <code>fren</code>"
     assert len(rendered.inline_keyboard_markup.inline_keyboard) == 2

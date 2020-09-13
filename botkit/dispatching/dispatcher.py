@@ -31,10 +31,10 @@ UPDATE_TYPE_HANDLING_SCOPE: Dict[UpdateType, Literal["global", "module"]] = {
 class BotkitDispatcher:
     def __init__(self):
         self.callback_query_action_dispatchers: Dict[
-            Client, CallbackQueryActionDispatcher
+            IClient, CallbackQueryActionDispatcher
         ] = dict()
         self.deep_link_start_action_dispatchers: Dict[
-            Client, DeepLinkStartActionDispatcher
+            IClient, DeepLinkStartActionDispatcher
         ] = dict()
         self._inline_query_factory: Any = None
         self.module_handlers: Dict[int, Dict[IClient, List[Handler]]] = dict()

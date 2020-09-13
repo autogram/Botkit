@@ -8,6 +8,7 @@ from haps import Egg, egg
 
 from botkit.core import modules
 from botkit.core.modules import module
+from botkit.core.modules.activation import haps_disambiguate_module_eggs
 from botkit.routing.route_builder.builder import RouteBuilder
 
 
@@ -18,7 +19,7 @@ def get_single_module() -> Callable[[], Any]:
 
     def inner():
         print("GETTING")
-        m = modules.haps_disambiguate_module_eggs()
+        m = haps_disambiguate_module_eggs()
         assert len(m) <= 1, "More than one module found!"
         assert m, "No module found!"
         return m[0]

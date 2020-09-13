@@ -2,9 +2,9 @@ from boltons.iterutils import flatten
 from pydantic import BaseModel
 from typing import List, Iterable
 
-from botkit.core.modules import ModuleLoader, ModuleStatus
 from botkit.core.modules._module import Module
 from botkit.builtin_modules.module_manager.pagination_model import PaginationModel
+from botkit.core.modules.activation import ModuleLoader, ModuleStatus
 from botkit.inlinequeries.contexts import PrefixBasedInlineModeContext
 
 

@@ -8,7 +8,7 @@ from unsync import Unfuture
 from botkit.builders.text.basetextbuilder import BaseTextBuilder
 from botkit.builders.text.htmltextbuilder import _HtmlTextBuilder
 
-from botkit.persistence.callback_store import CallbackActionContext, ICallbackStore
+from botkit.persistence.callback_store import CallbackActionContext, CallbackStoreBase
 from botkit.routing.triggers import ActionIdTypes
 from botkit.settings import botkit_settings
 from botkit.utils.cached_property import cached_property
@@ -21,8 +21,10 @@ else:
 
 class TelegramEntityBuilder(_HtmlTextBuilder):
     @cached_property
-    def _callback_manager(self) -> ICallbackStore:
-        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
+    def _callback_manager(self) -> CallbackStoreBase:
+        return Container().get_object(
+            CallbackStoreBase, botkit_settings.callback_manager_qualifier
+        )
 
     @classmethod
     def as_command(cls, name: str, to_lower: bool = False):

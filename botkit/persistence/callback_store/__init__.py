@@ -1,4 +1,4 @@
-from ._base import ICallbackStore, CallbackActionContext
+from ._base import CallbackStoreBase, CallbackActionContext
 
 # TODO: add proper try except for opt-in install of redis for callback management
 import redis_collections
@@ -9,7 +9,7 @@ from ._simple import create_callback, lookup_callback
 
 
 __all__ = [
-    "ICallbackStore",
+    "CallbackStoreBase",
     "RedisCallbackManager",
     "MemoryDictCallbackManager",
     "lookup_callback",

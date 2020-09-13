@@ -217,7 +217,7 @@ class PlayGameExpression:
             await callback_query.answer(url=game_url)
 
         plan = ExecutionPlan()
-        plan.set_view()  # TODO probably shouldn't be a view..?
+        plan.set_handler(return_website)
         route = RouteDefinition(plan=plan, triggers=self._triggers)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)

@@ -7,10 +7,10 @@ from haps.config import Configuration
 from botkit.builtin_services.options.base import IOptionStore
 from botkit.core.services import service
 from botkit.utils.botkit_logging.setup import create_logger
-from ._module import Module
-from .hmr import HotModuleReloadWorker
-from .module_activator import ModuleActivator
-from .module_status import ModuleStatus
+from botkit.core.modules._module import Module
+from ._hmr import HotModuleReloadWorker
+from ._module_activator import ModuleActivator
+from ._module_status import ModuleStatus
 
 log = create_logger("module_loader")
 

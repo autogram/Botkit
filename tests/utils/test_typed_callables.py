@@ -11,16 +11,12 @@ def my_func(ctx: Context, test_int: int = 1, test_none: Optional[str] = None):
     pass
 
 
-async def my_func_async(
-    ctx: Context, test_int: int = 1, test_none: Optional[str] = None
-):
+async def my_func_async(ctx: Context, test_int: int = 1, test_none: Optional[str] = None):
     pass
 
 
 class TestClass:
-    def my_method(
-        self, ctx: Context, test_int: int = 1, test_none: Optional[str] = None
-    ):
+    def my_method(self, ctx: Context, test_int: int = 1, test_none: Optional[str] = None):
         pass
 
     async def my_method_async(
@@ -81,10 +77,3 @@ def test_coroutine_method_properties():
         "test_int": int,
         "test_none": Optional[str],
     }
-
-
-def test_sth():
-    m = Message(message_id=123)
-    edit_sig = inspect.signature(m.edit)
-    reply_sig = inspect.signature(m.reply)
-    assert edit_sig == reply_sig

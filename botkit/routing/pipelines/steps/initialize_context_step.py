@@ -1,9 +1,9 @@
 from typing import Awaitable
 
-from haps import Inject
+from haps import Container, Inject
 
 from botkit.libraries.annotations import IClient
-from botkit.persistence.data_store import IDataStore
+from botkit.persistence.data_store import DataStoreBase
 from botkit.routing.pipelines.factory_types import IPipelineStep
 from typing import (
     Any,
@@ -16,10 +16,10 @@ from botkit.views.botkit_context import Context
 
 
 class InitializeContextStep(IPipelineStep):
-    data_store: IDataStore = Inject()
-
-    def __init__(self, update_type: UpdateType):
+    def __init__(self, update_type: UpdateType, data_store: DataStoreBase):
         self.update_type = update_type
+        self.data_store = data_store
+
         self.log = create_logger("context_initializer")
 
     def create_new_context(self, client, update):

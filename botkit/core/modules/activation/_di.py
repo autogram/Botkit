@@ -3,7 +3,7 @@ from typing import Iterable, List
 from haps import Container, Egg, SINGLETON_SCOPE, egg
 from haps.config import Configuration
 
-from ._module import Module
+from botkit.core.modules._module import Module
 
 # noinspection PyTypeHints
 egg.factories: List[Egg]

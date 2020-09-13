@@ -6,7 +6,7 @@ from pyrogram.types import InlineKeyboardButton
 from botkit.inlinequeries.contexts import DefaultInlineModeContext, IInlineModeContext
 from botkit.persistence.callback_store import (
     CallbackActionContext,
-    ICallbackStore,
+    CallbackStoreBase,
 )
 from botkit.routing.triggers import ActionIdTypes
 from botkit.settings import botkit_settings
@@ -19,7 +19,7 @@ class InlineMenuRowBuilder:
     def __init__(
         self,
         state: Optional[Any],
-        callback_manager: ICallbackStore,
+        callback_manager: CallbackStoreBase,
         *,
         override_buttons: List[Any] = None,
     ):
@@ -77,7 +77,7 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
     def __init__(
         self,
         state: Optional[Any],
-        callback_manager: ICallbackStore,
+        callback_manager: CallbackStoreBase,
         *,
         override_rows: List[List[Any]] = None,
     ):
@@ -117,9 +117,9 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
 
 
 class MenuBuilder:
-    def __init__(self, state: Optional[Any], callback_manager: ICallbackStore = None):
+    def __init__(self, state: Optional[Any], callback_manager: CallbackStoreBase = None):
         self._callback_manager = callback_manager or Container().get_object(
-            ICallbackStore, botkit_settings.callback_manager_qualifier
+            CallbackStoreBase, botkit_settings.callback_manager_qualifier
         )
 
         self._state = state

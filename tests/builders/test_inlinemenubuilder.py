@@ -1,24 +1,28 @@
+import pytest
 from haps import Container, Egg
 from pyrogram.types import InlineKeyboardButton
 
 from botkit.builders.menubuilder import MenuBuilder
 from botkit.persistence.callback_store import (
-    ICallbackStore,
+    CallbackStoreBase,
     MemoryDictCallbackManager,
 )
 from botkit.persistence.callback_store._simple import lookup_callback
 from botkit.settings import botkit_settings
 
-Container.configure(
-    [
-        Egg(
-            ICallbackStore,
-            ICallbackStore,
-            botkit_settings.callback_manager_qualifier,
-            MemoryDictCallbackManager,
-        )
-    ]
-)
+
+@pytest.fixture(scope="function", autouse=True)
+def configure_callback_store():
+    Container.configure(
+        [
+            Egg(
+                CallbackStoreBase,
+                CallbackStoreBase,
+                botkit_settings.callback_manager_qualifier,
+                MemoryDictCallbackManager,
+            )
+        ]
+    )
 
 
 def test_add_button__is_available():

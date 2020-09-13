@@ -8,7 +8,7 @@ from haps import Inject, base
 from haps.application import Application
 from pyrogram import Client as PyrogramClient
 
-from botkit.core.modules import ModuleLoader
+from botkit.core.modules.activation import ModuleLoader
 from botkit.settings import botkit_settings
 from botkit.utils.botkit_logging.setup import create_logger
 

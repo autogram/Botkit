@@ -5,11 +5,18 @@ from pytest import fixture
 from types import ModuleType
 
 
-@fixture(scope="module")
-def di():
-    def inner(*modules):
-        assert all((isinstance(x, ModuleType) for x in modules))
-        Container._reset()
-        Container.autodiscover([x.__name__ for x in modules])
+@fixture(scope="function", autouse=True)
+def reset_container():
+    Container._reset()
+    yield
+    Container._reset()
 
-    return inner
+
+# @fixture(scope="function")
+# def di():
+#     def inner(*modules):
+#         assert all((isinstance(x, ModuleType) for x in modules))
+#         Container.autodiscover([x for x in modules])
+#         print(modules, Container().config)
+#
+#     return inner

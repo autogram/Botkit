@@ -10,7 +10,6 @@ from botkit.settings import botkit_settings
 botkit_logger = logzero.setup_logger(
     name="botkit", formatter=botkit_settings.log_formatter, level=botkit_settings.log_level
 )
-botkit_logger.setLevel(logging.INFO)
 
 
 def create_logger(
@@ -21,7 +20,7 @@ def create_logger(
     if sub_logger_name:
         name = "botkit." + re.sub(r"^botkit\.?", "", sub_logger_name, re.MULTILINE)
     else:
-        name = "botkit." + __name__
+        name = "botkit"
 
     if use_standard_format:
         return logzero.setup_logger(

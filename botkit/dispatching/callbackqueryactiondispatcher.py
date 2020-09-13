@@ -8,7 +8,7 @@ from pyrogram.filters import create
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.types import CallbackQuery, Update
 
-from botkit.persistence.callback_store import CallbackActionContext, ICallbackStore
+from botkit.persistence.callback_store import CallbackActionContext, CallbackStoreBase
 from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.triggers import ActionIdTypes
 from botkit.routing.update_types.updatetype import UpdateType
@@ -80,8 +80,10 @@ class CallbackQueryActionDispatcher:
             return False
 
     @cached_property
-    def callback_manager(self) -> ICallbackStore:
-        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
+    def callback_manager(self) -> CallbackStoreBase:
+        return Container().get_object(
+            CallbackStoreBase, botkit_settings.callback_manager_qualifier
+        )
 
     async def _get_context_or_respond(
         self, callback_query: CallbackQuery

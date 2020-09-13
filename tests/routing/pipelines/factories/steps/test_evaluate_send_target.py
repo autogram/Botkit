@@ -4,9 +4,8 @@ import pytest
 from pyrogram.types import Chat, Message, User
 
 from botkit.routing.pipelines.execution_plan import SendTo
-from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import (
-    evaluate_send_target,
-)
+from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import evaluate_send_target
+from botkit.routing.update_types.updatetype import UpdateType
 from botkit.views.botkit_context import Context
 
 SAME_CHAT_ID = 123
@@ -17,18 +16,15 @@ REPLIED_TO_MESSAGE_ID = 2000
 
 @pytest.fixture(scope="function")
 def context():
-    (replied_to_message := Mock(Message)).configure_mock(
-        message_id=REPLIED_TO_MESSAGE_ID
-    )
+    (replied_to_message := Mock(Message)).configure_mock(message_id=REPLIED_TO_MESSAGE_ID)
     (chat := Mock(Chat)).configure_mock(id=SAME_CHAT_ID)
     (user := Mock(User)).configure_mock(id=USER_ID)
     (message := Mock(Message)).configure_mock(
-        chat=chat,
-        message_id=MESSAGE_ID,
-        reply_to_message=replied_to_message,
-        from_user=user,
+        chat=chat, message_id=MESSAGE_ID, reply_to_message=replied_to_message, from_user=user,
     )
-    return Context(state=None, client=None, update=message)
+
+    # TODO: Test this with other update types too
+    return Context(view_state=None, client=None, update=message, update_type=UpdateType.message)
 
 
 @pytest.mark.parametrize(
@@ -47,17 +43,11 @@ def context():
         (12345, (12345, None)),
         (lambda ctx: SendTo.same_chat, (SAME_CHAT_ID, None)),
         (lambda ctx: SendTo.same_chat_quote, (SAME_CHAT_ID, MESSAGE_ID)),
-        (
-            lambda ctx: SendTo.same_chat_quote_replied_to,
-            (SAME_CHAT_ID, REPLIED_TO_MESSAGE_ID),
-        ),
+        (lambda ctx: SendTo.same_chat_quote_replied_to, (SAME_CHAT_ID, REPLIED_TO_MESSAGE_ID),),
         (lambda ctx: SendTo.user_in_private, (USER_ID, None)),
         (lambda ctx: "same_chat", (SAME_CHAT_ID, None)),
         (lambda ctx: "same_chat_quote", (SAME_CHAT_ID, MESSAGE_ID)),
-        (
-            lambda ctx: "same_chat_quote_replied_to",
-            (SAME_CHAT_ID, REPLIED_TO_MESSAGE_ID),
-        ),
+        (lambda ctx: "same_chat_quote_replied_to", (SAME_CHAT_ID, REPLIED_TO_MESSAGE_ID),),
         (lambda ctx: "user_in_private", (USER_ID, None)),
         (lambda ctx: "@josxa", ("@josxa", None)),
         (lambda ctx: ("@josxa", 1000), ("@josxa", 1000)),

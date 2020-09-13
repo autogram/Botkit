@@ -6,7 +6,7 @@ from botkit.views.botkit_context import Context
 
 
 @base
-class IDataStore(ABC):
+class DataStoreBase(ABC):
     @abstractmethod
     async def fill_context_data(self, context: Context) -> None:
         pass  # TODO

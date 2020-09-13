@@ -10,11 +10,11 @@ from typing import Optional, List, Any, Literal
 
 from botkit.builders import ViewBuilder
 from botkit.builtin_modules.system.system_tests import notests
-from botkit.core.modules import ModuleLoader, ModuleStatus
+from botkit.core.modules.activation import ModuleLoader, ModuleStatus
 from botkit.libraries.annotations import IClient
 from botkit.persistence.callback_store import (
     RedisCallbackManager,
-    ICallbackStore,
+    CallbackStoreBase,
 )
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
@@ -135,7 +135,7 @@ class SystemManagementModule(Module):
 
         try:
             callback_manager: RedisCallbackManager = Container().get_object(
-                ICallbackStore, "redis"
+                CallbackStoreBase, "redis"
             )
             callback_manager.callbacks.sync()
             self.log.info("Callbacks synced.")

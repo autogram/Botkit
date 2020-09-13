@@ -1,21 +1,15 @@
-"""
-TODO: Refactor moduleloader:
-- Take out the _activate_module_or_fail method
-- Take out the deactive_module method
-- Report back the new status of the module
-"""
 from asyncio.exceptions import CancelledError
 from typing import Any, Type
 
-from haps import Container, inject, base, egg, scope, SINGLETON_SCOPE
+from haps import Container, SINGLETON_SCOPE, base, egg, scope
 from logzero import logger as log
 
-from botkit.core.modules import Module
-from botkit.core.modules.module_status import ModuleStatus
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.routing.route_builder.builder import RouteBuilder, RouteBuilderContext
 from botkit.routing.route_builder.route_collection import RouteCollection
 from botkit.settings import botkit_settings
+from botkit.core.modules._module import Module
+from ._module_status import ModuleStatus
 
 
 @base
