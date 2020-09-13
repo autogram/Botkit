@@ -71,16 +71,16 @@ jobs:
         uses: AutoModality/action-xunit-viewer@v1
         with:
           results: junit/
-        if: ${{ matrix.os != 'macos-latest' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' }}
       - name: Attach the report
         uses: actions/upload-artifact@v1
         with:
           name: ${{ steps.xunit-viewer.outputs.report-name }}
           path: ${{ steps.xunit-viewer.outputs.report-dir }}
-        if: ${{ matrix.os != 'macos-latest' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' }}
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1.1
-        if: ${{ matrix.os != 'macos-latest' }}
+        if: ${{ matrix.os == 'ubuntu-18.04' }}
         with:
           check_name: Unit Test Results
           github_token: ${{ secrets.GITHUB_TOKEN }}
