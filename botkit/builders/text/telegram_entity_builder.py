@@ -5,9 +5,7 @@ from boltons import strutils
 from haps import Container
 from unsync import Unfuture
 
-from botkit.builders.text.basetextbuilder import BaseTextBuilder
 from botkit.builders.text.htmltextbuilder import _HtmlTextBuilder
-
 from botkit.persistence.callback_store import CallbackActionContext, CallbackStoreBase
 from botkit.routing.triggers import ActionIdTypes
 from botkit.settings import botkit_settings
