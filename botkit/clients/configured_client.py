@@ -15,10 +15,8 @@ def create_session_name_from_token(bot_token: str) -> str:
 
 class ConfiguredClient(Client):
     def __init__(self, **kwargs) -> None:
+        session_name = self.config.session_string or self.config.session_path
         merged_args = dict(
-            session_name=self.config.session_string or self.config.session_path
-            if self.config and self.config.session_path
-            else None,
             api_id=config("API_ID"),
             api_hash=config("API_HASH"),
             bot_token=self.config.bot_token if self.config else None,
@@ -26,10 +24,8 @@ class ConfiguredClient(Client):
         )
         merged_args.update(kwargs)
 
-        session_name = merged_args.pop("session_name", None)
-
         if (
-            not not self.config.session_string
+            not self.config.session_string
             and session_name
             and (bot_token := merged_args.get("bot_token", None))
         ):
