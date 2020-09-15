@@ -128,7 +128,7 @@ class SystemManagementModule(Module):
         self.log.info(
             f"Pausing modules:\n" + "\n".join([m.get_name() for m in loaded_modules]) + "\n..."
         )
-        tasks = [self.module_loader.deactivate_module(m) for m in loaded_modules]
+        tasks = [self.module_loader.deactivate_module_async(m) for m in loaded_modules]
         await asyncio.gather(*tasks, return_exceptions=True)
         self.system_paused = True
         self.paused_modules = loaded_modules
@@ -156,7 +156,7 @@ class SystemManagementModule(Module):
         if self.paused_modules:
             self.log.info(f"Unpausing {len(self.paused_modules)} modules...")
             for m in self.paused_modules:
-                await self.module_loader.try_activate_module(m)
+                await self.module_loader.try_activate_module_async(m)
         else:
             self.log.error(
                 f"For some reason there were no paused modules: {self.paused_modules}. "

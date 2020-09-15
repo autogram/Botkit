@@ -61,7 +61,7 @@ class ModuleManagerModule(Module):
         module_to_enable = module_info.page_items[0]
         module_name = module_to_enable.name
         module = self.module_loader.get_module_by_name(module_name)
-        await self.module_loader.try_activate_module(module)
+        await self.module_loader.try_activate_module_async(module)
         module_to_enable.module_state = self.module_loader.get_module_status(module)
         return module_info
 
@@ -69,6 +69,6 @@ class ModuleManagerModule(Module):
         module_to_disable = module_info.page_items[0]
         module_name = module_to_disable.name
         module = self.module_loader.get_module_by_name(module_name)
-        await self.module_loader.deactivate_module(module)
+        await self.module_loader.deactivate_module_async(module)
         module_to_disable.module_state = self.module_loader.get_module_status(module)
         return module_info

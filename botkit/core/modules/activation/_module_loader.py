@@ -1,11 +1,13 @@
 import asyncio
+from asyncio import CancelledError
 from typing import Callable, Coroutine, Dict, Iterable, List, Optional
 
-from haps import Inject
+from haps import Container, Inject
 from haps.config import Configuration
 
 from botkit.builtin_services.options.base import IOptionStore
 from botkit.core.services import service
+from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.core.modules._module import Module
 from ._hmr import HotModuleReloadWorker
@@ -61,13 +63,13 @@ class ModuleLoader:
         tasks: List[Coroutine] = []
         for n, module in enumerate(self.modules):
             module.index = n + 1
-            tasks.append(self.try_activate_module(module))
+            tasks.append(self.try_activate_module_async(module))
 
         await asyncio.gather(*tasks)
 
         self._hmr_worker.start(self.modules)
 
-    async def try_activate_module(self, module: Module) -> None:
+    async def try_activate_module_async(self, module: Module) -> None:
         if module not in self.__module_statuses:
             self.add_module_without_activation(module)
 
@@ -89,6 +91,27 @@ class ModuleLoader:
 
     def get_module_status(self, module: Module) -> ModuleStatus:
         return self.__module_statuses[module]
+
+    async def deactivate_module_async(self, module: Module):
+        # TODO: Somehow find out which components to deactivate!
+        if self.get_module_status(module) != ModuleStatus.active:
+            raise ValueError("Cannot unregister as the module is not loaded.")
+
+        try:
+            await module.unload()
+        except CancelledError:
+            pass
+        except:
+            self.log.exception(f"Could not unload module {module.get_name()}.")
+
+        try:
+            # TODO: prettify
+            dispatcher = Container().get_object(BotkitDispatcher)
+            await dispatcher.remove_module_routes(module)
+        except:
+            self.log.exception(f"Could not remove routes of module {module.get_name()}.")
+
+        self.__module_statuses[module] = ModuleStatus.inactive
 
 
 # def run_validation_experiment(modules: Iterable[Module]):

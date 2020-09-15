@@ -77,26 +77,6 @@ class ModuleActivator:
                     comp.register(route_builder)
                     comp._is_registered = True
 
-    async def deactivate_module_async(self, module: Module):
-        # TODO: Somehow find out which components to deactivate!
-
-        if self.get_module_status(module) != ModuleStatus.active:
-            raise ValueError("Cannot unregister as the module is not loaded.")
-
-        try:
-            await module.unload()
-        except CancelledError:
-            pass
-        except:
-            self.log.exception(f"Could not unload module {module.get_name()}.")
-
-        try:
-            await self.dispatcher.remove_module_routes(module)
-        except:
-            self.log.exception(f"Could not remove routes of module {module.get_name()}.")
-
-        self.__module_statuses[module] = ModuleStatus.inactive
-
         # if not any((bool(x) for x in client.dispatcher.groups.values())):
         #     print(
         #         "A client could be shut down, but that logic is not implemented yet."
