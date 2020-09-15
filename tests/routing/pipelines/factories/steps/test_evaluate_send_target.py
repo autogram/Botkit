@@ -3,9 +3,11 @@ from unittest.mock import Mock
 import pytest
 from pyrogram.types import Chat, Message, User
 
+from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
 from botkit.routing.pipelines.execution_plan import SendTo
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import evaluate_send_target
 from botkit.routing.update_types.updatetype import UpdateType
+from botkit.types.client import IClient
 from botkit.views.botkit_context import Context
 
 SAME_CHAT_ID = 123
@@ -22,9 +24,10 @@ def context():
     (message := Mock(Message)).configure_mock(
         chat=chat, message_id=MESSAGE_ID, reply_to_message=replied_to_message, from_user=user,
     )
+    (client := Mock(IClient)).configure_mock(own_user_id=0)
 
     # TODO: Test this with other update types too
-    return Context(view_state=None, client=None, update=message, update_type=UpdateType.message)
+    return Context(view_state=None, client=client, update=message, update_type=UpdateType.message)
 
 
 @pytest.mark.parametrize(
@@ -54,6 +57,8 @@ def context():
         (lambda ctx: (12345, 1000), (12345, 1000)),
         (lambda ctx: ("@josxa", None), ("@josxa", None)),
         (lambda ctx: (-100, None), (-100, None)),
+        (lambda ctx: ChatDescriptor(type="private", peers=1234), (1234, None)),
+        (lambda ctx: (ChatDescriptor(type="private", peers=1234), 1000), (1234, 1000)),
     ],
 )
 def test_evaluate_send_target(send_target, expected, context):

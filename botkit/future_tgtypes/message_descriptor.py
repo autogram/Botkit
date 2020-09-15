@@ -27,7 +27,9 @@ class _CallbackQueryUpdate(Protocol):
 
 @dataclass(frozen=True)
 class MessageDescriptor:
+    # TODO: allow message descriptors
     chat_id: Optional[Union[int, str]]  # will be None for inline messages
+
     message_id: Union[int, str]
     is_inline: bool
     is_deleted: bool = False  # TODO: implement

@@ -71,12 +71,12 @@ class SystemManagementModule(Module):
             routes.on(filters.command("error") & only_owner).call(raise_error)
 
             (
-                routes.on(filters.command(["log", "logging", "level", "loglevel"]) & only_owner,)
+                routes.on(filters.command(["log", "logging", "level", "loglevel"]) & only_owner)
                 .gather(LogSettings)
                 .remove_trigger()
                 .then_send(
                     log_settings_view,
-                    via=self.bot_client or None,
+                    via_bot=self.bot_client or None,
                     to=SendTo.same_chat_quote_replied_to,
                 )
             )

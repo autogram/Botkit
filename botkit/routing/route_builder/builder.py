@@ -9,7 +9,6 @@ from typing import (
     Iterable,
     Optional,
     TYPE_CHECKING,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -33,14 +32,13 @@ from botkit.routing.pipelines.reducer import ReducerSignature
 from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.publish_expression import PublishActionExpressionMixin
 from botkit.routing.route_builder.route_collection import RouteCollection
-from botkit.routing.route_builder.types import IExpressionWithCallMethod, TView
+from botkit.routing.route_builder.types import IExpressionWithCallMethod
 from botkit.routing.route_builder.webhook_action_expression import WebhookActionExpressionMixin
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.types import TViewState
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.views.base import InlineResultViewBase
-from botkit.views.botkit_context import Context
 
 if TYPE_CHECKING:
     from botkit.core.components import Component
@@ -69,9 +67,9 @@ class RouteExpression:
         return self
 
     def and_remove_trigger(
-        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me,
     ) -> "RouteExpression":
-        self._route.plan.set_remove_trigger(strategy)
+        self._route.plan.set_remove_trigger(strategy, always=False, early=False)
         return self
 
 
@@ -108,23 +106,27 @@ class StateGenerationExpression(Generic[M]):
         return RouteExpression(self._route_collection, route)
 
     def then_send(
-        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None
+        self,
+        view,
+        to: SendTarget = SendTo.same_chat,
+        from_client: IClient = None,
+        via_bot: IClient = None,
     ) -> RouteExpression:
-        if via and not self._route_collection.current_client.is_user:
-            raise ValueError(
-                "Can only send a view `via` another bot when the client that this route belongs to is a "
-                "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
-                self._route_collection.current_client,
-            )
-        self._plan.set_view(view_or_view_type, "send").set_send_via(via).set_send_target(to)
+        (
+            self._plan.set_view(view, "send")
+            .set_from_and_via(from_client, via_bot)
+            .set_send_target(to)
+        )
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
     def remove_trigger(
-        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+        self,
+        strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me,
+        always: bool = False,
     ) -> "StateGenerationExpression[M]":
-        self._plan.set_remove_trigger(strategy)
+        self._plan.set_remove_trigger(strategy, always=always, early=True)
         return self
 
 
@@ -141,7 +143,9 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         super().__init__(routes, action, condition)
         self._route_collection = routes
         self._triggers = RouteTriggers(action=action, filters=None, condition=condition)
-        self._plan = ExecutionPlan().add_update_types(UpdateType.callback_query)
+        self._plan = ExecutionPlan(self._route_collection.current_client).add_update_types(
+            {UpdateType.callback_query, UpdateType.start_command}
+        )
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
@@ -150,15 +154,15 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         return RouteExpression(self._route_collection, route)
 
     def send_view(
-        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+        self,
+        view_or_view_type,
+        to: SendTarget = SendTo.same_chat,
+        from_client: IClient = None,
+        via_bot: IClient = None,
     ):
-        if via and not self._route_collection.current_client.is_user:
-            raise ValueError(
-                "Can only send a view `via` another bot when the client that this route belongs to is a "
-                "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
-                self._route_collection.current_client,
-            )
-        self._plan.set_view(view_or_view_type, "send").set_send_via(via).set_send_target(to)
+        self._plan.set_view(view_or_view_type, "send").set_from_and_via(
+            from_client=from_client, send_via_bot=via_bot
+        ).set_send_target(to)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
@@ -171,9 +175,11 @@ class ActionExpression(WebhookActionExpressionMixin, PublishActionExpressionMixi
         return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
 
     def remove_trigger(
-        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+        self,
+        strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me,
+        always: bool = False,
     ) -> "ActionExpression":
-        self._plan.set_remove_trigger(strategy)
+        self._plan.set_remove_trigger(strategy, always=always, early=True)
         return self
 
 
@@ -189,7 +195,10 @@ class CommandExpression(WebhookActionExpressionMixin):
         self._triggers = RouteTriggers(action=action, filters=None, condition=condition)
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
-        route = RouteDefinition(plan=ExecutionPlan().set_handler(handler), triggers=self._triggers)
+        route = RouteDefinition(
+            plan=ExecutionPlan(self._route_collection.current_client).set_handler(handler),
+            triggers=self._triggers,
+        )
         self._route_collection.add_for_current_client(route)
         return RouteExpression(self._route_collection, route)
 
@@ -197,7 +206,9 @@ class CommandExpression(WebhookActionExpressionMixin):
         self: "ActionExpression", reducer: ReducerSignature
     ) -> StateGenerationExpression[M]:
         return StateGenerationExpression(
-            self._route_collection, self._triggers, ExecutionPlan().set_reducer(reducer)
+            self._route_collection,
+            self._triggers,
+            ExecutionPlan(self._route_collection.current_client).set_reducer(reducer),
         )
 
 
@@ -216,7 +227,7 @@ class PlayGameExpression:
         async def return_website(client: IClient, callback_query: CallbackQuery):
             await callback_query.answer(url=game_url)
 
-        plan = ExecutionPlan()
+        plan = ExecutionPlan(self._route_collection.current_client)
         plan.set_handler(return_website)
         route = RouteDefinition(plan=plan, triggers=self._triggers)
         self._route_collection.add_for_current_client(route)
@@ -231,7 +242,7 @@ class ConditionsExpression(IExpressionWithCallMethod):
         condition: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None,
     ):
         self._route_collection = routes
-        self._plan = ExecutionPlan()
+        self._plan = ExecutionPlan(self._route_collection.current_client)
         self._triggers = RouteTriggers(filters=filters, condition=condition, action=None)
 
     def call(self, handler: HandlerSignature) -> RouteExpression:
@@ -241,17 +252,15 @@ class ConditionsExpression(IExpressionWithCallMethod):
         return RouteExpression(self._route_collection, route)
 
     def send(
-        self, view_or_view_type, to: SendTarget = SendTo.same_chat, via: IClient = None,
+        self,
+        view_or_view_type,
+        to: SendTarget = SendTo.same_chat,
+        from_client: IClient = None,
+        via_bot: IClient = None,
     ) -> RouteExpression:
-        if via and not self._route_collection.current_client.is_user:
-            raise ValueError(
-                "Can only send a view `via` another bot when the client that this route belongs to is a "
-                "userbot. A userbot and a regular bot together form a 'companion bot' relationship.",
-                self._route_collection.current_client,
-            )
         (
             self._plan.set_view(view_or_view_type, "send")
-            .set_send_via(via)
+            .set_from_and_via(from_client, via_bot)
             .set_send_target(to)
             .add_update_types(UpdateType.message)
         )
@@ -275,9 +284,11 @@ class ConditionsExpression(IExpressionWithCallMethod):
         return StateGenerationExpression(self._route_collection, self._triggers, self._plan)
 
     def remove_trigger(
-        self, strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me
+        self,
+        strategy: Union[RemoveTrigger, bool, None] = RemoveTrigger.only_for_me,
+        always: bool = False,
     ) -> "ConditionsExpression":
-        self._plan.set_remove_trigger(strategy)
+        self._plan.set_remove_trigger(strategy, always=always, early=True)
         return self
 
 

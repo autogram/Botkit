@@ -15,7 +15,7 @@ User = TypeVar("User", bound=IdentifiableUser)
 class IClient(IViewSender[Message], ABC, Generic[Message, User]):
     @property
     @abstractmethod
-    def me_user_id(self) -> int:
+    def own_user_id(self) -> int:
         ...
 
     @property

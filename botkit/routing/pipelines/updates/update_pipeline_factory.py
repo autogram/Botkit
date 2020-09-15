@@ -23,6 +23,7 @@ from botkit.routing.triggers import RouteTriggers
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
+from botkit.utils.nameof import nameof
 from botkit.views.botkit_context import Context
 
 
@@ -41,7 +42,6 @@ class UpdatePipelineFactory:
         # - Performance
         # - Allow users to override existing and inject their own steps
 
-        update_type = self.update_type
         initialize_context_async = self.initialize_context_step
         gather_initial_state, gather_async = GatherStepFactory.create_step(self.plan._gatherer)
         mutate_previous_state, mutate_async = ReduceStepFactory.create_step(self.plan._reducer)
@@ -49,12 +49,15 @@ class UpdatePipelineFactory:
         render_view = RenderViewStepFactory.create_step(self.plan._view)
         commit_rendered_view_async = CommitRenderedViewStepFactory.create_step(self.plan._view)
         handle, handle_async = CallStepFactory.create_step(self.plan._handler)
-        delete_trigger_message_async = RemoveTriggerStepFactory.create_step(
-            self.plan._remove_trigger_setting
-        )
+        _rm_trigger_params = self.plan._remove_trigger_params
+        always_remove_trigger = _rm_trigger_params and _rm_trigger_params.always
+        remove_trigger_early = _rm_trigger_params and _rm_trigger_params.early
+        delete_trigger_message_async = RemoveTriggerStepFactory.create_step(_rm_trigger_params)
         postprocess_data, postprocess_data_async = CollectStepFactory.create_step(
             self.plan._collector
         )
+
+        send_from = self.plan._view.send_from if self.plan._view else None
 
         # TODO: view_state transitions
         # should_transition = self.plan._state_transition
@@ -64,9 +67,11 @@ class UpdatePipelineFactory:
         async def handle_update(
             client: IClient, update: Any, context: Context = None
         ) -> Union[bool, Any]:
-
             context = await initialize_context_async(client, update, context)
             handle_result: Any = None
+
+            if always_remove_trigger and remove_trigger_early:
+                await delete_trigger_message_async(context)
 
             try:
                 if gather_initial_state:
@@ -85,10 +90,20 @@ class UpdatePipelineFactory:
                     await invoke_component(context)
 
                 if render_view:
+                    if send_from:
+                        # TODO: Kinda hacky, but otherwise `evaluate_send_target` doesn't have the right callback
+                        #  context...
+                        # - Make sure that there are no @cached_properties on the context if this remains!
+                        context.client = send_from
+
                     # TODO: It remains to be seen whether having `rendered_message` on the `context` is useful.
                     # It might turn out that just passing it to the `send_or_update` step is the better choice.
                     context.rendered_message = render_view(context)
                     await commit_rendered_view_async(context)
+
+                    if send_from:
+                        # Reset
+                        context.client = client
 
                 if handle:
                     if handle_async:
@@ -118,8 +133,11 @@ class UpdatePipelineFactory:
                     )
                     return
                 raise e
+            finally:
+                if always_remove_trigger and not remove_trigger_early:
+                    await delete_trigger_message_async(context)
 
-            if delete_trigger_message_async is not None:
+            if not always_remove_trigger and delete_trigger_message_async is not None:
                 await delete_trigger_message_async(context)
 
             await self.data_store.synchronize_context_data(context)

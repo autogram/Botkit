@@ -61,6 +61,13 @@ class _HtmlTextBuilder(BaseTextBuilder):
     def as_underline(cls, text: str, end="", if_: bool = True) -> str:
         return cls._apply_end(cls._wrap_and_escape(text, "u", if_), end)
 
+    def bold_and_underline(self, text: str, end=""):
+        return self._append(self.as_bold_and_underline(text=text, end=end))
+
+    @classmethod
+    def as_bold_and_underline(cls, text: str, end="") -> str:
+        return cls._apply_end(f"<b><u>{cls.as_escaped_html(text)}</u></b>", end)
+
     @classmethod
     def as_mono(cls, text: str, end="", if_: bool = True) -> str:
         return cls.as_code(text, end, if_)

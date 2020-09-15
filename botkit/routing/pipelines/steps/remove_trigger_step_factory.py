@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable, List, Optional
 
-from botkit.routing.pipelines.execution_plan import RemoveTrigger
+from botkit.routing.pipelines.execution_plan import RemoveTrigger, RemoveTriggerParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger
@@ -8,14 +8,14 @@ from botkit.views.botkit_context import Context
 
 
 class RemoveTriggerStepFactory(
-    IStepFactory[Optional[RemoveTrigger], Optional[Callable[[Context], Awaitable[None]]]]
+    IStepFactory[Optional[RemoveTriggerParameters], Optional[Callable[[Context], Awaitable[None]]]]
 ):
     @property
     def applicable_update_types(self) -> List[UpdateType]:
         return [UpdateType.message]
 
     @classmethod
-    def create_step(cls, remove_trigger_setting: Optional[RemoveTrigger]):
+    def create_step(cls, remove_trigger_setting: Optional[RemoveTriggerParameters]):
         if not remove_trigger_setting:
             return None
 
@@ -23,7 +23,7 @@ class RemoveTriggerStepFactory(
 
         async def delete_trigger_message_async(context: Context) -> None:
             try:
-                if remove_trigger_setting == RemoveTrigger.only_for_me:
+                if remove_trigger_setting.strategy == RemoveTrigger.only_for_me:
                     if (await context.client.get_me()).id != context.user_id:
                         return
 

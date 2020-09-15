@@ -11,12 +11,3 @@ def reset_container():
     yield
     Container._reset()
 
-
-# @fixture(scope="function")
-# def di():
-#     def inner(*modules):
-#         assert all((isinstance(x, ModuleType) for x in modules))
-#         Container.autodiscover([x for x in modules])
-#         print(modules, Container().config)
-#
-#     return inner

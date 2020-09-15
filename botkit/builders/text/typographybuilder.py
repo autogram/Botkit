@@ -23,7 +23,7 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
         return self
 
     def h2(self, title: str):
-        self._append(f"<b><u>{self.as_escaped_html(title)}</u></b>")
+        self.bold_and_underline(title)
         self.br()
         return self
 
@@ -31,9 +31,17 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
         self.bold(title.upper(), end=" — ")
         return self
 
+    def desc(self, key: str, value: str):
+        self.bold(key.rstrip(": "), end=": ").text(value).br()
+        return self
+
     def headline(self, title: str, level: int):
         if level == 1:
             return self.h1(title)
+        if level == 2:
+            return self.h2(title)
+        if level == 3:
+            return self.h3(title)
         raise ValueError("No such headline level.", level)
 
     def smallcaps(self, text: str, end=""):

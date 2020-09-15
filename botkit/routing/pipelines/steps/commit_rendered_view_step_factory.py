@@ -1,8 +1,10 @@
 from collections import namedtuple
-from typing import Any, Awaitable, Callable, List, Optional
+from typing import Any, Awaitable, Callable, List, Optional, Union
 
 from pyrogram.errors import MessageIdInvalid
 
+from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
+from botkit.future_tgtypes.message_descriptor import MessageDescriptor
 from botkit.routing.pipelines.execution_plan import SendTarget, SendTo, ViewParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
@@ -39,6 +41,7 @@ class CommitRenderedViewStepFactory(
 
             async def send_view(context: Context) -> None:
                 try:
+                    client = view_params.send_from if view_params.send_from else context.client
                     target = evaluate_send_target(send_target, context)
 
                     reply_log = (
@@ -47,11 +50,11 @@ class CommitRenderedViewStepFactory(
                         else ""
                     )
 
-                    if view_params.send_via is not None:
+                    if view_params.send_via_bot is not None:
                         log.debug(
                             f"Sending rendered message via bot client to {target.peer_id}{reply_log}"
                         )
-                        companion = CompanionBotService(context.client, view_params.send_via)
+                        companion = CompanionBotService(client, view_params.send_via_bot)
                         sent = await companion.send_rendered_message_via(
                             target.peer_id,
                             rendered=context.rendered_message,
@@ -60,7 +63,7 @@ class CommitRenderedViewStepFactory(
                         context._data["inline_message_id"] = sent.inline_message_id
                     else:
                         log.debug(f"Sending rendered message to {target}{reply_log}")
-                        await context.client.send_rendered_message(
+                        await client.send_rendered_message(
                             peer=target.peer_id,
                             rendered=context.rendered_message,
                             reply_to=target.reply_to_msg_id,
@@ -74,11 +77,14 @@ class CommitRenderedViewStepFactory(
 
             async def update_view(context: Context):
                 try:
+                    # TODO: Not sure if send_from was indeed meant to be used only for sending
+                    client = view_params.send_from if view_params.send_from else context.client
+
                     if (
                         inline_message_id := getattr(context.update, "inline_message_id", None)
                     ) is not None:
                         try:
-                            return await context.client.update_inline_message_with_rendered(
+                            return await client.update_inline_message_with_rendered(
                                 inline_message_id, context.rendered_message
                             )
                         except MessageIdInvalid:
@@ -102,7 +108,7 @@ class CommitRenderedViewStepFactory(
                         message_id = context.message_id
 
                     log.debug(f"Updating inline message in chat {chat_id} with rendered content")
-                    return await context.client.update_message_with_rendered(
+                    return await client.update_message_with_rendered(
                         peer=chat_id, message_id=message_id, rendered=context.rendered_message,
                     )
                 except Exception as e:
@@ -114,10 +120,18 @@ class CommitRenderedViewStepFactory(
 def evaluate_send_target(send_target: SendTarget, context: Context) -> EvaluatedSendTarget:
     assert send_target is not None
 
+    def resolve_chat_id(value: Union[int, ChatDescriptor]) -> Union[SendTo, int]:
+        # TODO: allow MessageDescriptors, add tests
+        if not isinstance(value, ChatDescriptor):
+            return value
+        return value.get_chat_id(context.client.own_user_id)
+
     if callable(send_target):
         static_send_target = send_target(context)
         if isinstance(static_send_target, tuple):
-            return EvaluatedSendTarget(static_send_target[0], static_send_target[1])
+            return EvaluatedSendTarget(
+                resolve_chat_id(static_send_target[0]), static_send_target[1]
+            )
     else:
         static_send_target = send_target
 
@@ -151,3 +165,5 @@ def evaluate_send_target(send_target: SendTarget, context: Context) -> Evaluated
         return EvaluatedSendTarget(context.user_id, None)
     if isinstance(static_send_target, (int, str)):
         return EvaluatedSendTarget(static_send_target, None)
+    if isinstance(static_send_target, ChatDescriptor):
+        return EvaluatedSendTarget(resolve_chat_id(static_send_target), None)

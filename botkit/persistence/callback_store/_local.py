@@ -12,7 +12,7 @@ from ._simple import (
 
 
 @egg(qualifier="memory")
-class MemoryDictCallbackManager(CallbackStoreBase):
+class MemoryDictCallbackStore(CallbackStoreBase):
     def create_callback(self, context: CallbackActionContext) -> str:
         return create_callback(context)
 

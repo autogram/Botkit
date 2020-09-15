@@ -23,7 +23,7 @@ class ModuleManagerModule(Module):
             (
                 routes.on(command("modules", prefixes=["#", "/"]))
                 .gather(self.get_modules)
-                .then_send(PagedModuleView, via=self.bot_client)
+                .then_send(PagedModuleView, via_bot=self.bot_client)
             )
 
         with routes.using(self.bot_client):

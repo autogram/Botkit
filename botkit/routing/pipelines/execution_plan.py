@@ -1,7 +1,7 @@
 import inspect
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Callable, Iterable, Optional, Set, Tuple, Type, Union
+from typing import Callable, Iterable, Optional, Set, Tuple, Type, Union, cast
 from uuid import UUID
 
 from boltons.iterutils import is_collection
@@ -26,6 +26,7 @@ from botkit.types.client import IClient
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature
+from botkit.views.view_state_model import ViewState
 from botkit.views.views import MessageViewBase
 
 
@@ -80,7 +81,8 @@ class ViewParameters:
     # TODO: This should not be a part of this class!
     view: Union[Type[MessageViewBase], MessageViewBase, ViewRenderFuncSignature]
 
-    send_via: Optional[IClient] = None
+    send_from: Optional[IClient] = None
+    send_via_bot: Optional[IClient] = None
 
     # TODO: Make this a list of items?
     send_target: Optional[SendTarget] = SendTo.same_chat
@@ -100,15 +102,25 @@ class RemoveTrigger(Enum):
     aggressively = "aggressively"
 
 
+@dataclass
+class RemoveTriggerParameters:
+    strategy: RemoveTrigger
+    always: bool
+    early: bool
+
+
 class ExecutionPlan:
-    def __init__(self) -> None:
+    def __init__(self, client: IClient) -> None:
+        self._client_type: Literal["user", "bot"] = cast(
+            Literal["user", "bot"], "bot" if client.is_bot else "user"
+        )
         self._gatherer: Optional[TypedCallable[GathererSignature]] = None
         self._reducer: Optional[TypedCallable[ReducerSignature]] = None
         self._handler: Optional[TypedCallable[HandlerSignature]] = None
         self._handling_component: Optional[Component] = None
         self._view: Optional[ViewParameters] = None
         self._update_types: Set[UpdateType] = set()
-        self._remove_trigger_setting: Optional[RemoveTrigger] = None
+        self._remove_trigger_params: Optional[RemoveTriggerParameters] = None
         self._state_transition: Optional[UUID] = None  # TODO: implement
         self._collector: Optional[TypedCallable[CollectorSignature]] = None
 
@@ -123,6 +135,10 @@ class ExecutionPlan:
         # if inspect.isclass(state_generator):
         #     gatherer = TypedCallable(step_func=lambda: state_generator())
         # else:
+
+        if inspect.isclass(state_generator) and issubclass(state_generator, ViewState):
+            state_generator = state_generator.gather
+
         gatherer = TypedCallable(func=state_generator)
 
         if gatherer.num_non_optional_params > 1:
@@ -230,27 +246,52 @@ class ExecutionPlan:
 
         return self
 
-    def set_send_via(self, send_via: IClient) -> "ExecutionPlan":
-        if send_via is None:
-            self._view.send_via = None
+    def set_from_and_via(
+        self, from_client: IClient = None, send_via_bot: IClient = None
+    ) -> "ExecutionPlan":
+        if not from_client and not send_via_bot:
+            self._view.send_from = None
+            self._view.send_via_bot = None
             return self
 
         if not self._view:
             raise ValueError("Please specify the view to be sent first.")
 
-        if not send_via.is_bot:
-            raise ValueError(
-                "Sending a message `via` is only possible with regular bots, not with userbots.",
-                send_via,
-            )
-
-        if self._view.command == "update":
+        if send_via_bot and self._view.command == "update":
             raise ValueError(
                 "Cannot *update* a view `via` another bot. This is only possible when *sending* a new view."
             )
 
-        self._view.send_via = send_via
-        return self
+        if not send_via_bot.is_bot:
+            raise ValueError(
+                "Sending a message `via` is only possible with regular bots, not with user clients.",
+                send_via_bot,
+            )
+
+        if from_client and send_via_bot:
+            if from_client.is_bot:
+                raise ValueError(
+                    "Sending a message `via` a bot is only possible when `send_from` is a user client.",
+                    from_client,
+                )
+            self._view.send_from = from_client
+            self._view.send_via_bot = send_via_bot
+            return self
+
+        if from_client:  # and not send_via_bot
+            self._view.send_from = from_client
+            return self
+
+        if send_via_bot:  # and not send_from
+            if self._client_type != "user":
+                raise ValueError(
+                    "Sending a message `via` a bot is only possible when the current client is a user client.",
+                    send_via_bot,
+                )
+            self._view.send_via_bot = send_via_bot
+            return self
+
+        raise NotImplementedError("some condition is missing here...")
 
     def set_send_target(self, send_target: SendTarget) -> "ExecutionPlan":
         if not self._view:
@@ -276,12 +317,21 @@ class ExecutionPlan:
             raise error_cb(invalid_elems)
         self._update_types = desired_types
 
-    def set_remove_trigger(self, remove_trigger_strategy: Union[RemoveTrigger, bool, None]):
-        if isinstance(remove_trigger_strategy, bool):
-            self._remove_trigger_setting = (
-                RemoveTrigger.only_for_me if remove_trigger_strategy else None
+    def set_remove_trigger(
+        self,
+        strategy: Union[RemoveTrigger, bool, None],
+        always: bool = False,
+        early: bool = False,
+    ):
+        if isinstance(strategy, bool):
+            self._remove_trigger_params = RemoveTriggerParameters(
+                strategy=RemoveTrigger.only_for_me if strategy else None,
+                always=always,
+                early=early,
             )
         else:
             # enum or None
-            self._remove_trigger_setting = remove_trigger_strategy
+            self._remove_trigger_params = RemoveTriggerParameters(
+                strategy=strategy, always=always, early=early
+            )
         return self

@@ -8,7 +8,6 @@ from .rendered_messages import RenderedMessage
 from ..future_tgtypes.chat_descriptor import ChatDescriptor
 from ..routing.types import TViewState
 from ..routing.update_types.updatetype import UpdateType
-from ..types.client import IClient
 
 TPayload = TypeVar("TPayload")
 
@@ -52,7 +51,6 @@ class Context(Generic[TViewState, TPayload], UpdateFieldExtractor):  # TODO: may
     update_type: UpdateType
     view_state: TViewState
 
-    client: Union[IClient, Any]
     action: Optional[CallbackActionType] = None
     payload: Optional[TPayload] = None
 

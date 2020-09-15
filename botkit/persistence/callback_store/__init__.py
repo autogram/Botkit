@@ -4,14 +4,14 @@ from ._base import CallbackStoreBase, CallbackActionContext
 import redis_collections
 
 from ._redis import RedisCallbackManager
-from ._local import MemoryDictCallbackManager
+from ._local import MemoryDictCallbackStore
 from ._simple import create_callback, lookup_callback
 
 
 __all__ = [
     "CallbackStoreBase",
     "RedisCallbackManager",
-    "MemoryDictCallbackManager",
+    "MemoryDictCallbackStore",
     "lookup_callback",
     "create_callback",
 ]

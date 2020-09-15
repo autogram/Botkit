@@ -16,7 +16,7 @@ from botkit.types.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.views.botkit_context import Context
 
-START_WITH_UUID4_ARG_REGEX = re.compile(r"^/start [0-9a-f-]{36}$", re.MULTILINE)
+START_WITH_UUID4_ARG_REGEX = re.compile(r"^/start ([0-9a-f-]{36})$", re.MULTILINE)
 
 log = create_logger("deep_link_start_action_dispatcher")
 
@@ -40,7 +40,11 @@ class DeepLinkStartActionDispatcher:
         )
 
     async def handle(self, client: IClient, message: Message) -> Union[bool, Any]:
-        cb_ctx = self.callback_manager.lookup_callback(message.command[1:])  # asserted by regex
+        command_args_str = message.matches[0].group(1)
+        cb_ctx = self.callback_manager.lookup_callback(
+            command_args_str.strip()
+        )  # asserted by regex
+
         if not cb_ctx:
             return False
 

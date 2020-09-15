@@ -15,21 +15,23 @@ from botkit.tghelpers.entities.message_entities import (
     ParsedEntity,
     parse_entities,
 )
+from ..types.client import IClient
 
 
 @dataclass
 class UpdateFieldExtractor:  # TODO: implement properly
     update: Update
+    client: Union[IClient, Any]
 
     @property
     def chat(self) -> Optional[Chat]:
-        if isinstance(self.update, pyrogram.types.Message):
+        if hasattr(self.update, "chat"):
             return self.update.chat
         return None
 
     @property
     def chat_descriptor(self) -> Optional[ChatDescriptor]:
-        return ChatDescriptor.from_update(self.update)
+        return ChatDescriptor.from_chat_and_user(self.chat, self.user, self.client.own_user_id)
 
     @property
     def user(self) -> Optional[Chat]:
@@ -96,6 +98,11 @@ class UpdateFieldExtractor:  # TODO: implement properly
     @property
     def replied_to_message_id(self) -> Optional[int]:
         return reply_msg.message_id if (reply_msg := self.replied_to_message) else None
+
+    @property
+    def command_args_or_quote(self) -> Optional[str]:
+        """ Prefers the command arguments over the replied-to message text, or None if neither is present. """
+        return self.command_args_str or self.replied_to_message_text
 
     @property
     def matches(self) -> Optional[List[re.Match]]:

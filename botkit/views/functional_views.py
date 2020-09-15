@@ -25,9 +25,12 @@ def quacks_like_view_render_func(obj: Any) -> bool:
     return True
 
 
+_RenderedMessageType = TypeVar("_RenderedMessageType", bound=RenderedMessage, covariant=True)
+
+
 def render_functional_view(
-    view_func: Callable, state: Optional[Any], callback_manager: CallbackStoreBase = None
-) -> RenderedMessage:
+    view_func: Callable, state: Optional[Any], callback_store: CallbackStoreBase = None
+) -> _RenderedMessageType:
     # TODO: Decide if htis is a good idea
     # if view_state is None:
     #     raise ValueError("No view_state was specified, cannot render.")
@@ -40,7 +43,7 @@ def render_functional_view(
     #     view_func, {type(builder): builder, type(menu): menu, type(meta): meta,},
     # )
 
-    builder = ViewBuilder(state, callback_manager)
+    builder = ViewBuilder(state, callback_store)
     view_func(state, builder)
 
     return builder.render()

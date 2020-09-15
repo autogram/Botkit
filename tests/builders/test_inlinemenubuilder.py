@@ -5,7 +5,7 @@ from pyrogram.types import InlineKeyboardButton
 from botkit.builders.menubuilder import MenuBuilder
 from botkit.persistence.callback_store import (
     CallbackStoreBase,
-    MemoryDictCallbackManager,
+    MemoryDictCallbackStore,
 )
 from botkit.persistence.callback_store._simple import lookup_callback
 from botkit.settings import botkit_settings
@@ -19,7 +19,7 @@ def configure_callback_store():
                 CallbackStoreBase,
                 CallbackStoreBase,
                 botkit_settings.callback_manager_qualifier,
-                MemoryDictCallbackManager,
+                MemoryDictCallbackStore,
             )
         ]
     )

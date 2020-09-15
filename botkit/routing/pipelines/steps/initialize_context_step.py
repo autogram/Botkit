@@ -1,6 +1,4 @@
-from typing import Awaitable
-
-from haps import Container, Inject
+import asyncio
 
 from botkit.libraries.annotations import IClient
 from botkit.persistence.data_store import DataStoreBase
@@ -22,16 +20,16 @@ class InitializeContextStep(IPipelineStep):
 
         self.log = create_logger("context_initializer")
 
-    def create_new_context(self, client, update):
-        return Context(client=client, update=update, update_type=self.update_type, view_state=None)
-
     async def __call__(self, client: IClient, update: Any, context: Optional[Context]) -> Context:
         if not context:
-            context = self.create_new_context(client, update)
+            # Create new context
+            context = Context(
+                client=client, update=update, update_type=self.update_type, view_state=None
+            )
         else:
             self.log.debug("Passing on existing context")
 
-        await self.data_store.fill_context_data(context)
+        await self.fill_context_data(context)
 
         if context.message_state:
             self.log.debug(f"Carrying message_state of type {type(context.message_state)}")
@@ -41,3 +39,17 @@ class InitializeContextStep(IPipelineStep):
             self.log.debug(f"Carrying chat_state of type {type(context.chat_state)}")
 
         return context
+
+    async def fill_context_data(self, context: Context):
+        tasks = [
+            self.data_store.retrieve_user_data(context.user_id),
+            self.data_store.retrieve_chat_data(context.chat_descriptor),
+            self.data_store.retrieve_message_data(context.message_descriptor),
+        ]
+        res = await asyncio.gather(*tasks)
+
+        user_data, chat_data, message_data = res
+
+        context.user_state = user_data
+        context.chat_state = chat_data
+        context.message_state = message_data

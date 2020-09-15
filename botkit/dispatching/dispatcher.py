@@ -1,6 +1,7 @@
 from logging import Logger
 from typing import Any, Dict, List, Union
 
+from ensure import ensure
 from haps import SINGLETON_SCOPE, base, egg, scope
 from pyrogram import Client
 from pyrogram.handlers.handler import Handler
@@ -93,12 +94,17 @@ class BotkitDispatcher:
             dp = await self._get_or_create_callback_query_action_dispatcher(client)
             dp.add_action_route(route_handler)
 
+        elif update_type == UpdateType.start_command:
+            if not route_handler.action_id:
+                raise ValueError(
+                    f"Route handler {route_handler} declares to be associated to callback queries "
+                    f"but its action_id was None."
+                )
+            dp = await self._get_or_create_deep_link_start_action_dispatcher(client)
+            dp.add_action_route(route_handler)
+
         elif update_type == UpdateType.message:
-            if route_handler.action_id is not None:
-                dp = await self._get_or_create_deep_link_start_action_dispatcher(client)
-                dp.add_action_route(route_handler)
-            else:
-                await self.add_handler(group_index, client, route_handler.pyrogram_handler)
+            await self.add_handler(group_index, client, route_handler.pyrogram_handler)
 
         elif update_type == UpdateType.raw:
             raise NotImplementedError("Cannot dispatch raw updates yet.")
