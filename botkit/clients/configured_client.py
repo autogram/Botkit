@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from sqlite3 import OperationalError
 
 from decouple import config
 from pyrogram import Client
@@ -15,8 +16,8 @@ def create_session_name_from_token(bot_token: str) -> str:
 class ConfiguredClient(Client):
     def __init__(self, **kwargs) -> None:
         merged_args = dict(
-            session_name=self.config.session_name
-            if self.config and self.config.session_name
+            session_name=self.config.session_string or self.config.session_path
+            if self.config and self.config.session_path
             else None,
             api_id=config("API_ID"),
             api_hash=config("API_HASH"),
@@ -26,15 +27,22 @@ class ConfiguredClient(Client):
         merged_args.update(kwargs)
 
         session_name = merged_args.pop("session_name", None)
-        if not session_name and (bot_token := merged_args.get("bot_token", None)):
+
+        if (
+            not not self.config.session_string
+            and session_name
+            and (bot_token := merged_args.get("bot_token", None))
+        ):
             # noinspection PyUnboundLocalVariable
             session_name = create_session_name_from_token(bot_token)
+
         super().__init__(session_name, **merged_args)
         self._me = None
 
     @property
     @abstractmethod
     def config(self) -> ClientConfig:
+        # noinspection PydanticTypeChecker
         return None
 
     async def get_me(self) -> User:

@@ -3,6 +3,7 @@ import logging
 import signal
 from abc import abstractmethod
 from asyncio.events import AbstractEventLoop
+from pathlib import Path
 
 from haps import Inject, base
 from haps.application import Application
@@ -51,12 +52,17 @@ class Startup(Application, ABC):
         await asyncio.gather(*start_tasks)
 
     async def __start_client(self, client):
-        session_path = (
-            client.session_name if hasattr(client, "session_name") else client.session.filename
+        session_name = (
+            client.session_name
+            if hasattr(client, "session_name")
+            else client.session.filename
+            if hasattr(client.session, "filename")
+            else str(client.session)
         )
 
-        self.log.debug(f"Starting session " f"{session_path}...")
+        self.log.debug(f"Starting session {session_name}...")
         await client.start()
+
         me = await client.get_me()
         self.log.info(f"Started {user_or_display_name(me)} as {client.__class__.__name__}.")
 
