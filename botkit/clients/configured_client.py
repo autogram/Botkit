@@ -32,6 +32,7 @@ class ConfiguredClient(Client):
             # noinspection PyUnboundLocalVariable
             session_name = create_session_name_from_token(bot_token)
 
+        print(session_name)
         super().__init__(session_name, **merged_args)
         self._me = None
 
