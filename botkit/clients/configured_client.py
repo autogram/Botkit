@@ -6,6 +6,9 @@ from pyrogram import Client
 from pyrogram.types import User
 
 from botkit.clients.client_config import ClientConfig
+from botkit.utils.botkit_logging.setup import create_logger
+
+log = create_logger("configured_client")
 
 
 def create_session_name_from_token(bot_token: str) -> str:
@@ -32,7 +35,7 @@ class ConfiguredClient(Client):
             # noinspection PyUnboundLocalVariable
             session_name = create_session_name_from_token(bot_token)
 
-        print(session_name)
+        logger.warning(session_name)
         super().__init__(session_name, **merged_args)
         self._me = None
 
