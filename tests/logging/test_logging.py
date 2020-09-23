@@ -1,84 +1,82 @@
 import logging
+from unittest import mock
 
 import pytest
+from loguru import logger
 
 from botkit.settings import botkit_settings
-from botkit.utils.botkit_logging.lookup import get_all_botkit_loggers
 from botkit.utils.botkit_logging.setup import create_logger
+
+
+# region fixtures
 
 
 @pytest.fixture(autouse=True)
 def reset_botkit_logger_before_every_test():
-    botkit_settings.log_level = None  # This will reset it to default
-    existing_loggers = get_all_botkit_loggers()
-
-    for logger in existing_loggers:
-        for h in logger.handlers:
-            logger.removeHandler(h)
-        for f in logger.filters:
-            # Not actually used, but just to be on the safe side...
-            logger.removeFilter(f)
-
+    # TODO
     yield
 
 
-def test_botkit_default_log_level_is_notset(caplog):
-    log = create_logger()
-    assert log.level == logging.NOTSET
+@pytest.fixture
+def caplog(_caplog):
+    class PropogateHandler(logging.Handler):
+        def emit(self, record):
+            logging.getLogger(record.name).handle(record)
+
+    handler_id = logger.add(PropogateHandler(), format="{message} {extra}")
+    yield _caplog
+    logger.remove(handler_id)
+
+
+# endregion
+
+# region tests
 
 
 def test_botkit_logzero_can_log_when_level_set_before_creation(caplog):
-    botkit_settings.log_level = logging.DEBUG
+    botkit_settings.log_level = "DEBUG"
 
     log = create_logger("test_logging")
-    log.addHandler(caplog.handler)
 
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
-        assert caplog.record_tuples == [("botkit.test_logging", 10, "debug")]
+        assert caplog.record_tuples == [
+            ("test_logging", 10, "debug {'name': 'botkit.test_logging'}")
+        ]
 
 
 def test_botkit_logzero_can_log_when_level_set_after_creation(caplog):
     log = create_logger("test_logging")
-    log.addHandler(caplog.handler)
 
-    botkit_settings.log_level = logging.DEBUG
+    botkit_settings.log_level = "DEBUG"
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
-        assert caplog.record_tuples == [("botkit.test_logging", 10, "debug")]
+        assert caplog.record_tuples == [
+            ("test_logging", 10, "debug {'name': 'botkit.test_logging'}")
+        ]
 
 
 def test_botkit_logzero_sub_logger_can_log_when_level_set_before_creation(caplog):
-    botkit_settings.log_level = logging.DEBUG
+    botkit_settings.log_level = "DEBUG"
 
     log = create_logger("test")
-    log.addHandler(caplog.handler)
 
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
-        assert caplog.record_tuples == [("botkit.test", 10, "debug")]
+        assert caplog.record_tuples == [("test_logging", 10, "debug {'name': 'botkit.test'}")]
 
 
 def test_botkit_logzero_sub_logger_can_log_when_level_set_after_creation(caplog):
     log = create_logger("test")
-    log.addHandler(caplog.handler)
 
     with caplog.at_level(logging.DEBUG):
-        botkit_settings.log_level = logging.DEBUG
+        botkit_settings.log_level = "DEBUG"
         log.debug("debug")
-        assert caplog.record_tuples == [("botkit.test", 10, "debug")]
-
-
-def test_botkit_logzero_sub_logger_logs_in_debug(caplog):
-    botkit_settings.log_level = logging.DEBUG
-    with caplog.at_level(logging.DEBUG):
-        sub_log = create_logger("sub")
-        sub_log.debug("debug")
-        assert caplog.record_tuples == []
+        assert caplog.record_tuples == [("test_logging", 10, "debug {'name': 'botkit.test'}")]
 
 
 def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creation(caplog,):
-    botkit_settings.log_level = logging.INFO
+    botkit_settings.log_level = "INFO"
     with caplog.at_level(logging.INFO):
         sub_log = create_logger("sub")
         sub_log.debug("debug")
@@ -97,5 +95,12 @@ def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creat
     ],
 )
 def test_create_logger_name(name, exp_name):
-    logger = create_logger(name)
-    assert logger.name == exp_name
+    def bind_mock(**kwargs):
+        assert "name" in kwargs
+        assert kwargs["name"] == exp_name
+
+    with mock.patch.object(logger, "bind", bind_mock):
+        create_logger(name)
+
+
+# endregion

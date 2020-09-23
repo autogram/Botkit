@@ -1,1 +1,0 @@
-- [ ] Try out https://github.com/Delgan/loguru instead?

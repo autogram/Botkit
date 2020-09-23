@@ -1,8 +1,8 @@
 import logging
+from pprint import pprint
 
 from botkit.settings import botkit_settings
-
-botkit_settings.log_level = logging.DEBUG
+from ...utils.botkit_logging.setup import create_logger
 
 from haps import Container, SINGLETON_SCOPE, egg, scope
 from datetime import datetime, timedelta
@@ -14,12 +14,12 @@ from redis import Redis
 from redis_collections import Dict as RedisDict, LRUDict
 
 from ._base import (
-    CallbackStoreBase,
+    ICallbackStore,
     generate_id,
 )
 from ._base import CallbackActionContext
 
-from logzero import logger as log
+log = create_logger("redis_callbacks")
 
 # noinspection PyUnresolvedReferences
 base.classes.add(Redis)
@@ -31,7 +31,7 @@ class RedisClientUnavailableException(Exception):
 
 @egg("redis")
 @scope(SINGLETON_SCOPE)
-def create_redis_callback_manager() -> CallbackStoreBase:
+def create_redis_callback_manager() -> ICallbackStore:
     try:
         redis = Container().get_object(Redis)
     except Exception as e:
@@ -45,7 +45,7 @@ def create_redis_callback_manager() -> CallbackStoreBase:
     return redis_cbm
 
 
-class RedisCallbackManager(CallbackStoreBase):
+class RedisCallbackManager(ICallbackStore):
     """
     # TODO: Try use json instead of pickled dicts? https://github.com/honzajavorek/redis-collections/issues/122
     # TODO: Force pydantic models?
@@ -79,15 +79,30 @@ class RedisCallbackManager(CallbackStoreBase):
                 redis=redis_client, key=key + "_normal_dict"
             )
 
+        self.fallback_memory_callbacks = dict()
+
     def create_callback(self, context: CallbackActionContext) -> str:
         id_ = generate_id()
-        self.callbacks[id_] = context.dict()
+        serialized = context.dict()
+
+        try:
+            self.callbacks[id_] = serialized
+        except TypeError as e:
+            log.error(
+                f"{e} -- "
+                "Callback context could not be serialized. Using in-memory store instead, so this"
+                "callback will be lost on system restart."
+            )
+            self.fallback_memory_callbacks = serialized
         return id_
 
     def lookup_callback(self, id_: Union[str, UUID]) -> Optional[CallbackActionContext]:
-        context: Optional[Dict] = self.callbacks.get(str(id_).strip())
+        id_ = str(id_).strip()
+        context: Optional[Dict] = self.callbacks.get(id_)
         if context is None:
-            return None
+            context = self.fallback_memory_callbacks.get(id_)
+            if context is None:
+                return None
         return CallbackActionContext(**context)
 
     def clear(self):

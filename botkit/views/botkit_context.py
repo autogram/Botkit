@@ -5,7 +5,8 @@ from typing import Any, Dict, Generic, Iterator, Optional, TypeVar, Union
 from botkit.dispatching.types import CallbackActionType
 from botkit.future_tgtypes.update_field_extractor import UpdateFieldExtractor
 from .rendered_messages import RenderedMessage
-from ..future_tgtypes.chat_descriptor import ChatDescriptor
+from ..future_tgtypes.chat_identity import ChatIdentity
+from ..future_tgtypes.message_identity import MessageIdentity
 from ..routing.types import TViewState
 from ..routing.update_types.updatetype import UpdateType
 
@@ -33,8 +34,8 @@ class _ScopedState(MutableMapping):
 
 
 class ChatState(_ScopedState):
-    def __init__(self, chat_descriptor: ChatDescriptor):
-        self.chat_descriptor = chat_descriptor
+    def __init__(self, chat_identity: ChatIdentity):
+        self.chat_identity = chat_identity
         super(ChatState, self).__init__()
 
 
@@ -58,7 +59,6 @@ class Context(Generic[TViewState, TPayload], UpdateFieldExtractor):  # TODO: may
     user_state: Optional[UserState] = None
     chat_state: Optional[ChatState] = None
 
-    # TODO: It might or might not make sense to have this here. It may be removed in the future in favor of
-    # simple argument passing inside the pipelines.
+    # TODO: These should maybe not live on the context, but move to a dedicated `Pipeline(-specific)Context`
     rendered_message: RenderedMessage = None
-    _data: Dict = field(default_factory=dict)
+    response_identity: MessageIdentity = None

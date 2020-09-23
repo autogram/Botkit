@@ -3,7 +3,7 @@ from uuid import UUID
 
 from haps import egg
 
-from ._base import CallbackStoreBase
+from ._base import ICallbackStore
 from ._base import CallbackActionContext
 from ._simple import (
     create_callback,
@@ -12,7 +12,7 @@ from ._simple import (
 
 
 @egg(qualifier="memory")
-class MemoryDictCallbackStore(CallbackStoreBase):
+class MemoryDictCallbackStore(ICallbackStore):
     def create_callback(self, context: CallbackActionContext) -> str:
         return create_callback(context)
 

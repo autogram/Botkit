@@ -34,6 +34,7 @@ def test_full_view_can_be_rendered():
     assert isinstance(rendered, RenderedTextMessage)
     assert rendered.text == "Henlo my <b>bestest</b> <code>fren</code>"
     assert len(rendered.inline_keyboard_markup.inline_keyboard) == 2
+    assert len(rendered.inline_keyboard_markup.inline_keyboard[0][0].callback_data) == 36
     assert rendered.description == DESCRIPTION
     assert rendered.title == TITLE
 

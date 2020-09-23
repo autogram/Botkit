@@ -6,7 +6,7 @@ from buslane.commands import Command, CommandHandler
 from haps import Inject, Container
 from pyrogram import filters
 from pyrogram.types import Message
-from typing import Optional, List, Any, Literal
+from typing import Optional, List, Any, Literal, Union
 
 from botkit.builders import ViewBuilder
 from botkit.builtin_modules.system.system_tests import notests
@@ -14,7 +14,7 @@ from botkit.core.modules.activation import ModuleLoader, ModuleStatus
 from botkit.libraries.annotations import IClient
 from botkit.persistence.callback_store import (
     RedisCallbackManager,
-    CallbackStoreBase,
+    ICallbackStore,
 )
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
@@ -28,11 +28,6 @@ log = create_logger("system_management_module", use_standard_format=False)
 
 
 @dataclass
-class _LoadCtx:
-    user_client_id: int
-
-
-@dataclass
 class ToggleSystemStateCommand(Command):
     new_state: Literal["pause", "unpause"]
     triggered_by: Any
@@ -42,21 +37,30 @@ class ToggleSystemStateCommand(Command):
 class SystemManagementModule(Module):
     module_loader: ModuleLoader = Inject()
 
-    def __init__(self, user_client: IClient, bot_client: Optional[IClient] = None) -> None:
+    def __init__(
+        self,
+        user_client: IClient,
+        bot_client: Optional[IClient] = None,
+        admin_user: Union[int, str] = None,
+    ) -> None:
+        """
+        Args:
+            user_client ():
+            bot_client ():
+            admin_user ():
+        """
         self.user_client = user_client
         self.bot_client = bot_client
+        self.admin_user = admin_user
 
         self.system_paused: bool = False
         self.paused_modules: Optional[List[Module]] = None
-
-    async def load(self) -> _LoadCtx:
-        return _LoadCtx(user_client_id=(await self.user_client.get_me()).id)
 
     def register(self, routes: RouteBuilder):
         command_bus.register(_ToggleSystemStateCommandHandler(self))
 
         restart_command = filters.command("r", prefixes=[".", "#"]) | filters.command("restart")
-        only_owner = filters.user(routes.context.load_result.user_client_id)
+        only_owner = filters.user(self.admin_user or self.user_client.own_user_id)
 
         with routes.using(self.user_client):
             routes.on(restart_command & only_owner).call(self.restart_system)
@@ -135,7 +139,7 @@ class SystemManagementModule(Module):
 
         try:
             callback_manager: RedisCallbackManager = Container().get_object(
-                CallbackStoreBase, "redis"
+                ICallbackStore, "redis"
             )
             callback_manager.callbacks.sync()
             self.log.info("Callbacks synced.")

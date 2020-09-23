@@ -1,7 +1,13 @@
-from typing import Any, Iterable, Optional, TYPE_CHECKING, TypeVar, Union
-from typing import Awaitable, Callable, Union
-
-from botkit.persistence.callback_store import CallbackActionContext
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Iterable,
+    Optional,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+)
 
 from botkit.libraries._checks import is_installed
 from botkit.views.botkit_context import Context
@@ -11,9 +17,10 @@ if TYPE_CHECKING:
 else:
     IClient = None
 
+
 if is_installed("pyrogram"):
     from pyrogram import Client
-    from pyrogram.types import CallbackQuery, InlineQuery, Message, Poll, Update
+    from pyrogram.types import CallbackQuery, InlineQuery, Message, Poll
 
     TClient = TypeVar("TClient", bound=Client)
     TMessage = TypeVar("TMessage", bound=Message)

@@ -25,3 +25,10 @@ in these cases you will be better off using a Telegram client library directly.
 ## Roadmap
 
 - At the moment, only Pyrogram is supported, but Botkit is architected in a way that it will eventually become library-agnostic, meaning that you will be able to use any Python library underneath it. -->
+
+
+
+## Design Philosophy
+
+### Why ISomething interfaces?
+https://mail.python.org/pipermail/python-3000/2007-April/006614.html

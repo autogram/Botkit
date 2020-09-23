@@ -10,6 +10,7 @@ from typing_extensions import Literal
 
 from botkit.core.components import Component
 from botkit.libraries.annotations import HandlerSignature
+from botkit.models import IGatherer
 from botkit.routing.pipelines.collector import CollectorSignature
 from botkit.routing.pipelines.gatherer import (
     GathererSignature,
@@ -26,7 +27,6 @@ from botkit.types.client import IClient
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature
-from botkit.views.view_state_model import ViewState
 from botkit.views.views import MessageViewBase
 
 
@@ -136,8 +136,8 @@ class ExecutionPlan:
         #     gatherer = TypedCallable(step_func=lambda: state_generator())
         # else:
 
-        if inspect.isclass(state_generator) and issubclass(state_generator, ViewState):
-            state_generator = state_generator.gather
+        if inspect.isclass(state_generator) and issubclass(state_generator, IGatherer):
+            state_generator = state_generator.create_from_context
 
         gatherer = TypedCallable(func=state_generator)
 
@@ -211,9 +211,20 @@ class ExecutionPlan:
         )
         return self
 
-    def set_handling_component(self, component: Component) -> "ExecutionPlan":
+    def set_handling_component(
+        self, component: Union[Component, Type[Component]]
+    ) -> "ExecutionPlan":
         if self._handling_component:
             raise ValueError("There can only be one component in a given route.")
+
+        if inspect.isclass(component):
+            try:
+                component = component()
+            except:
+                raise ValueError(
+                    f"Component {component} is a class, but does not have a parameterless initializer."
+                )
+
         self._handling_component = component
         return self
 
@@ -313,6 +324,10 @@ class ExecutionPlan:
     def _set_update_types_exclusive(
         self, desired_types: Set[UpdateType], error_cb: Callable[[Set[str]], Exception]
     ) -> None:
+        # TODO: This is a hotfix (1)
+        if UpdateType.start_command in self._update_types:
+            desired_types.add(UpdateType.start_command)
+
         if invalid_elems := {t.name for t in self._update_types if t not in desired_types}:
             raise error_cb(invalid_elems)
         self._update_types = desired_types

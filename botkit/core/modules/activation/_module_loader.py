@@ -21,8 +21,9 @@ DISABLED_MODULES = [
     "FunctionsBasedModule",
     "ReceiverModule",
     # belong together
-    "IncomingMessagesModule",
+    "ConversationMirrorModule",
     "ReplyModule",
+    "Html5GameModule",
     # end
     "NotionCollectorModule",
 ]
@@ -30,7 +31,7 @@ DISABLED_MODULES = [
 
 @service
 class ModuleLoader:
-    options: IOptionStore = Inject()
+    # options: IOptionStore = Inject()
     activator: ModuleActivator = Inject()
     _hmr_worker: HotModuleReloadWorker = Inject()
 

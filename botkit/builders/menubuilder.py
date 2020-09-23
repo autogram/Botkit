@@ -1,35 +1,32 @@
-from typing import Any, Collection, Dict, Iterator, List, Optional, Union
+from typing import Any, Collection, Dict, Iterator, List, TYPE_CHECKING, Union
+from uuid import uuid4
 
-from haps import Container
+from botkit.builders.callbackbuilder import CallbackBuilder
+
+if TYPE_CHECKING:
+    from botkit.widgets import MenuWidget
+
 from pyrogram.types import InlineKeyboardButton
 
 from botkit.inlinequeries.contexts import DefaultInlineModeContext, IInlineModeContext
-from botkit.persistence.callback_store import (
-    CallbackActionContext,
-    CallbackStoreBase,
-)
-from botkit.routing.triggers import ActionIdTypes
-from botkit.settings import botkit_settings
+from botkit.routing.triggers import ActionIdType
 from botkit.uncategorized import buttons
 from botkit.utils.sentinel import NotSet, Sentinel
 
 
 # noinspection PyIncorrectDocstring
+
+
 class InlineMenuRowBuilder:
     def __init__(
-        self,
-        state: Optional[Any],
-        callback_manager: CallbackStoreBase,
-        *,
-        override_buttons: List[Any] = None,
+        self, callback_builder: CallbackBuilder, *, override_buttons: List[Any] = None,
     ):
         if override_buttons:
             self.buttons = override_buttons
         else:
             self.buttons: List[InlineKeyboardButton] = []
 
-        self._callback_manager = callback_manager
-        self._state = state
+        self._callback_builder = callback_builder
 
     @property
     def is_empty(self):
@@ -45,10 +42,25 @@ class InlineMenuRowBuilder:
         self.buttons.append(button)
         return self
 
+    def btn(
+        self,
+        caption: str,
+        payload: Any = None,
+        notification: Union[str, None, Sentinel] = NotSet,
+        show_alert: bool = False,
+    ):
+        return self.action_button(
+            caption=caption,
+            action=f"test_{uuid4()}",
+            payload=payload,
+            notification=notification,
+            show_alert=show_alert,
+        )
+
     def action_button(
         self,
         caption: str,
-        action: ActionIdTypes,
+        action: ActionIdType,
         payload: Any = None,
         notification: Union[str, None, Sentinel] = NotSet,
         show_alert: bool = False,
@@ -59,15 +71,13 @@ class InlineMenuRowBuilder:
         :param show_alert: Whether to show the `notification` as an alert. Only applicable if `notification` is not
         None.
         """
-        cb = CallbackActionContext(
-            action=action,
-            state=self._state,
+        callback_id = self._callback_builder.create_callback(
+            action_id=action,
             triggered_by="button",
             payload=payload,
             notification=caption if notification is NotSet else notification,
             show_alert=show_alert,
         )
-        callback_id = self._callback_manager.create_callback(cb)
         button = InlineKeyboardButton(caption, callback_id)
         self.buttons.append(button)
         return self
@@ -75,18 +85,13 @@ class InlineMenuRowBuilder:
 
 class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
     def __init__(
-        self,
-        state: Optional[Any],
-        callback_manager: CallbackStoreBase,
-        *,
-        override_rows: List[List[Any]] = None,
+        self, callback_builder: CallbackBuilder, *, override_rows: List[List[Any]] = None,
     ):
-        self._state = state
-        self._callback_manager = callback_manager
+        self._callback_builder = callback_builder
         if override_rows:
             self._rows = {
                 n: InlineMenuRowBuilder(
-                    state=self._state, callback_manager=callback_manager, override_buttons=x
+                    callback_builder=self._callback_builder, override_buttons=x
                 )
                 for n, x in enumerate(override_rows)
             }
@@ -109,7 +114,7 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
         else:
             index = index
         return self._rows.setdefault(
-            index, InlineMenuRowBuilder(state=self._state, callback_manager=self._callback_manager)
+            index, InlineMenuRowBuilder(callback_builder=self._callback_builder)
         )
 
     def _get_nonempty_rows(self) -> List[InlineMenuRowBuilder]:
@@ -117,17 +122,15 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
 
 
 class MenuBuilder:
-    def __init__(self, state: Optional[Any], callback_manager: CallbackStoreBase = None):
-        self._callback_manager = callback_manager or Container().get_object(
-            CallbackStoreBase, botkit_settings.callback_manager_qualifier
-        )
-
-        self._state = state
-        self._rows = InlineMenuRowsCollection(
-            state=self._state, callback_manager=self._callback_manager
-        )
+    def __init__(self, callback_builder: CallbackBuilder):
+        self._callback_builder = callback_builder
+        self._rows = InlineMenuRowsCollection(callback_builder=callback_builder)
 
         self.force_reply = False
+
+    def add(self, widget: "MenuWidget") -> "MenuBuilder":
+        widget.render_menu(self)
+        return self
 
     @property
     def is_dirty(self) -> bool:
@@ -150,5 +153,5 @@ class MenuBuilder:
     @rows.setter
     def rows(self, value):
         self._rows = InlineMenuRowsCollection(
-            state=self._state, callback_manager=self._callback_manager, override_rows=value
+            callback_builder=self._callback_builder, override_rows=value
         )

@@ -11,3 +11,4 @@
 
 ## Just ideas
 - Klassen im RouteBuilder verschachteln (Klassen in Klassen), wenn sie sonst nirgends gebraucht werden
+- https://github.com/povilasb/pycollection-pipelines

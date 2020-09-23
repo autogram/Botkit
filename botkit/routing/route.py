@@ -18,7 +18,7 @@ from botkit.libraries.annotations import HandlerSignature
 from botkit.routing.pipelines.execution_plan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
-from botkit.routing.triggers import ActionIdTypes, RouteTriggers
+from botkit.routing.triggers import ActionIdType, RouteTriggers
 from botkit.routing.update_types.updatetype import UpdateType
 
 M = TypeVar("M")
@@ -31,7 +31,7 @@ class RouteHandler:
     callback: HandlerSignature
     description: str
     scope: Literal["global", "module"] = "module"
-    action_id: Optional[ActionIdTypes] = None
+    action_id: Optional[ActionIdType] = None
     # TODO: ☝ this is not so nice as it is not set for some instances. Instead maybe go for "unique key in scope"
     #  that is always calculated..?
 

@@ -2,7 +2,7 @@ from abc import ABC
 
 from abc import ABCMeta, abstractmethod
 from decouple import config
-from logzero import logger
+from loguru import logger
 
 from botkit.inlinequeries.inlineresultcontainer import InlineResultContainer
 
@@ -12,9 +12,7 @@ class InlineResultGenerator(ABC):
     #     return self.context.matches(inline_query.query)
 
     @abstractmethod
-    async def generate_results(
-        self, container: InlineResultContainer, user_input: str
-    ) -> bool:
+    async def generate_results(self, container: InlineResultContainer, user_input: str) -> bool:
         pass
 
     async def generate(self, container: InlineResultContainer, user_input: str) -> None:

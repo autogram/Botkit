@@ -3,8 +3,8 @@ from typing import Any, Awaitable, Callable, List, Optional, Union
 
 from pyrogram.errors import MessageIdInvalid
 
-from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
-from botkit.future_tgtypes.message_descriptor import MessageDescriptor
+from botkit.future_tgtypes.chat_identity import ChatIdentity
+from botkit.future_tgtypes.message_identity import MessageIdentity
 from botkit.routing.pipelines.execution_plan import SendTarget, SendTo, ViewParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
@@ -55,19 +55,23 @@ class CommitRenderedViewStepFactory(
                             f"Sending rendered message via bot client to {target.peer_id}{reply_log}"
                         )
                         companion = CompanionBotService(client, view_params.send_via_bot)
-                        sent = await companion.send_rendered_message_via(
+                        sent: MessageIdentity = await companion.send_rendered_message_via(
                             target.peer_id,
                             rendered=context.rendered_message,
                             reply_to=target.reply_to_msg_id,
                         )
-                        context._data["inline_message_id"] = sent.inline_message_id
+                        context.response_identity = sent
                     else:
                         log.debug(f"Sending rendered message to {target}{reply_log}")
-                        await client.send_rendered_message(
+                        sent = await client.send_rendered_message(
                             peer=target.peer_id,
                             rendered=context.rendered_message,
                             reply_to=target.reply_to_msg_id,
                         )
+                        context.response_identity = MessageIdentity.from_message(sent)
+
+                    return context.response_identity
+
                 except Exception as e:
                     raise CommitRenderedViewStepError(e)
 
@@ -84,9 +88,16 @@ class CommitRenderedViewStepFactory(
                         inline_message_id := getattr(context.update, "inline_message_id", None)
                     ) is not None:
                         try:
-                            return await client.update_inline_message_with_rendered(
+                            await client.update_inline_message_with_rendered(
                                 inline_message_id, context.rendered_message
                             )
+
+                            # TODO: It might be possible to have a global, persistent store that maps
+                            # `inline_message_id`s to a corresponding chat. That way we could fill the
+                            #  context's response `MessageIdentity` here!
+                            # context.response_identity = MessageIdentity.from_message(???)
+                            return None
+
                         except MessageIdInvalid:
                             # TODO should be fixed, remove as soon as Dan has published
                             # Then replace with proper error handling..?
@@ -108,7 +119,7 @@ class CommitRenderedViewStepFactory(
                         message_id = context.message_id
 
                     log.debug(f"Updating inline message in chat {chat_id} with rendered content")
-                    return await client.update_message_with_rendered(
+                    updated = await client.update_message_with_rendered(
                         peer=chat_id, message_id=message_id, rendered=context.rendered_message,
                     )
                 except Exception as e:
@@ -120,9 +131,9 @@ class CommitRenderedViewStepFactory(
 def evaluate_send_target(send_target: SendTarget, context: Context) -> EvaluatedSendTarget:
     assert send_target is not None
 
-    def resolve_chat_id(value: Union[int, ChatDescriptor]) -> Union[SendTo, int]:
-        # TODO: allow MessageDescriptors, add tests
-        if not isinstance(value, ChatDescriptor):
+    def resolve_chat_id(value: Union[int, ChatIdentity]) -> Union[SendTo, int]:
+        # TODO: allow MessageIdentitys, add tests
+        if not isinstance(value, ChatIdentity):
             return value
         return value.get_chat_id(context.client.own_user_id)
 
@@ -165,5 +176,5 @@ def evaluate_send_target(send_target: SendTarget, context: Context) -> Evaluated
         return EvaluatedSendTarget(context.user_id, None)
     if isinstance(static_send_target, (int, str)):
         return EvaluatedSendTarget(static_send_target, None)
-    if isinstance(static_send_target, ChatDescriptor):
+    if isinstance(static_send_target, ChatIdentity):
         return EvaluatedSendTarget(resolve_chat_id(static_send_target), None)

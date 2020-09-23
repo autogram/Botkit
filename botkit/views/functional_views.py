@@ -8,9 +8,10 @@ from typing import (
 
 from decorators import FuncDecorator
 
-from botkit.builders import ViewBuilder
-from botkit.persistence.callback_store import CallbackStoreBase
+from botkit.builders import CallbackBuilder, HtmlBuilder, MenuBuilder, MetaBuilder, ViewBuilder
+from botkit.persistence.callback_store import ICallbackStore
 from botkit.views.rendered_messages import RenderedMessage
+from paraminjector import call_with_args
 
 T = TypeVar("T")
 
@@ -29,7 +30,7 @@ _RenderedMessageType = TypeVar("_RenderedMessageType", bound=RenderedMessage, co
 
 
 def render_functional_view(
-    view_func: Callable, state: Optional[Any], callback_store: CallbackStoreBase = None
+    view_func: Callable, state: Optional[Any], callback_store: ICallbackStore = None
 ) -> _RenderedMessageType:
     # TODO: Decide if htis is a good idea
     # if view_state is None:
@@ -43,8 +44,20 @@ def render_functional_view(
     #     view_func, {type(builder): builder, type(menu): menu, type(meta): meta,},
     # )
 
-    builder = ViewBuilder(state, callback_store)
-    view_func(state, builder)
+    builder = ViewBuilder(CallbackBuilder(state=state, callback_store=callback_store))
+
+    # TODO: use the static version
+    call_with_args(
+        view_func,
+        available_args={
+            ViewBuilder: builder,
+            HtmlBuilder: builder.html,
+            MenuBuilder: builder.menu,
+            MetaBuilder: builder.meta,
+        },
+        fixed_pos_args=(state,),
+    )
+    # view_func(state, builder)
 
     return builder.render()
 

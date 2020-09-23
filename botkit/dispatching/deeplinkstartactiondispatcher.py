@@ -7,9 +7,9 @@ from pyrogram import filters
 from pyrogram.handlers import MessageHandler
 from pyrogram.types import Message
 
-from botkit.persistence.callback_store import CallbackStoreBase
+from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.route import RouteHandler
-from botkit.routing.triggers import ActionIdTypes
+from botkit.routing.triggers import ActionIdType
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.settings import botkit_settings
 from botkit.types.client import IClient
@@ -23,7 +23,7 @@ log = create_logger("deep_link_start_action_dispatcher")
 
 class DeepLinkStartActionDispatcher:
     def __init__(self):
-        self._action_routes: Dict[ActionIdTypes, RouteHandler] = dict()
+        self._action_routes: Dict[ActionIdType, RouteHandler] = dict()
 
     def add_action_route(self, route: RouteHandler):
         assert route.action_id is not None
@@ -62,7 +62,5 @@ class DeepLinkStartActionDispatcher:
         return await route.callback(client, message, context)
 
     @cached_property
-    def callback_manager(self) -> CallbackStoreBase:
-        return Container().get_object(
-            CallbackStoreBase, botkit_settings.callback_manager_qualifier
-        )
+    def callback_manager(self) -> ICallbackStore:
+        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)

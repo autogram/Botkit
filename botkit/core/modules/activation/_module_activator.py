@@ -1,11 +1,13 @@
+import inspect
 from asyncio.exceptions import CancelledError
 from typing import Any, Type
 
 from haps import Container, SINGLETON_SCOPE, base, egg, scope
-from logzero import logger as log
+from loguru import logger as log
 
 from botkit.dispatching.dispatcher import BotkitDispatcher
-from botkit.routing.route_builder.builder import RouteBuilder, RouteBuilderContext
+from botkit.routing.route_builder.builder import RouteBuilder
+from botkit.routing.route_builder.expressions import RouteBuilderContext
 from botkit.routing.route_builder.route_collection import RouteCollection
 from botkit.settings import botkit_settings
 from botkit.core.modules._module import Module
@@ -73,6 +75,8 @@ class ModuleActivator:
     def _register_components(cls, route_builder: RouteBuilder, collection: RouteCollection):
         for client, components in collection.components_by_client.items():
             for comp in components:
+                if inspect.isclass(comp):
+                    raise ValueError(f"Component {comp} is a class, not an instance.")
                 if not comp._is_registered:
                     comp.register(route_builder)
                     comp._is_registered = True

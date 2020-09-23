@@ -1,22 +1,34 @@
 import asyncio
 import traceback
 from dataclasses import dataclass
-from logging import Handler, LogRecord, NOTSET
+from logging import Handler, LogRecord
 from typing import Tuple, Union
 
 from botkit.builders import ViewBuilder
+from botkit.core.components import Component
 from botkit.libraries.annotations import IClient
+from botkit.routing.route_builder.builder import RouteBuilder
+from botkit.settings import botkit_settings
+from botkit.views.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature, render_functional_view
+
+
+class ChatLoggerComponent(Component):
+    def register(self, routes: RouteBuilder):
+        pass
+
+    async def invoke(self, context: Context):
+        pass
 
 
 @dataclass
 class ChatLoggerConfig:
     client: IClient
     log_chat: Union[int, str]
-    level: int = NOTSET
+    level_name: Union[int, str] = "WARNING"
 
 
-def default_renderer(props: Tuple[str, LogRecord], builder: ViewBuilder):
+def _default_renderer(props: Tuple[str, LogRecord], builder: ViewBuilder):
     text, record = props
     builder.html.code(record.filename)
 
@@ -26,12 +38,20 @@ def default_renderer(props: Tuple[str, LogRecord], builder: ViewBuilder):
     builder.html.text(":").br().text(record.message)
 
 
+def _filter_by_current_level(record):
+    return record["level"].no >= botkit_settings.log_level
+
+
+async def emit_log():
+    pass
+
+
 class ChatLogHandler(Handler):
     def __init__(
         self,
         client: IClient,
         config: ChatLoggerConfig,
-        render_log_entry: ViewRenderFuncSignature = default_renderer,
+        render_log_entry: ViewRenderFuncSignature = _default_renderer,
     ):
         self.render_log_entry = render_log_entry
         self.client = client

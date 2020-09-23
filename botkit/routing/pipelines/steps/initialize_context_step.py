@@ -43,8 +43,8 @@ class InitializeContextStep(IPipelineStep):
     async def fill_context_data(self, context: Context):
         tasks = [
             self.data_store.retrieve_user_data(context.user_id),
-            self.data_store.retrieve_chat_data(context.chat_descriptor),
-            self.data_store.retrieve_message_data(context.message_descriptor),
+            self.data_store.retrieve_chat_data(context.chat_identity),
+            self.data_store.retrieve_message_data(context.message_identity),
         ]
         res = await asyncio.gather(*tasks)
 

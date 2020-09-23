@@ -5,7 +5,7 @@ from typing import AsyncIterator, Generic, Optional, TypeVar, Union
 from uuid import uuid4
 
 from haps import SINGLETON_SCOPE, base, scope
-from logzero import logger as log
+from loguru import logger as log
 from pyrogram import filters
 from pyrogram.filters import create
 from pyrogram.handlers import ChosenInlineResultHandler, InlineQueryHandler, MessageHandler
@@ -21,6 +21,7 @@ from pyrogram.types import (
     Photo,
 )
 
+from botkit.future_tgtypes.message_identity import MessageIdentity
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 from botkit.types.client import IClient
 from botkit.views.base import InlineResultViewBase
@@ -53,7 +54,7 @@ class CompanionBotService:
         query_text = "henlo"
 
         async def answer_inline_query(client: IClient, query: InlineQuery):
-            rendered: RenderedMessage = view.default_renderer()
+            rendered: RenderedMessage = view._default_renderer()
 
             result = InlineQueryResultArticle(
                 title="sent via userbot",
@@ -110,7 +111,7 @@ class CompanionBotService:
         reply_to=None,
         silent: bool = False,
         hide_via: bool = False,
-    ) -> ChosenInlineResult:
+    ) -> MessageIdentity:
         bot_username = (await self.bot_client.get_me()).username
 
         # TODO:
@@ -177,15 +178,20 @@ class CompanionBotService:
                     print("Returning!!")
                     return
 
-                recorded_inline_result = RecordedResponseContainer()
+                chosen_inline_result_container: RecordedResponseContainer[
+                    ChosenInlineResult
+                ] = RecordedResponseContainer()
+                sent_inline_bot_result_container: RecordedResponseContainer[
+                    Message
+                ] = RecordedResponseContainer()
 
                 async def inline_result_chosen(_, chosen_result: ChosenInlineResult):
-                    recorded_inline_result.set_value(chosen_result)
+                    chosen_inline_result_container.set_value(chosen_result)
 
                 chosen_result_handler = ChosenInlineResultHandler(inline_result_chosen)
                 async with self.add_handler(chosen_result_handler):
                     # Send result as user
-                    await self.user_client.send_inline_bot_result(
+                    res = await self.user_client.send_inline_bot_result(
                         chat_id,
                         query_id=bot_results.query_id,
                         result_id=bot_results.results[0].id,
@@ -193,9 +199,17 @@ class CompanionBotService:
                         reply_to_message_id=reply_to,
                         hide_via=hide_via,
                     )
-                    await recorded_inline_result.wait()
+                    sent_inline_bot_result_container.set_value(res)
+                    await chosen_inline_result_container.wait()
 
-                return recorded_inline_result.value
+                result = MessageIdentity(
+                    chat_id=chat_id,
+                    message_id=chosen_inline_result_container.value.inline_message_id
+                    if chosen_inline_result_container.value.inline_message_id
+                    else sent_inline_bot_result_container.value.message_id,
+                    is_inline=True,
+                )
+                return result
             except (AttributeError, TimeoutError):
                 log.error("Bot did not respond.")
 

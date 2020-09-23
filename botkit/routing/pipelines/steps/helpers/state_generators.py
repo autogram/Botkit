@@ -1,10 +1,9 @@
 from typing import Any
 
-from logzero import setup_logger
-
+from botkit.utils.botkit_logging.setup import create_logger
 from botkit.views.botkit_context import Context
 
-log = setup_logger("state_generation")
+log = create_logger("state_generation")
 
 
 def update_view_state_if_applicable(state_generation_result: Any, context: Context) -> bool:

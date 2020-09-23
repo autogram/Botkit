@@ -1,9 +1,14 @@
 from abc import abstractmethod
 from typing import Any, Union, cast
 
+from haps import Container, Inject
+
+from botkit.builders import CallbackBuilder
 from botkit.builders.htmlbuilder import HtmlBuilder
 from botkit.builders.menubuilder import MenuBuilder
 from botkit.builders.quizbuilder import QuizBuilder
+from botkit.persistence.callback_store import ICallbackStore
+from botkit.settings import botkit_settings
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import (
     IRegisterable,
@@ -34,6 +39,8 @@ class MessageViewBase(InlineResultViewBase[TViewState], RenderMarkupBase):
 
 
 class TextView(MessageViewBase[TViewState], RenderMarkupBase):
+    _callback_store: ICallbackStore = Inject(botkit_settings.callback_manager_qualifier)
+
     @abstractmethod
     def render_body(self, builder: HtmlBuilder) -> None:
         pass
@@ -43,7 +50,7 @@ class TextView(MessageViewBase[TViewState], RenderMarkupBase):
         rendered.__class__ = RenderedTextMessage
         rendered = cast(RenderedTextMessage, rendered)
 
-        builder = HtmlBuilder()
+        builder = HtmlBuilder(CallbackBuilder(self.state, self._callback_store))
         self.render_body(builder)
         rendered.text = builder.render()
 
@@ -51,6 +58,8 @@ class TextView(MessageViewBase[TViewState], RenderMarkupBase):
 
 
 class MediaView(MessageViewBase[TViewState]):
+    _callback_store: ICallbackStore = Inject(botkit_settings.callback_manager_qualifier)
+
     def __init__(self, state: TViewState):
         super().__init__(state)
 
@@ -66,7 +75,7 @@ class MediaView(MessageViewBase[TViewState]):
         rendered = super().render()
         rendered.media = self.get_media()
 
-        builder = HtmlBuilder()
+        builder = HtmlBuilder(CallbackBuilder(self.state, self._callback_store))
         self.render_caption(builder)
         rendered.caption = builder.render()
 
@@ -139,7 +148,12 @@ def _render_message_markup(obj: Union[ModelViewBase, RenderMarkupBase]) -> Rende
         raise ValueError(f"Too many parameters for {inspected_render.name}")
 
     elif inspected_render.num_parameters == 1:
-        menu_builder = MenuBuilder(obj.state, None)
+        menu_builder = MenuBuilder(
+            CallbackBuilder(
+                obj.state,
+                Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier),
+            )
+        )
         obj.render_markup(menu_builder)
         buttons = menu_builder.render()
         if not buttons or not buttons[0]:

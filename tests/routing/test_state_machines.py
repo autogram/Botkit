@@ -7,7 +7,8 @@ from pyrogram.types import Message
 
 from botkit.core.modules import Module
 from botkit.libraries.annotations import IClient
-from botkit.routing.route_builder.builder import RouteBuilder, StateRouteBuilder
+from botkit.routing.route_builder.builder import RouteBuilder
+from botkit.routing.route_builder.state_route_builder import StateRouteBuilder
 
 client: IClient = Mock(IClient)
 

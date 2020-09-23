@@ -1,19 +1,12 @@
-import logging
 from abc import ABC, abstractmethod
-from logging import Logger
-from typing import Any, Generic, Optional, TYPE_CHECKING, Type, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
-from logzero import setup_logger
+import loguru
+from loguru._logger import Logger
 
+from botkit.abstractions import IAsyncLoadUnload, IRegisterable
 from botkit.routing.types import TViewState
-from botkit.settings import botkit_settings
 from botkit.views.botkit_context import Context
-
-if TYPE_CHECKING:
-    from botkit.routing.route_builder.builder import RouteBuilder
-else:
-    RouteBuilder = TypeVar("RouteBuilder")
-
 
 # TODO: make sure components get properly destroyed/garbage collected when they're not needed anymore
 # TODO: components can only have parameterless constructor..???
@@ -21,18 +14,19 @@ else:
 TCompState = TypeVar("TCompState")
 
 
-class Component(Generic[TViewState, TCompState], ABC):
+class Component(Generic[TViewState, TCompState], IAsyncLoadUnload, IRegisterable, ABC):
     _logger: Optional[Logger]
-    _is_registered: str
+    _is_registered: bool
+
+    _unique_index: Optional[int] = None
+    _index_counter: int = 0
 
     def __new__(cls, *args, **kwargs) -> Any:
+        Component._index_counter += 1
         instance: Component = super().__new__(cls, *args, **kwargs)
         instance._is_registered = False
+        instance._unique_index = Component._index_counter
         return instance
-
-    @abstractmethod
-    def register(self, routes: RouteBuilder):
-        ...
 
     @abstractmethod
     async def invoke(self, context: Context):
@@ -40,14 +34,8 @@ class Component(Generic[TViewState, TCompState], ABC):
 
     @property
     def log(self) -> Logger:
-        return self.logger
+        return loguru.logger
 
     @property
     def logger(self) -> Logger:
-        if not getattr(self, "_logger", None):
-            self._logger: Logger = setup_logger(
-                self.__class__.__name__, formatter=botkit_settings.log_formatter
-            )
-            self._logger.setLevel(logging.INFO)
-        # noinspection Mypy
-        return self._logger
+        return loguru.logger

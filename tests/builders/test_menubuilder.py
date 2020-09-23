@@ -2,31 +2,26 @@ import pytest
 from haps import Container, Egg
 from pyrogram.types import InlineKeyboardButton
 
+from botkit.builders.callbackbuilder import CallbackBuilder
 from botkit.builders.menubuilder import MenuBuilder
 from botkit.persistence.callback_store import (
-    CallbackStoreBase,
+    ICallbackStore,
     MemoryDictCallbackStore,
 )
 from botkit.persistence.callback_store._simple import lookup_callback
 from botkit.settings import botkit_settings
 
 
-@pytest.fixture(scope="function", autouse=True)
-def configure_callback_store():
-    Container.configure(
-        [
-            Egg(
-                CallbackStoreBase,
-                CallbackStoreBase,
-                botkit_settings.callback_manager_qualifier,
-                MemoryDictCallbackStore,
-            )
-        ]
-    )
+@pytest.fixture(scope="function")
+def create_cbb():
+    def _create_with_state(state):
+        return CallbackBuilder(state=state, callback_store=MemoryDictCallbackStore())
+
+    return _create_with_state
 
 
-def test_add_button__is_available():
-    builder = MenuBuilder({"my": "choices"})
+def test_add_button__is_available(create_cbb):
+    builder = MenuBuilder(create_cbb({"my": "choices"}))
 
     builder.rows[0].switch_inline_button("test")
 
@@ -36,8 +31,8 @@ def test_add_button__is_available():
     assert keyboard[0][0].switch_inline_query_current_chat == ""
 
 
-def test_add_buttons_to_rows__structure_is_correct():
-    builder = MenuBuilder({"my": "choices"})
+def test_add_buttons_to_rows__structure_is_correct(create_cbb):
+    builder = MenuBuilder(create_cbb({"my": "choices"}))
 
     builder.rows[1].switch_inline_button("row1_col0").switch_inline_button("row1_col1")
     builder.rows[1].switch_inline_button("row1_col2")
@@ -53,9 +48,9 @@ def test_add_buttons_to_rows__structure_is_correct():
     assert keyboard[1][1].text == "row3_col1"
 
 
-def test_buttons_retain_state_and_payload():
+def test_buttons_retain_state_and_payload(create_cbb):
     state = {"my": "choices"}
-    builder = MenuBuilder(state)
+    builder = MenuBuilder(create_cbb(state))
     b = builder.rows[1].action_button("caption", "test_action", payload="test_payload")
 
     keyboard = builder.render()

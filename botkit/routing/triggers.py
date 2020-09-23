@@ -7,11 +7,11 @@ from pyrogram.filters import Filter
 
 from botkit.routing.update_types.updatetype import UpdateType
 
-ActionIdTypes = Union[int, str]
+ActionIdType = Union[int, str]
 
 
 @dataclass
 class RouteTriggers:
     filters: Optional[Filter] = None
-    action: Optional[ActionIdTypes] = None
+    action: Optional[ActionIdType] = None
     condition: Optional[Callable[[], Union[bool, Awaitable[bool]]]] = None

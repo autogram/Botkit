@@ -6,7 +6,7 @@ from pyrogram.types import Chat, Message, User
 
 from botkit.core.modules import Module
 from botkit.core.modules.activation import ModuleLoader
-from botkit.persistence.callback_store import CallbackStoreBase
+from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.routing.update_types.updatetype import UpdateType
@@ -27,7 +27,7 @@ class SelftestModule(Module):
 
     async def load(self) -> None:
         try:
-            Container().get_object(CallbackStoreBase, botkit_settings.callback_manager_qualifier)
+            Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
         except Exception as ex:
             self.log.exception("Callback manager could not be instantiated.")
             if botkit_settings.callback_manager_qualifier != "memory":

@@ -7,21 +7,23 @@ import pyrogram.types
 from pyrogram.types import Update
 
 from botkit.future_tgtypes.chat import Chat
-from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
+from botkit.future_tgtypes.chat_identity import ChatIdentity
 from botkit.future_tgtypes.message import Message
-from botkit.future_tgtypes.message_descriptor import MessageDescriptor
+from botkit.future_tgtypes.message_identity import MessageIdentity
 from botkit.tghelpers.entities.message_entities import (
     MessageEntityType,
     ParsedEntity,
     parse_entities,
 )
-from ..types.client import IClient
+
+if TYPE_CHECKING:
+    from botkit.types.client import IClient
 
 
 @dataclass
 class UpdateFieldExtractor:  # TODO: implement properly
     update: Update
-    client: Union[IClient, Any]
+    client: Union["IClient", Any]
 
     @property
     def chat(self) -> Optional[Chat]:
@@ -30,8 +32,8 @@ class UpdateFieldExtractor:  # TODO: implement properly
         return None
 
     @property
-    def chat_descriptor(self) -> Optional[ChatDescriptor]:
-        return ChatDescriptor.from_chat_and_user(self.chat, self.user, self.client.own_user_id)
+    def chat_identity(self) -> Optional[ChatIdentity]:
+        return ChatIdentity.from_chat_and_user(self.chat, self.user, self.client.own_user_id)
 
     @property
     def user(self) -> Optional[Chat]:
@@ -48,12 +50,12 @@ class UpdateFieldExtractor:  # TODO: implement properly
         return user.id if (user := self.user) else None
 
     @property
-    def message_descriptor(self) -> Optional[MessageDescriptor]:
-        return MessageDescriptor.from_update(self.update)
+    def message_identity(self) -> Optional[MessageIdentity]:
+        return MessageIdentity.from_update(self.update)
 
     @property
     def message_id(self) -> Optional[Union[int, str]]:
-        return descriptor.message_id if (descriptor := self.message_descriptor) else None
+        return descriptor.message_id if (descriptor := self.message_identity) else None
 
     @property
     def message_text(self) -> Optional[str]:
@@ -76,7 +78,7 @@ class UpdateFieldExtractor:  # TODO: implement properly
             return self.update.command[1:]
 
     @property
-    def command_args_str(self) -> Optional[str]:
+    def command_arg_str(self) -> Optional[str]:
         """
         Returns everything after the /command as a string.
         """
@@ -95,6 +97,8 @@ class UpdateFieldExtractor:  # TODO: implement properly
                 return replied_to.text
         return None
 
+    quoted_text = replied_to_message_text
+
     @property
     def replied_to_message_id(self) -> Optional[int]:
         return reply_msg.message_id if (reply_msg := self.replied_to_message) else None
@@ -102,7 +106,7 @@ class UpdateFieldExtractor:  # TODO: implement properly
     @property
     def command_args_or_quote(self) -> Optional[str]:
         """ Prefers the command arguments over the replied-to message text, or None if neither is present. """
-        return self.command_args_str or self.replied_to_message_text
+        return self.command_arg_str or self.replied_to_message_text
 
     @property
     def matches(self) -> Optional[List[re.Match]]:

@@ -10,7 +10,7 @@ from pyrogram.types import CallbackQuery
 from botkit.dispatching.callbackqueryactiondispatcher import CallbackQueryActionDispatcher
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.libraries.annotations import IClient
-from botkit.persistence.callback_store import CallbackStoreBase, MemoryDictCallbackStore
+from botkit.persistence.callback_store import ICallbackStore, MemoryDictCallbackStore
 from botkit.persistence.data_store import DataStoreBase, MemoryDataStore
 from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.builder import RouteBuilder
@@ -27,8 +27,8 @@ def configure_data_stores():
     Container.configure(
         [
             Egg(
-                CallbackStoreBase,
-                CallbackStoreBase,
+                ICallbackStore,
+                ICallbackStore,
                 botkit_settings.callback_manager_qualifier,
                 MemoryDictCallbackStore,
             ),

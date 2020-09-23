@@ -45,7 +45,7 @@ class DialogflowService(INLUService):
     def detect_intents(
         self, chat_id: int, message: str, language_code: str = "en"
     ) -> MessageUnderstanding:
-        session = self.session_client.session_path(self.config.project_id, chat_id)
+        session = self.session_client.session_file(self.config.project_id, chat_id)
 
         text_input = TextInput(text=message, language_code=language_code)
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Iterable, Protocol, TypeVar, Union
+from typing import Generic, Iterable, Protocol, TypeVar, Union
 
 from botkit.views.sender_interface import IViewSender, Message
 
@@ -13,10 +13,7 @@ User = TypeVar("User", bound=IdentifiableUser)
 
 
 class IClient(IViewSender[Message], ABC, Generic[Message, User]):
-    @property
-    @abstractmethod
-    def own_user_id(self) -> int:
-        ...
+    own_user_id: int
 
     @property
     @abstractmethod
@@ -32,11 +29,15 @@ class IClient(IViewSender[Message], ABC, Generic[Message, User]):
     async def get_me(self) -> IdentifiableUser:
         ...
 
-    # @abstractmethod
-    # async def delete_messages(
-    #     self,
-    #     chat_id: Union[int, str],
-    #     message_ids: Union[int, Message, Iterable[Union[int, Message]]],
-    #     revoke: bool = True,
-    # ) -> bool:
-    #     ...
+    # TODO: mark as @abstractmethod
+    async def delete_messages(
+        self,
+        chat_id: Union[int, str],
+        message_ids: Union[int, Message, Iterable[Union[int, Message]]],
+        revoke: bool = True,
+    ) -> bool:
+        ...
+
+    # TODO: mark as @abstractmethod
+    async def get_inline_bot_results(self, bot_username, query_text):
+        pass

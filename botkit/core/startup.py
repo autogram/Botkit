@@ -3,14 +3,13 @@ import logging
 import signal
 from abc import abstractmethod
 from asyncio.events import AbstractEventLoop
-from pathlib import Path
 
 from haps import Inject, base
 from haps.application import Application
 from pyrogram import Client as PyrogramClient
 
 from botkit.core.modules.activation import ModuleLoader
-from botkit.settings import botkit_settings
+from botkit.types.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 
 try:
@@ -19,7 +18,7 @@ try:
 except:
     TelethonClient = None
 
-from typing import List, Union
+from typing import Any, List, Union
 
 from botkit.core.modules._module import Module
 from botkit.tghelpers.names import user_or_display_name
@@ -51,19 +50,13 @@ class Startup(Application, ABC):
         start_tasks = (self.__start_client(c) for c in self.clients)
         await asyncio.gather(*start_tasks)
 
-    async def __start_client(self, client):
-        session_name = (
-            client.session_name
-            if hasattr(client, "session_name")
-            else client.session.filename
-            if hasattr(client.session, "filename")
-            else str(client.session)
-        )
-
-        self.log.debug(f"Starting session {session_name}...")
+    async def __start_client(self, client: Union[IClient, Any]):
+        self.log.debug(f"Starting {client.config.description}...")
         await client.start()
 
         me = await client.get_me()
+        client.own_user_id = me.id
+
         self.log.info(f"Started {user_or_display_name(me)} as {client.__class__.__name__}.")
 
     def run(self, loop: AbstractEventLoop = None) -> None:
@@ -95,7 +88,9 @@ class Startup(Application, ABC):
         await self._start_clients()
         for m in self.get_extra_modules() or []:
             self.module_loader.add_module_without_activation(m)
+        self.log.debug("Activating modules")
         await self.module_loader.activate_enabled_modules()
+        self.log.debug("Running startup tasks")
         await self.run_startup_tasks()
         self.log.info("Ready.")
 

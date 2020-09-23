@@ -1,13 +1,18 @@
 from pprint import pprint
+from haps import Container
 from typing import Any, Optional, TypeVar
+
+from botkit.builders.callbackbuilder import CallbackBuilder
+from botkit.persistence.callback_store import ICallbackStore
+from botkit.settings import botkit_settings
 
 TState = TypeVar("TState")
 
 
 class BaseTextBuilder:
-    def __init__(self, state: TState = None):  # TODO: make non-optional
-        self.state = state
+    def __init__(self, callback_builder: CallbackBuilder):  # TODO: make non-optional
         self.parts = []
+        self.callback_builder = callback_builder
 
     def raw(self, text: str, end=""):
         return self._append_with_end(text, end)
@@ -16,8 +21,8 @@ class BaseTextBuilder:
         self.parts.append(" ")
         return self
 
-    def br(self):
-        self.parts.append("\n")
+    def br(self, count: int = 1):
+        self.parts.append("\n" * count)
         return self
 
     def para(self):

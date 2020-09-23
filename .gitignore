@@ -116,3 +116,4 @@ dmypy.json
 .pyre/
 .idea
 /botkit.egg-info/
+/tests/configuration/*.session

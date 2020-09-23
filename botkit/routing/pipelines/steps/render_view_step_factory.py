@@ -2,10 +2,14 @@ import inspect
 import warnings
 from typing import Callable, List, Optional, cast
 
+from haps import Container
+
+from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.pipelines.execution_plan import ViewParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.update_types.updatetype import UpdateType
+from botkit.settings import botkit_settings
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.views.botkit_context import Context
 from botkit.views.functional_views import (
@@ -41,6 +45,10 @@ class RenderViewStepFactory(
             else str(view_params.view)
         )
 
+        callback_store = Container().get_object(
+            ICallbackStore, botkit_settings.callback_manager_qualifier
+        )
+
         log = create_logger("renderer")
 
         def render_view(context: Context) -> RenderedMessageBase:
@@ -48,7 +56,9 @@ class RenderViewStepFactory(
 
             try:
                 if is_view_render_func:
-                    return render_functional_view(view_params.view, context.view_state)
+                    return render_functional_view(
+                        view_params.view, context.view_state, callback_store
+                    )
 
                 elif create_view_instance_dynamically:
                     view_instance = view_params.view(context.view_state)

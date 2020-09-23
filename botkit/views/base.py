@@ -1,28 +1,17 @@
 from abc import ABC
 from typing import (
     Generic,
-    TYPE_CHECKING,
     Union,
     overload,
 )
 
 from pyrogram.types import ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
+from botkit.abstractions import IRegisterable
 from botkit.builders.menubuilder import MenuBuilder
 from botkit.builders.metabuilder import MetaBuilder
 from botkit.views.rendered_messages import RenderedMessage
 from botkit.views.types import TViewState
-
-if TYPE_CHECKING:
-    from botkit.routing.route_builder.builder import RouteBuilder as _RouteBuilder
-else:
-    _RouteBuilder = None
-
-
-class IRegisterable(ABC):
-    @classmethod
-    def register(cls, routes: _RouteBuilder):
-        pass
 
 
 class ModelViewBase(Generic[TViewState], ABC):

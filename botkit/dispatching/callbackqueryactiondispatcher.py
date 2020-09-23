@@ -3,23 +3,26 @@ from typing import Any, Dict, Optional, Union
 
 from cached_property import cached_property
 from haps import Container
-from logzero import logger as log
+from loguru import logger as log
 from pyrogram.filters import create
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.types import CallbackQuery, Update
 
-from botkit.persistence.callback_store import CallbackActionContext, CallbackStoreBase
+from botkit.core.components import Component
+from botkit.core.modules import Module
+from botkit.persistence.callback_store import CallbackActionContext, ICallbackStore
 from botkit.routing.route import RouteDefinition, RouteHandler
-from botkit.routing.triggers import ActionIdTypes
+from botkit.routing.triggers import ActionIdType
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.settings import botkit_settings
 from botkit.types.client import IClient
 from botkit.views.botkit_context import Context
+from botkit.widgets import Widget
 
 
 class CallbackQueryActionDispatcher:
     def __init__(self, handle_errors: bool = True, alert_on_error: bool = True):
-        self._action_routes: Dict[ActionIdTypes, RouteHandler] = dict()
+        self._action_routes: Dict[ActionIdType, RouteHandler] = dict()
 
         self.handle_errors = handle_errors
         self.alert_on_error = alert_on_error
@@ -40,6 +43,14 @@ class CallbackQueryActionDispatcher:
             raise ValueError(f"Action ID {route.action_id} is not unique.")
 
         self._action_routes[route.action_id] = route
+
+    def localize_action_id(
+        self, action_id: ActionIdType, module: Module, component: Component, widget: Widget
+    ):
+        """
+        Make every action ID unique per module, component, or widget
+        """
+        raise NotImplementedError  # TODO
 
     @property
     def pyrogram_handler(self) -> CallbackQueryHandler:
@@ -80,10 +91,8 @@ class CallbackQueryActionDispatcher:
             return False
 
     @cached_property
-    def callback_manager(self) -> CallbackStoreBase:
-        return Container().get_object(
-            CallbackStoreBase, botkit_settings.callback_manager_qualifier
-        )
+    def callback_manager(self) -> ICallbackStore:
+        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
 
     async def _get_context_or_respond(
         self, callback_query: CallbackQuery
@@ -99,11 +108,15 @@ class CallbackQueryActionDispatcher:
             return None
 
         if context.action not in self._action_routes:
-            log.error("No route registered for callback query.")
-            if self.handle_errors:
-                await callback_query.answer(
-                    text=self.no_action_found_error_message, show_alert=self.alert_on_error,
-                )
-            return None
+            if context.action.startswith("test_"):
+                context.notification = "This button is just a UI mockup."
+                context.show_alert = False
+            else:
+                log.error("No route registered for callback query.")
+                if self.handle_errors:
+                    await callback_query.answer(
+                        text=self.no_action_found_error_message, show_alert=self.alert_on_error,
+                    )
+                return None
 
         return context

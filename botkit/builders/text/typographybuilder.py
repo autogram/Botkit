@@ -16,15 +16,15 @@ class IconSettings:
 class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
     icons = IconSettings
 
-    def h1(self, title: str):
+    def h1(self, title: str, breaks: int = 2):
         self.parts.append(f"▶️ ")
         self.bold(title)
-        self.para()
+        self.br(breaks)
         return self
 
-    def h2(self, title: str):
+    def h2(self, title: str, breaks: int = 2):
         self.bold_and_underline(title)
-        self.br()
+        self.br(breaks)
         return self
 
     def h3(self, title: str):

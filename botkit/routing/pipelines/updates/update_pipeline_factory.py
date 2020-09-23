@@ -1,4 +1,5 @@
 import inspect
+import traceback
 from typing import Any, Union
 
 from haps import Container
@@ -99,7 +100,11 @@ class UpdatePipelineFactory:
                     # TODO: It remains to be seen whether having `rendered_message` on the `context` is useful.
                     # It might turn out that just passing it to the `send_or_update` step is the better choice.
                     context.rendered_message = render_view(context)
-                    await commit_rendered_view_async(context)
+
+                    try:
+                        await commit_rendered_view_async(context)
+                    except:
+                        log.exception("commit_rendered_view_async")
 
                     if send_from:
                         # Reset

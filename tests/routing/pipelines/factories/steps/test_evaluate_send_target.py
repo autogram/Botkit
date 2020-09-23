@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from pyrogram.types import Chat, Message, User
 
-from botkit.future_tgtypes.chat_descriptor import ChatDescriptor
+from botkit.future_tgtypes.chat_identity import ChatIdentity
 from botkit.routing.pipelines.execution_plan import SendTo
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import evaluate_send_target
 from botkit.routing.update_types.updatetype import UpdateType
@@ -57,8 +57,8 @@ def context():
         (lambda ctx: (12345, 1000), (12345, 1000)),
         (lambda ctx: ("@josxa", None), ("@josxa", None)),
         (lambda ctx: (-100, None), (-100, None)),
-        (lambda ctx: ChatDescriptor(type="private", peers=1234), (1234, None)),
-        (lambda ctx: (ChatDescriptor(type="private", peers=1234), 1000), (1234, 1000)),
+        (lambda ctx: ChatIdentity(type="private", peers=1234), (1234, None)),
+        (lambda ctx: (ChatIdentity(type="private", peers=1234), 1000), (1234, 1000)),
     ],
 )
 def test_evaluate_send_target(send_target, expected, context):

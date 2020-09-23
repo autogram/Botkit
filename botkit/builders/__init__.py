@@ -1,11 +1,16 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from haps import Container
+
+from .callbackbuilder import CallbackBuilder
+
+if TYPE_CHECKING:
+    from botkit.widgets import Widget
 
 from .htmlbuilder import HtmlBuilder
 from .menubuilder import MenuBuilder
 from .metabuilder import MetaBuilder
-from ..persistence.callback_store import CallbackStoreBase
+from ..persistence.callback_store import ICallbackStore
 from ..settings import botkit_settings
 from ..views.rendered_messages import RenderedMessage, RenderedTextMessage
 
@@ -15,14 +20,16 @@ class ViewBuilder:
     menu: MenuBuilder
     meta: MetaBuilder
 
-    def __init__(self, state: Any, callback_manager: CallbackStoreBase = None):
-        if callback_manager is None:
-            callback_manager = Container().get_object(
-                CallbackStoreBase, botkit_settings.callback_manager_qualifier
-            )
-        self.html = HtmlBuilder(state)
-        self.menu = MenuBuilder(state, callback_manager)
+    def __init__(self, callback_builder: CallbackBuilder):
+        self.html = HtmlBuilder(callback_builder)
+        self.menu = MenuBuilder(callback_builder)
         self.meta = MetaBuilder()
+
+    def add(self, widget: "Widget"):
+        self.html.add(widget)
+        self.menu.add(widget)
+        self.meta.add(widget)
+        widget.render_html(self.html)
 
     @property
     def is_dirty(self) -> bool:
