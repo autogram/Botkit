@@ -47,6 +47,7 @@ watchgod = { version = "^0.6", optional = true }
 ensure = "^1.0.0"
 telethon = {version = "^1.16.4", optional = true}
 loguru = "^0.5.3"
+logzero = "^1.5.0"
 
 [tool.poetry.extras]
 redis = ["redis-collections"]
