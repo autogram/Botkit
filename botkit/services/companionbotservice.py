@@ -138,7 +138,7 @@ class CompanionBotService:
                 result = InlineQueryResultArticle(
                     title="sent via userbot",
                     input_message_content=InputTextMessageContent(
-                        message_text=rendered.text,
+                        message_text=rendered.text[:4096],
                         parse_mode=rendered.parse_mode,
                         disable_web_page_preview=rendered.disable_web_page_preview,
                     ),

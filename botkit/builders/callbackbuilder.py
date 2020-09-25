@@ -19,7 +19,7 @@ class CallbackBuilder:
         self,
         action_id: CallbackActionType,
         triggered_by: Literal["button", "command"],
-        notification: Optional[str],
+        notification: Optional[str] = None,
         show_alert: bool = False,
         payload: Optional[Any] = None,
     ) -> str:

@@ -1,4 +1,5 @@
 import inspect
+from loguru import logger as log
 from typing import (
     Any,
     Callable,
@@ -46,18 +47,21 @@ def render_functional_view(
 
     builder = ViewBuilder(CallbackBuilder(state=state, callback_store=callback_store))
 
-    # TODO: use the static version
-    call_with_args(
-        view_func,
-        available_args={
-            ViewBuilder: builder,
-            HtmlBuilder: builder.html,
-            MenuBuilder: builder.menu,
-            MetaBuilder: builder.meta,
-        },
-        fixed_pos_args=(state,),
-    )
-    # view_func(state, builder)
+    try:
+        # TODO: use the static version
+        call_with_args(
+            view_func,
+            available_args={
+                ViewBuilder: builder,
+                HtmlBuilder: builder.html,
+                MenuBuilder: builder.menu,
+                MetaBuilder: builder.meta,
+            },
+            fixed_pos_args=(state,),
+        )
+    except:
+        log.exception("Paraminjector failed")
+        view_func(state, builder)
 
     return builder.render()
 

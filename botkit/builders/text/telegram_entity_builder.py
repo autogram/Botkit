@@ -1,5 +1,5 @@
 from typing import Any, Iterable, Literal, Optional, TYPE_CHECKING, Union
-from urllib.parse import urlencode
+from urllib.parse import quote_plus, urlencode
 
 from boltons import strutils
 from haps import Container
@@ -45,8 +45,8 @@ class NavigationBuilder(_HtmlTextBuilder):
         return self._append_with_end(self.as_command(name=name, to_lower=to_lower), end)
 
     @classmethod
-    def as_prompt(cls, text) -> "str":
-        text = urlencode(text)
+    def as_prompt(cls, text: str) -> "str":
+        text = quote_plus(text)
         return f"https://telegram.me/share/url?url={text}"
 
     def deep_link_start(
@@ -65,10 +65,8 @@ class NavigationBuilder(_HtmlTextBuilder):
         to_bot = to_bot.lstrip("@")
 
         # TODO: add the other parameters like notification?
-        cb = self.callback_builder.callback_store.create_callback(
-            CallbackActionContext(
-                action=action, state=self.state, payload=payload, triggered_by="command"
-            )
+        cb = self.callback_builder.create_callback(
+            action_id=action, payload=payload, triggered_by="command"
         )
 
         return self.link(text, f"https://t.me/{to_bot}?{start_type}={cb}", end=end)

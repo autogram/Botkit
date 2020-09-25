@@ -24,6 +24,7 @@ from botkit.routing.route_builder.types import TView
 from botkit.routing.update_types.update_type_inference import infer_update_types
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.types.client import IClient
+from botkit.utils.botkit_logging.setup import create_logger
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature
@@ -73,6 +74,8 @@ SendTarget = Union[ChatTarget, SendTargetFuncSignature]
 
 ViewCommandLiteral = Literal["send", "update"]
 
+
+log = create_logger()
 
 @dataclass
 class ViewParameters:
@@ -309,6 +312,7 @@ class ExecutionPlan:
             raise ValueError("A view should be set before specifying a send target.")
 
         self._view.send_target = send_target
+        self._check_remove_trigger_reply_combination()
         return self
 
     def add_update_types(
@@ -332,6 +336,13 @@ class ExecutionPlan:
             raise error_cb(invalid_elems)
         self._update_types = desired_types
 
+    def _check_remove_trigger_reply_combination(self):
+        if not self._remove_trigger_params or not self._view or not self._view.send_target:
+            return
+
+        if self._view.send_target in (SendTo.same_chat_quote, "same_chat_quote"):
+            log.warning("Removing trigger while replying to the trigger message may be unwanted behavior.")
+
     def set_remove_trigger(
         self,
         strategy: Union[RemoveTrigger, bool, None],
@@ -349,4 +360,6 @@ class ExecutionPlan:
             self._remove_trigger_params = RemoveTriggerParameters(
                 strategy=strategy, always=always, early=early
             )
+
+        self._check_remove_trigger_reply_combination()
         return self

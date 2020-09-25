@@ -56,10 +56,11 @@ class RouteDefinition:
     @cached_property
     def handler_by_update_type(self) -> Dict[UpdateType, RouteHandler]:
         update_types = self.plan._update_types
-        if not update_types:
-            # Should never happen if handler is set.
-            # TODO: can happen with disabled modules
-            warnings.warn(f"No update types were determined at route initialization.")
+
+        # if not update_types:
+        #     # Should never happen if handler is set.
+        #     # TODO: can happen with disabled modules
+        #     warnings.warn(f"No update types were determined at route initialization.")
 
         results = {}
         for update_type in update_types:

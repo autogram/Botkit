@@ -43,19 +43,9 @@ class InlineMenuRowBuilder:
         return self
 
     def btn(
-        self,
-        caption: str,
-        payload: Any = None,
-        notification: Union[str, None, Sentinel] = NotSet,
-        show_alert: bool = False,
+        self, caption: str, payload: Any = None,
     ):
-        return self.action_button(
-            caption=caption,
-            action=f"test_{uuid4()}",
-            payload=payload,
-            notification=notification,
-            show_alert=show_alert,
-        )
+        return self.action_button(caption=caption, action=f"test_{uuid4()}", payload=payload,)
 
     def action_button(
         self,

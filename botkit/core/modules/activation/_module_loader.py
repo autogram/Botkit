@@ -66,6 +66,9 @@ class ModuleLoader:
             module.index = n + 1
             tasks.append(self.try_activate_module_async(module))
 
+        if not tasks:
+            return
+
         await asyncio.gather(*tasks)
 
         self._hmr_worker.start(self.modules)

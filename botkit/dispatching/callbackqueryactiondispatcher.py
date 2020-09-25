@@ -109,8 +109,10 @@ class CallbackQueryActionDispatcher:
 
         if context.action not in self._action_routes:
             if context.action.startswith("test_"):
-                context.notification = "This button is just a UI mockup."
-                context.show_alert = False
+                asyncio.ensure_future(
+                    callback_query.answer("This button is just a UI mockup.", show_alert=False)
+                )
+                return None
             else:
                 log.error("No route registered for callback query.")
                 if self.handle_errors:
