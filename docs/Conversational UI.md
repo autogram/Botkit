@@ -7,7 +7,7 @@
 ```python
 
 def ask_go_on_date_with_me(conv: Conversation):
-    answer = yield conv.ask("Would you like to go on a date with me?")
+    answer: Response = yield conv.ask("Would you like to go on a date with me?")
 
     if answer.intent == "affirmation":
 
@@ -44,14 +44,22 @@ def find_a_date(conv: Conversation, user_data: UserData):
 ```python
 
 def ask_age(conv: Conversation) -> Optional[int]:
-    age: Optional[int] = yield conv.ask("Soo, how old are you?", extract=int, force_reply=True)
+    age_answer: Response = yield conv.ask("Soo, how old are you?", force_reply=True)
+
+    if age_entity := age_answer.entities.get("age"):
+        age = int(age_entity)
+    elif year_of_birth := age_answer.entities.get("year_of_birth")
+        age = datetime.now().year - int(year_of_birth)
+    else:
+        conv.say("Oh, you don't wanna tell?").exit()
+        return None
 
     if age < 20:
         return (
             conv.say(f"Ah, so nice that you're {age}!")
                 .sad("But I was kinda looking for someone older...")
                 .say("Maybe in a few years? :wink:")
-                .exit("Goodbye!", stop_responding=True)  # (what a mean person!)
+                .exit("Goodbye!", stop_responding=True)  # (what a rude bot!)
         )
 
     return age
@@ -59,7 +67,7 @@ def ask_age(conv: Conversation) -> Optional[int]:
 
 def ask_boy_or_girl(conv) -> Literal["gender_male", "gender_female", "gender_other"]:
     # Choices get rendered as buttons automatically
-    gender = yield conv.ask(
+    gender: Response = yield conv.ask(
         "Are you a boy or a girl?",
         choices=["A boy", "A girl", "Something else"]
     )
@@ -67,7 +75,29 @@ def ask_boy_or_girl(conv) -> Literal["gender_male", "gender_female", "gender_oth
 
 ```
 
+- Integrating Botkit Widgets into conversations
+
+```python
+
+def ask_date_day_and_time(conv: Conversation, user_data: UserData) -> datetime:
+    conv.say("So, when would you like to meet?")
+
+    conv.invoke(DateTimePicker(
+        min=datetime.utcnow(),
+        timezone=user_data["timezone"],
+        on_result_chosen="datetime_chosen"
+    )
+
+    while True:
+        answer: Response = (yield)  # wait for events to happen
+        if answer.event == "datetime_chosen":
+            break
+
+    return answer.event_payload
+
+```
 
 ## TODO
 
-- [ ] Figure out how to persist coroutine state between restarts
+- [ ] Figure out how to persist coroutine state between restarts.
+- [ ] It is unclear yet what the entry points to individual state machines should look like.

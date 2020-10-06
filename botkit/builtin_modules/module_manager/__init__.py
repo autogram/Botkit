@@ -7,7 +7,7 @@ from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.services.companionbotservice import CompanionBotService
 from .paged_module_view import PagedModuleView
 from .view_models import ModuleInfo, ModuleInfosCollectionModel
-from ...types.client import IClient
+from botkit.clients.client import IClient
 
 
 class ModuleManagerModule(Module):

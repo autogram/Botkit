@@ -31,7 +31,7 @@ def determine_pyrogram_handler_update_types(handler: TypedCallable) -> Set[Updat
     if not used_arg_types:
         raise ValueError(f"No type hints specified for handler {handler}.")
 
-    used_update_types = list(flatten([_get_update_types(a) for a in used_arg_types]))
+    used_update_types = list(flatten([_get_update_types_from_union(a) for a in used_arg_types]))
 
     # Early return if no subclasses of `Update` are found
     if not any(used_update_types):
@@ -56,7 +56,7 @@ def determine_pyrogram_handler_update_types(handler: TypedCallable) -> Set[Updat
     return found_arg_types
 
 
-def _get_update_types(t: Any) -> List[Type[pyrogram.types.Update]]:
+def _get_update_types_from_union(t: Any) -> List[Type[pyrogram.types.Update]]:
     if _is_pyrogram_update_type(t):
         return [t]  # Direct subclass
     else:

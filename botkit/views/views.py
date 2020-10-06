@@ -52,7 +52,7 @@ class TextView(MessageViewBase[TViewState], RenderMarkupBase):
 
         builder = HtmlBuilder(CallbackBuilder(self.state, self._callback_store))
         self.render_body(builder)
-        rendered.text = builder.render()
+        rendered.text = builder.render_html()
 
         return rendered
 
@@ -77,7 +77,7 @@ class MediaView(MessageViewBase[TViewState]):
 
         builder = HtmlBuilder(CallbackBuilder(self.state, self._callback_store))
         self.render_caption(builder)
-        rendered.caption = builder.render()
+        rendered.caption = builder.render_html()
 
         return rendered
 

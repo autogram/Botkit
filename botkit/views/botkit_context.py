@@ -1,12 +1,12 @@
 from collections.abc import MutableMapping
-from dataclasses import dataclass, field
-from typing import Any, Dict, Generic, Iterator, Optional, TypeVar, Union
+from dataclasses import dataclass
+from typing import Any, Generic, Iterator, Optional, TypeVar
 
 from botkit.dispatching.types import CallbackActionType
 from botkit.future_tgtypes.update_field_extractor import UpdateFieldExtractor
 from .rendered_messages import RenderedMessage
-from ..future_tgtypes.chat_identity import ChatIdentity
-from ..future_tgtypes.message_identity import MessageIdentity
+from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
+from botkit.future_tgtypes.identities.message_identity import MessageIdentity
 from ..routing.types import TViewState
 from ..routing.update_types.updatetype import UpdateType
 

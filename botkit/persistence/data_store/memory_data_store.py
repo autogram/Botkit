@@ -1,45 +1,10 @@
 from collections import defaultdict
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Generic,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    AbstractSet,
-    Hashable,
-    Iterable,
-    Iterator,
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    MutableSet,
-    Sequence,
-    AsyncIterator,
-    AsyncIterable,
-    Coroutine,
-    Collection,
-    AsyncGenerator,
-    Deque,
-    Dict,
-    List,
-    Set,
-    FrozenSet,
-    NamedTuple,
-    Generator,
-    cast,
-    overload,
-    TYPE_CHECKING,
-)
-from typing_extensions import TypedDict
+from typing import Optional
 
 from haps import SINGLETON_SCOPE, egg, scope
 
-from botkit.future_tgtypes.chat_identity import ChatIdentity
-from botkit.future_tgtypes.message_identity import MessageIdentity
+from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
+from botkit.future_tgtypes.identities.message_identity import MessageIdentity
 from botkit.persistence.data_store import DataStoreBase
 from botkit.views.botkit_context import Context
 

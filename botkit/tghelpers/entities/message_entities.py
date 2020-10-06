@@ -53,7 +53,7 @@ def parse_entities(
 
     return [
         ParsedEntity(entity=entity, text=parse_entity_text(entity, message.text))
-        for entity in message.entities
+        for entity in message.entities or []
         if entity.type in types
     ]
 

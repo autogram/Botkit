@@ -7,9 +7,9 @@ import pyrogram.types
 from pyrogram.types import Update
 
 from botkit.future_tgtypes.chat import Chat
-from botkit.future_tgtypes.chat_identity import ChatIdentity
+from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
 from botkit.future_tgtypes.message import Message
-from botkit.future_tgtypes.message_identity import MessageIdentity
+from botkit.future_tgtypes.identities.message_identity import MessageIdentity
 from botkit.tghelpers.entities.message_entities import (
     MessageEntityType,
     ParsedEntity,
@@ -17,11 +17,11 @@ from botkit.tghelpers.entities.message_entities import (
 )
 
 if TYPE_CHECKING:
-    from botkit.types.client import IClient
+    from botkit.clients.client import IClient
 
 
 @dataclass
-class UpdateFieldExtractor:  # TODO: implement properly
+class UpdateFieldExtractor:
     update: Update
     client: Union["IClient", Any]
 
@@ -29,6 +29,8 @@ class UpdateFieldExtractor:  # TODO: implement properly
     def chat(self) -> Optional[Chat]:
         if hasattr(self.update, "chat"):
             return self.update.chat
+        if message := getattr(self.update, "message", None):
+            return getattr(message, "chat", None)
         return None
 
     @property

@@ -2,6 +2,9 @@ from pprint import pprint
 from haps import Container
 from typing import Any, Optional, TypeVar
 
+from pyrogram.parser import Parser
+from pyrogram.types.messages_and_media.message import Str
+
 from botkit.builders.callbackbuilder import CallbackBuilder
 from botkit.persistence.callback_store import ICallbackStore
 from botkit.settings import botkit_settings
@@ -13,6 +16,10 @@ class BaseTextBuilder:
     def __init__(self, callback_builder: CallbackBuilder):  # TODO: make non-optional
         self.parts = []
         self.callback_builder = callback_builder
+
+    @property
+    def is_dirty(self) -> bool:
+        return bool(self.parts)
 
     def raw(self, text: str, end=""):
         return self._append_with_end(text, end)
@@ -51,8 +58,12 @@ class BaseTextBuilder:
         else:
             return text + str(end)
 
-    def render(self) -> str:
+    def render_html(self) -> str:
         result = "".join(self.parts)
         if not result or result.isspace():
             return "\xad"  # zero-width char
         return result
+
+    async def render_and_parse(self) -> Str:
+        res = await (Parser(None)).parse(self.render_html(), "html")
+        return Str(res["message"]).init(res["entities"])

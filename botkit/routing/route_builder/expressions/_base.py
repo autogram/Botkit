@@ -1,6 +1,6 @@
 from typing import Protocol, TYPE_CHECKING
 
-from botkit.libraries import HandlerSignature
+from botkit.agnostic import HandlerSignature
 from botkit.routing.route_builder.has_route_collection import IRouteCollection
 from botkit.routing.triggers import RouteTriggers
 

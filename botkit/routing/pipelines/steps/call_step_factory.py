@@ -1,7 +1,7 @@
 import warnings
 from typing import Any, Awaitable, Callable, Optional
 
-from botkit.libraries.annotations import HandlerSignature
+from botkit.agnostic.annotations import HandlerSignature
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.utils.typed_callable import TypedCallable

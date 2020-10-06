@@ -12,7 +12,7 @@ from botkit.routing.route import RouteHandler
 from botkit.routing.triggers import ActionIdType
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.settings import botkit_settings
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.views.botkit_context import Context
 

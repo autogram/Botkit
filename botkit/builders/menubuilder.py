@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Collection, Dict, Iterator, List, TYPE_CHECKING, Union
 from uuid import uuid4
 
@@ -13,24 +14,53 @@ from botkit.routing.triggers import ActionIdType
 from botkit.uncategorized import buttons
 from botkit.utils.sentinel import NotSet, Sentinel
 
+MAX_BUTTONS_PER_ROW = 8
+
+
+@dataclass
+class ButtonRow:
+    _array: List[InlineKeyboardButton]
+    limit: int = MAX_BUTTONS_PER_ROW
+
+    def add_button(self):
+        pass
+
+
+class MenuButtonMatrix:
+    def __init__(self):
+        self.current_row: int = 0
+        self._rows: List[ButtonRow]
+
 
 # noinspection PyIncorrectDocstring
-
-
 class InlineMenuRowBuilder:
     def __init__(
-        self, callback_builder: CallbackBuilder, *, override_buttons: List[Any] = None,
+        self,
+        parent_collection: "InlineMenuRowsCollection",
+        callback_builder: CallbackBuilder,
+        *,
+        override_buttons: List[Any] = None,
     ):
+        self._parent_collection = parent_collection
         if override_buttons:
             self.buttons = override_buttons
         else:
             self.buttons: List[InlineKeyboardButton] = []
 
         self._callback_builder = callback_builder
+        self._limit = MAX_BUTTONS_PER_ROW
 
     @property
     def is_empty(self):
         return not len(self.buttons)
+
+    @property
+    def limit(self) -> int:
+        return self._limit
+
+    @limit.setter
+    def limit(self, num_columns: int):
+        self._limit = num_columns
 
     def switch_inline_button(
         self,
@@ -81,7 +111,9 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
         if override_rows:
             self._rows = {
                 n: InlineMenuRowBuilder(
-                    callback_builder=self._callback_builder, override_buttons=x
+                    parent_collection=self,
+                    callback_builder=self._callback_builder,
+                    override_buttons=x,
                 )
                 for n, x in enumerate(override_rows)
             }
@@ -101,10 +133,8 @@ class InlineMenuRowsCollection(Collection[InlineMenuRowBuilder]):
         if index < 0:
             # TODO: apply modulo and document what this does
             index = len(self._rows) - 2 - index
-        else:
-            index = index
         return self._rows.setdefault(
-            index, InlineMenuRowBuilder(callback_builder=self._callback_builder)
+            index, InlineMenuRowBuilder(self, callback_builder=self._callback_builder)
         )
 
     def _get_nonempty_rows(self) -> List[InlineMenuRowBuilder]:

@@ -9,7 +9,7 @@ from pydantic import validator
 from typing_extensions import Literal
 
 from botkit.core.components import Component
-from botkit.libraries.annotations import HandlerSignature
+from botkit.agnostic.annotations import HandlerSignature
 from botkit.models import IGatherer
 from botkit.routing.pipelines.collector import CollectorSignature
 from botkit.routing.pipelines.gatherer import (
@@ -23,7 +23,7 @@ from botkit.routing.pipelines.reducer import (
 from botkit.routing.route_builder.types import TView
 from botkit.routing.update_types.update_type_inference import infer_update_types
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.botkit_context import Context
@@ -77,6 +77,7 @@ ViewCommandLiteral = Literal["send", "update"]
 
 log = create_logger()
 
+
 @dataclass
 class ViewParameters:
     command: ViewCommandLiteral
@@ -85,7 +86,21 @@ class ViewParameters:
     view: Union[Type[MessageViewBase], MessageViewBase, ViewRenderFuncSignature]
 
     send_from: Optional[IClient] = None
+    """
+    The (user) client instance to send the response from.
+    """
+
     send_via_bot: Optional[IClient] = None
+    """
+    If a user client is set for `send_from`, a bot client instance for sending the response as an inline query result.
+    This is useful for sending messages that contain button menus as a user.
+    """
+
+    enforce_send_via: bool = False
+    """
+    Indicates whether to enforce `send_via_bot` even when the rendered message has no features that 
+    require a bot client (such as reply markup).
+    """
 
     # TODO: Make this a list of items?
     send_target: Optional[SendTarget] = SendTo.same_chat
@@ -129,7 +144,7 @@ class ExecutionPlan:
 
     def set_gatherer(self, state_generator: Optional[GathererSignature]) -> "ExecutionPlan":
         if self._reducer:
-            raise ValueError("Route cannot have both a gatherer after a reduce step.")
+            raise ValueError("Route cannot have a gather- after a reduce-step.")
 
         if state_generator is None:
             return self
@@ -205,13 +220,18 @@ class ExecutionPlan:
         if not inferred_update_types:
             raise ValueError(f"Could not infer update types from the callback {handler}.")
 
-        self._set_update_types_exclusive(
-            inferred_update_types,
-            lambda invalid: ValueError(
-                f"The given handler signature {self._handler} is not compatible with the "
-                f"other actions added to this execution plan, namely {invalid}."
-            ),
-        )
+        if self._update_types:
+            self._set_update_types_as_intersection(inferred_update_types)
+        else:
+            self._update_types = inferred_update_types
+
+        # self._set_update_types_exclusive(
+        #     inferred_update_types,
+        #     lambda invalid: ValueError(
+        #         f"The given handler signature {self._handler} is not compatible with the "
+        #         f"other actions added to this execution plan, namely {invalid}."
+        #     ),
+        # )
         return self
 
     def set_handling_component(
@@ -225,7 +245,8 @@ class ExecutionPlan:
                 component = component()
             except:
                 raise ValueError(
-                    f"Component {component} is a class, but does not have a parameterless initializer."
+                    f"Component {component} is a class and needs to have a parameterless initializer "
+                    f"(a `def __init__(self):` without parameters)."
                 )
 
         self._handling_component = component
@@ -336,12 +357,17 @@ class ExecutionPlan:
             raise error_cb(invalid_elems)
         self._update_types = desired_types
 
+    def _set_update_types_as_intersection(self, desired_types: Set[UpdateType]):
+        self._update_types.intersection_update(desired_types)
+
     def _check_remove_trigger_reply_combination(self):
         if not self._remove_trigger_params or not self._view or not self._view.send_target:
             return
 
         if self._view.send_target in (SendTo.same_chat_quote, "same_chat_quote"):
-            log.warning("Removing trigger while replying to the trigger message may be unwanted behavior.")
+            log.warning(
+                "Removing trigger while replying to the trigger message may be unwanted behavior."
+            )
 
     def set_remove_trigger(
         self,

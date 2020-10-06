@@ -10,7 +10,7 @@ from typing import (
 from pyrogram.filters import Filter
 from pyrogram.handlers.handler import Handler
 
-from botkit.libraries import HandlerSignature
+from botkit.agnostic import HandlerSignature
 from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.expressions import (
     ActionExpression,
@@ -22,7 +22,7 @@ from botkit.routing.route_builder.expressions import (
 )
 from botkit.routing.route_builder.has_route_collection import IRouteCollection
 from botkit.routing.route_builder.route_collection import RouteCollection
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 
 
 class RouteBuilderBase(IRouteCollection):

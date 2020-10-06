@@ -38,7 +38,7 @@ class ViewBuilder:
     def render(self) -> RenderedMessage:
         # TODO: implement the other message types aswell
         return RenderedTextMessage(
-            text=self.html.render(),
+            text=self.html.render_html(),
             inline_buttons=self.menu.render(),
             title=self.meta.title,
             description=self.meta.description,

@@ -4,6 +4,7 @@ from threading import RLock
 _missing = object()
 
 
+# TODO: Can this be replaced with functools.cached_property ??
 class _CachedPropertyDecorator(object):
     def __init__(self, func):
         self.__name__ = func.__name__

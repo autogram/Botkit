@@ -1,15 +1,15 @@
-import re
 from dataclasses import field
-from enum import Enum, auto
+from dataclasses import field
+from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional, Type, Union
 
 from boltons.strutils import slugify
 from haps import base
-from pydantic import ConstrainedStr, DirectoryPath, FilePath, constr, root_validator, validator
+from pydantic import DirectoryPath, FilePath, constr, root_validator, validator
 from pydantic.dataclasses import dataclass
 
-from botkit.libraries._checks import SupportedLibraries, ensure_installed
+from botkit.agnostic.library_checks import SupportedLibraryName, ensure_installed
 
 
 class ClientType(Enum):
@@ -34,7 +34,7 @@ PhoneNumber = Union[int, constr(regex=r"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-
 @dataclass
 class ClientConfig:
     client_type: ClientType
-    flavor: SupportedLibraries
+    flavor: SupportedLibraryName
 
     session_root_dir: DirectoryPath = field(default_factory=lambda: Path.cwd().absolute())
 
@@ -73,7 +73,6 @@ class ClientConfig:
 
     @root_validator(pre=True)
     def make_library_dependent(cls, values):
-        flavor = values["flavor"]
         session_file = values.get("session_file")
 
         if not session_file:

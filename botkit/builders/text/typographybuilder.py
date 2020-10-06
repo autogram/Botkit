@@ -1,3 +1,4 @@
+from concurrent.futures.process import ProcessPoolExecutor
 from typing import Iterable, Optional
 
 from botkit.builders.text.emoji import Emoji
@@ -32,7 +33,7 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
         return self
 
     def desc(self, key: str, value: str):
-        self.bold(key.rstrip(": "), end=": ").text(value).br()
+        self.bold(key.rstrip(": "), end=": ").raw(value).br()
         return self
 
     def headline(self, title: str, level: int):

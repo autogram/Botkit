@@ -1,12 +1,11 @@
 import inspect
-import traceback
 from typing import Any, Union
 
 from haps import Container
 
-from botkit.libraries import HandlerSignature
+from botkit.agnostic import HandlerSignature
 from botkit.persistence.data_store import DataStoreBase
-from botkit.routing.pipelines.execution_plan import ExecutionPlan
+from botkit.routing.pipelines.executionplan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.pipelines.steps._base import Continue, StepError
 from botkit.routing.pipelines.steps.call_step_factory import CallStepFactory
@@ -22,46 +21,39 @@ from botkit.routing.pipelines.steps.remove_trigger_step_factory import RemoveTri
 from botkit.routing.pipelines.steps.render_view_step_factory import RenderViewStepFactory
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.utils.nameof import nameof
 from botkit.views.botkit_context import Context
 
 
 class UpdatePipelineFactory:
-    def __init__(self, triggers: RouteTriggers, plan: ExecutionPlan, for_update_type: UpdateType):
-        self.data_store: DataStoreBase = Container().get_object(DataStoreBase)
-        self.initialize_context_step = InitializeContextStep(
-            for_update_type, data_store=self.data_store
-        )
-        self.triggers = triggers
-        self.plan = plan
-        self.update_type = for_update_type
+    def __init__(self, data_store: DataStoreBase = None):
+        self.data_store: DataStoreBase = data_store or Container().get_object(DataStoreBase)
 
-    def build_callback(self) -> HandlerSignature:
+    def build_callback(self, plan: ExecutionPlan, for_update_type: UpdateType) -> HandlerSignature:
         # TODO: Main goals with the generalized pipeline steps should be:
-        # - Performance
+        # - Performance (by preprocessing anything that's known at startup time)
         # - Allow users to override existing and inject their own steps
 
-        initialize_context_async = self.initialize_context_step
-        gather_initial_state, gather_async = GatherStepFactory.create_step(self.plan._gatherer)
-        mutate_previous_state, mutate_async = ReduceStepFactory.create_step(self.plan._reducer)
-        invoke_component = InvokeComponentStepFactory.create_step(self.plan._handling_component)
-        render_view = RenderViewStepFactory.create_step(self.plan._view)
-        commit_rendered_view_async = CommitRenderedViewStepFactory.create_step(self.plan._view)
-        handle, handle_async = CallStepFactory.create_step(self.plan._handler)
-        _rm_trigger_params = self.plan._remove_trigger_params
+        initialize_context_async = InitializeContextStep(
+            for_update_type, data_store=self.data_store
+        )
+        gather_initial_state, gather_async = GatherStepFactory.create_step(plan._gatherer)
+        mutate_previous_state, mutate_async = ReduceStepFactory.create_step(plan._reducer)
+        invoke_component = InvokeComponentStepFactory.create_step(plan._handling_component)
+        render_view = RenderViewStepFactory.create_step(plan._view)
+        commit_rendered_view_async = CommitRenderedViewStepFactory.create_step(plan._view)
+        handle, handle_async = CallStepFactory.create_step(plan._handler)
+        _rm_trigger_params = plan._remove_trigger_params
         always_remove_trigger = _rm_trigger_params and _rm_trigger_params.always
         remove_trigger_early = _rm_trigger_params and _rm_trigger_params.early
         delete_trigger_message_async = RemoveTriggerStepFactory.create_step(_rm_trigger_params)
-        postprocess_data, postprocess_data_async = CollectStepFactory.create_step(
-            self.plan._collector
-        )
+        postprocess_data, postprocess_data_async = CollectStepFactory.create_step(plan._collector)
 
-        send_from = self.plan._view.send_from if self.plan._view else None
+        send_from = plan._view.send_from if plan._view else None
 
         # TODO: view_state transitions
-        # should_transition = self.plan._state_transition
+        # should_transition = plan._state_transition
 
         log = create_logger("pipeline")
 
@@ -116,8 +108,8 @@ class UpdatePipelineFactory:
                     else:
                         handle_result = handle(update, context)
 
-                    # render_view = RenderViewStepFactory.create_step(self.plan._view)
-                    # commit_rendered_view = CommitRenderedViewStepFactory.create_step(self.plan._view)
+                    # render_view = RenderViewStepFactory.create_step(plan._view)
+                    # commit_rendered_view = CommitRenderedViewStepFactory.create_step(plan._view)
 
                 if postprocess_data:
                     if postprocess_data_async:
@@ -151,82 +143,84 @@ class UpdatePipelineFactory:
 
         return handle_update
 
-    def get_description(self) -> str:
+    def get_description(
+        self, triggers: RouteTriggers, plan: ExecutionPlan, for_update_type: UpdateType
+    ) -> str:
         parts = []
-        if self.triggers.action is not None:
-            parts += "ActionHandler("
+        if triggers.action is not None:
+            parts.append("ActionHandler(")
 
-            if self.plan._handler:
-                parts += {self.plan._handler.name}
-            elif (view := self.plan._view) :
+            if plan._handler:
+                parts.append(plan._handler.name)
+            elif view := plan._view:
 
                 # TODO: nice string from the view parameters
-                parts += view.command.title()
-                parts += " "
-                parts += (
+                parts.append(view.command.title())
+                parts.append(" ")
+                parts.append(
                     view.view.__class__.__name__
                     if inspect.isclass(view.view)
                     else view.view.__name__
                 )
-                parts += str(view.send_target)
+                parts.append(str(view.send_target))
 
-            if self.plan._reducer:
-                reducer_name = self.plan._reducer.name
+            if plan._reducer:
+                reducer_name = plan._reducer.name
                 if "lambda" not in reducer_name:
-                    parts += f", reducer={reducer_name}"
+                    parts.append(f", reducer={reducer_name}")
 
-            if self.plan._gatherer:
-                gatherer_name = self.plan._gatherer.name
+            if plan._gatherer:
+                gatherer_name = plan._gatherer.name
                 if "lambda" not in gatherer_name:
-                    parts += f", reducer={gatherer_name}"
+                    parts.append(f", reducer={gatherer_name}")
         else:
             pipeline_name = self.__class__.__name__.replace("Factory", "")
 
-            parts += f"{pipeline_name}("
-            if self.plan._handler:
-                parts += self.plan._handler.name
+            parts.append(f"{pipeline_name}(")
+            if plan._handler:
+                parts.append(plan._handler.name)
             else:
                 args = []
-                if self.plan._gatherer:
-                    args += f"gatherer={self.plan._gatherer}"
-                if self.plan._reducer:
-                    args += f"reducer={self.plan._reducer}"
-                if self.plan._view:
-                    args += f"view={self.plan._view.view}"
-                parts += ", ".join(args)
+                if plan._gatherer:
+                    args.append(f"gatherer={plan._gatherer}")
+                if plan._reducer:
+                    args.append(f"reducer={plan._reducer}")
+                if plan._view:
+                    args.append(f"view={plan._view.view}")
+                parts.append(", ".join(args))
 
-        if self.triggers.filters is not None:
-            parts += ", filters="
-            parts += type(self.triggers.filters).__name__
+        if triggers.filters is not None:
+            parts.append(", filters=")
+            parts.append(type(triggers.filters).__name__)
 
-        parts += ")"
+        parts.append(")")
         return "".join(parts)
 
-    def create_update_filter(self) -> UpdateFilterSignature:
-        return self.triggers.filters
-        cond = self.triggers.condition
-        filters = self.triggers.filters
-
-        cond_is_awaitable = cond and inspect.isawaitable(cond)
-
-        async def check(client: IClient, update: Update) -> bool:
-            if cond is not None:
-
-                if cond_is_awaitable:
-                    if not await cond():
-                        return False
-
-            if filters:
-                try:
-                    return await filters(client, update)
-                except:
-                    print(filters)
-                    print(type(filters))
-                    traceback.print_exc()
-
-            return False
-
-        # TODO: Hotfix for weird PR in pyro
-        check.__call__ = check
-
-        return check
+    def create_update_filter(self, triggers: RouteTriggers) -> UpdateFilterSignature:
+        return triggers.filters
+        # cond = triggers.condition
+        # filters = triggers.filters
+        #
+        # cond_is_awaitable = cond and inspect.isawaitable(cond)
+        #
+        # async def check(client: IClient, update: Update) -> bool:
+        #     if cond is not None:
+        #
+        #         if cond_is_awaitable:
+        #             if not await cond():
+        #                 return False
+        #
+        #     if filters:
+        #         try:
+        #             return await filters(client, update)
+        #         except:
+        #             print(filters)
+        #             print(type(filters))
+        #             traceback.print_exc()
+        #
+        #     return False
+        #
+        # # TODO: Hotfix for weird PR in pyro
+        # check.__call__ = check
+        #
+        # return check

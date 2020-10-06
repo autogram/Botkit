@@ -48,10 +48,7 @@ class ModuleActivator:
             raise e
 
         try:
-            route_collection = self.build_module_routes(
-                self.route_builder_class, module, load_result
-            )
-            module.route_collection = route_collection
+            self.build_module_routes(self.route_builder_class, module, load_result)
 
             await self.dispatcher.add_module_routes(module)
         except Exception as e:
@@ -69,6 +66,8 @@ class ModuleActivator:
         module.register(route_builder)
         route_collection = route_builder._route_collection
         cls._register_components(route_builder, route_collection)
+
+        module.route_collection = route_collection
         return route_collection
 
     @classmethod

@@ -9,7 +9,7 @@ from pyrogram.types import CallbackQuery
 
 from botkit.dispatching.callbackqueryactiondispatcher import CallbackQueryActionDispatcher
 from botkit.dispatching.dispatcher import BotkitDispatcher
-from botkit.libraries.annotations import IClient
+from botkit.agnostic.annotations import IClient
 from botkit.persistence.callback_store import ICallbackStore, MemoryDictCallbackStore
 from botkit.persistence.data_store import DataStoreBase, MemoryDataStore
 from botkit.routing.route import RouteDefinition

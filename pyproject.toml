@@ -3,7 +3,7 @@ name = "autogram-botkit"
 packages = [
     { include = "botkit" }
 ]
-version = "0.2.1"
+version = "0.2.2"
 description = "Opinionated, library-agnostic Python framework for rapid development of Telegram (user)bots with focus on maintainability for large projects."
 license = "GPL-3.0-or-later"
 authors = ["JosXa <joscha.goetzer@gmail.com>"]
@@ -47,6 +47,8 @@ watchgod = { version = "^0.6", optional = true }
 ensure = "^1.0.0"
 telethon = {version = "^1.16.4", optional = true}
 loguru = "^0.5.3"
+paraminjector = "^0.1.0"
+noattr = "^0.0.8"
 
 [tool.poetry.extras]
 redis = ["redis-collections"]
@@ -68,3 +70,7 @@ devtools = {extras = ["pygments"], version = "^0.6"}
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.black]
+line-length = 99
+target-version = ['py38']

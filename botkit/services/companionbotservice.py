@@ -7,6 +7,7 @@ from uuid import uuid4
 from haps import SINGLETON_SCOPE, base, scope
 from loguru import logger as log
 from pyrogram import filters
+from pyrogram.errors import BadRequest
 from pyrogram.filters import create
 from pyrogram.handlers import ChosenInlineResultHandler, InlineQueryHandler, MessageHandler
 from pyrogram.handlers.handler import Handler
@@ -21,9 +22,9 @@ from pyrogram.types import (
     Photo,
 )
 
-from botkit.future_tgtypes.message_identity import MessageIdentity
+from botkit.future_tgtypes.identities.message_identity import MessageIdentity
 from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.views.base import InlineResultViewBase
 from botkit.views.rendered_messages import (
     RenderedMediaMessage,
@@ -202,6 +203,7 @@ class CompanionBotService:
                     sent_inline_bot_result_container.set_value(res)
                     await chosen_inline_result_container.wait()
 
+                # TODO: Bug - chosen_inline_result_container.value has been observed to be `Updates` here
                 result = MessageIdentity(
                     chat_id=chat_id,
                     message_id=chosen_inline_result_container.value.inline_message_id
@@ -210,8 +212,15 @@ class CompanionBotService:
                     is_inline=True,
                 )
                 return result
-            except (AttributeError, TimeoutError):
-                log.error("Bot did not respond.")
+            except TimeoutError:
+                log.error("Bot did not respond in time.")
+            except AttributeError:
+                log.exception("Something unexpected happened")
+            except BadRequest as e:
+                if e.ID == "BOT_RESPONSE_TIMEOUT":
+                    log.error("Bot did not respond in time.")
+                else:
+                    log.exception("Something unexpected happened")
 
     async def send_view_via(
         self,

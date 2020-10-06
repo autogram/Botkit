@@ -37,7 +37,7 @@ def test_func_can_be_decorated(get_single_module):
     actual = get_single_module()
 
     assert actual.base_ is modules.Module
-    assert actual.type_.__name__ == "OpenInBrowserModule"
+    assert actual.type.__name__ == "OpenInBrowserModule"
 
 
 def test_func_decorator_without_name(get_single_module):
@@ -76,7 +76,7 @@ def test_func_decorator_missing_route_builder_fails(get_single_module):
 
     actual = get_single_module()
 
-    instance = actual.type_()
+    instance = actual.type()
 
     with pytest.raises(TypeError) as ex:
         instance.register(RouteBuilder())

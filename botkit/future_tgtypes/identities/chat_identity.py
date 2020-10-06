@@ -1,18 +1,20 @@
-from typing import Any, Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
-from botkit.future_tgtypes.message_identity import Chat
+from botkit.future_tgtypes.identities.message_identity import Chat
 from botkit.future_tgtypes.user import User
 from botkit.utils.botkit_logging.setup import create_logger
 
 log = create_logger("chat_identity")
 
 
-@dataclass(frozen=True)
-class ChatIdentity:
+class ChatIdentity(BaseModel):
     type: Literal["private", "bot", "group", "supergroup", "channel"]
     peers: Union[int, Tuple[int, int]]  # will be a tuple if conversation is `private` or `bot`
+
+    class Config:
+        allow_mutation = False
 
     # noinspection PydanticTypeChecker
     @classmethod
@@ -42,6 +44,10 @@ class ChatIdentity:
             return self.peers
 
         peers_set = set(self.peers)
+
+        if len(peers_set) == 1:
+            return peers_set.pop()
+
         peers_set.remove(client_user_id)
 
         if len(peers_set) == 1:
@@ -49,6 +55,10 @@ class ChatIdentity:
 
         raise NotImplementedError(
             "There are some combinations of type, user clients, and bot clients that have not "
-            "been considered yet for resolving chat_ids from ChatIdentitys. Please"
-            "open an issue on GitHub!"
+            "been considered yet for resolving chat_ids from ChatIdentities. Please "
+            f"open an issue on GitHub and include that the peers you ran into this exception with were "
+            f"{str(peers_set) if peers_set else 'an empty set'}."
         )
+
+    def __hash__(self):
+        return hash((type(self),) + tuple(self.__dict__.values()))

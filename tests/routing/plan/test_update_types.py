@@ -3,8 +3,8 @@ from typing import Callable, List, Union
 from pyrogram import Client
 from pyrogram.types import CallbackQuery, Message
 
-from botkit.libraries.annotations import IClient
-from botkit.libraries.pyro_types._pyrogram_update_type_inference import (
+from botkit.agnostic.annotations import IClient
+from botkit.agnostic.pyrogram_impl._pyrogram_update_type_inference import (
     determine_pyrogram_handler_update_types,
 )
 from botkit.routing.update_types.updatetype import UpdateType
@@ -21,9 +21,7 @@ def make_valid_handler_variations(update_type: object) -> List[Callable]:
     async def no_client_annotation(client, x: update_type):
         pass
 
-    async def with_additional_args(
-        client, message: update_type, additional_arg: int = None
-    ):
+    async def with_additional_args(client, message: update_type, additional_arg: int = None):
         pass
 
     async def more_args_inbetween(client, something, sth_else, message: update_type):

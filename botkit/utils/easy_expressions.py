@@ -56,8 +56,8 @@ class Easy(object):
             or self._like != ""
         ):
             capture_literal = "" if self._capture else "?:"
-            quantity_literal = self.getQuantityLiteral()
-            character_literal = self.getCharacterLiteral()
+            quantity_literal = self.get_quantity_literal()
+            character_literal = self.get_character_literal()
             reluctant_literal = "?" if self._reluctant else ""
             self._literals.append(
                 "("
@@ -73,7 +73,7 @@ class Easy(object):
 
         return
 
-    def getQuantityLiteral(self):
+    def get_quantity_literal(self):
         """
         Gets the 'quantity' literal.
 
@@ -87,7 +87,7 @@ class Easy(object):
         else:
             return "{0," + str(self._max) + "}"
 
-    def getCharacterLiteral(self):
+    def get_character_literal(self):
         """
         Gets the 'character' literal.
 
@@ -111,7 +111,7 @@ class Easy(object):
         if self._like != "":
             return str(self._like)
 
-    def getLiteral(self):
+    def get_literal(self):
         """
         Flush, and return the joined literal.
         """
@@ -123,7 +123,7 @@ class Easy(object):
 
         """
 
-        literal = self.incrementGroupNumbering(regex.getLiteral(), self._groups_used)
+        literal = self.incrementGroupNumbering(regex.get_literal(), self._groups_used)
         self._groups_used = self._groups_used + regex._groups_used
         return literal
 
@@ -140,7 +140,7 @@ class Easy(object):
             return subbed
         return literal
 
-    def addFlag(self, flag):
+    def add_flag(self, flag):
         """
         If we don't have the flag already, add it.
         """
@@ -148,19 +148,19 @@ class Easy(object):
             self.flags = self.flags + flag
         return self
 
-    def ignoreCase(self):
+    def ignore_case(self):
         """
         """
-        self.addFlag("i")
+        self.add_flag("i")
         return self
 
-    def multiLine(self):
+    def multi_line(self):
         """
         """
-        self.addFlag("m")
+        self.add_flag("m")
         return self
 
-    def globalMatch(self):
+    def global_match(self):
         """
         Global matching.
 
@@ -169,10 +169,10 @@ class Easy(object):
         TODO. FIX THIS.
 
         """
-        self.addFlag("g")
+        self.add_flag("g")
         return self
 
-    def startOfInput(self):
+    def start_of_input(self):
         """
         """
         self._literals.append("(?:^)")
@@ -181,31 +181,31 @@ class Easy(object):
     def startOfLine(self):
         """
         """
-        self.multiLine()
-        return self.startOfInput()
+        self.multi_line()
+        return self.start_of_input()
 
-    def endOfInput(self):
+    def end_of_input(self):
         """
         """
         self.flush()
         self._literals.append("(?:$)")
         return self
 
-    def endOfLine(self):
+    def end_of_line(self):
         """
         """
-        self.multiLine()
-        return self.endOfInput()
+        self.multi_line()
+        return self.end_of_input()
 
     def either(self, r):
         """
         """
         if type(r) == type(""):
-            return self.eitherLike(Easy().exactly(1).of(r))
+            return self.either_like(Easy().exactly(1).of(r))
         else:
-            self.eitherLike(r)
+            self.either_like(r)
 
-    def eitherLike(self, r):
+    def either_like(self, r):
         """
         """
         self.flush()
@@ -243,7 +243,7 @@ class Easy(object):
         return self.not_ahead(r)
 
     def nor(self, r):
-        if this._min == 0 and self._of_any:
+        if self._min == 0 and self._of_any:
             self._min = -1
             self._of_any = False
         self.neither(r)

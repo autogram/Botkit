@@ -1,6 +1,6 @@
 import asyncio
 
-from botkit.libraries.annotations import IClient
+from botkit.agnostic.annotations import IClient
 from botkit.persistence.data_store import DataStoreBase
 from botkit.routing.pipelines.factory_types import IPipelineStep
 from typing import (

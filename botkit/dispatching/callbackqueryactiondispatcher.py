@@ -6,16 +6,16 @@ from haps import Container
 from loguru import logger as log
 from pyrogram.filters import create
 from pyrogram.handlers import CallbackQueryHandler
-from pyrogram.types import CallbackQuery, Update
+from pyrogram.types import CallbackQuery
 
 from botkit.core.components import Component
 from botkit.core.modules import Module
 from botkit.persistence.callback_store import CallbackActionContext, ICallbackStore
-from botkit.routing.route import RouteDefinition, RouteHandler
+from botkit.routing.route import RouteHandler
 from botkit.routing.triggers import ActionIdType
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.settings import botkit_settings
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.views.botkit_context import Context
 from botkit.widgets import Widget
 

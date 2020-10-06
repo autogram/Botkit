@@ -1,4 +1,4 @@
-from botkit.libraries.annotations import (
+from botkit.agnostic.annotations import (
     HandlerSignature,
     ReturnType,
     TArg,

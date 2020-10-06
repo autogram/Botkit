@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, List, Literal, Optional, Union
 
@@ -12,9 +13,16 @@ from botkit.views.types import KeyboardTypes
 
 
 @dataclass
-class RenderedMessageBase:
+class RenderedMessageBase(ABC):
     title: Optional[str] = None
     description: Optional[str] = None
+
+    @property
+    @abstractmethod
+    def requires_bot(self) -> bool:
+        """
+        Whether this message contains features that only a bot can render (and not a user).
+        """
 
 
 @dataclass
@@ -28,6 +36,10 @@ class RenderedMessageMarkup(RenderedMessageBase):
             return None
         rows = [list(x) for x in self.inline_buttons]
         return InlineKeyboardMarkup(rows)
+
+    @property
+    def requires_bot(self) -> bool:
+        return bool(self.reply_markup or (self.inline_buttons and self.inline_buttons[0]))
 
 
 @dataclass

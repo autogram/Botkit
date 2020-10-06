@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable, List, Optional
 
-from botkit.routing.pipelines.execution_plan import RemoveTrigger, RemoveTriggerParameters
+from botkit.routing.pipelines.executionplan import RemoveTrigger, RemoveTriggerParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger

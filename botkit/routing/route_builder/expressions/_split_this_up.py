@@ -11,9 +11,9 @@ from typing import (
 from pyrogram.filters import Filter, create
 from pyrogram.types import CallbackQuery
 
-from botkit.libraries.annotations import HandlerSignature
+from botkit.agnostic.annotations import HandlerSignature
 from botkit.routing.pipelines.collector import CollectorSignature
-from botkit.routing.pipelines.execution_plan import (
+from botkit.routing.pipelines.executionplan import (
     ExecutionPlan,
     RemoveTrigger,
     SendTarget,
@@ -30,7 +30,7 @@ from botkit.routing.route_builder.webhook_action_expression import WebhookAction
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.types import TViewState
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.views.base import InlineResultViewBase
 
 if TYPE_CHECKING:

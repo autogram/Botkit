@@ -2,6 +2,7 @@ from botkit.builders.htmlbuilder import HtmlBuilder
 from botkit.builders.menubuilder import MenuBuilder
 from .view_models import ModuleInfosCollectionModel, ModuleInlineContext
 from botkit.views.views import TextView
+from ...builders import CallbackBuilder
 
 
 class PagedModuleView(TextView[ModuleInfosCollectionModel]):
@@ -38,9 +39,11 @@ class PagedModuleView(TextView[ModuleInfosCollectionModel]):
 
         for n, info in enumerate(self.state.page_items):
             if info.name not in "ModuleManagerModule":
-                caption = HtmlBuilder()
+                caption = HtmlBuilder(None)
                 caption.text("Deactivate" if info.is_active else "Activate")
                 caption.spc().text(info.name)
                 builder.rows[n + 1].action_button(
-                    caption.render(), "deactivate" if info.is_active else "activate", self.state,
+                    caption.render_html(),
+                    "deactivate" if info.is_active else "activate",
+                    self.state,
                 )

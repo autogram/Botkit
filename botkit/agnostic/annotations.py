@@ -9,11 +9,11 @@ from typing import (
     Union,
 )
 
-from botkit.libraries._checks import is_installed
+from botkit.agnostic.library_checks import is_installed
 from botkit.views.botkit_context import Context
 
 if TYPE_CHECKING:
-    from botkit.types.client import IClient
+    from botkit.clients.client import IClient
 else:
     IClient = None
 

@@ -3,9 +3,9 @@ from typing import Any, Awaitable, Callable, List, Optional, Union
 
 from pyrogram.errors import MessageIdInvalid
 
-from botkit.future_tgtypes.chat_identity import ChatIdentity
-from botkit.future_tgtypes.message_identity import MessageIdentity
-from botkit.routing.pipelines.execution_plan import SendTarget, SendTo, ViewParameters
+from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
+from botkit.future_tgtypes.identities.message_identity import MessageIdentity
+from botkit.routing.pipelines.executionplan import SendTarget, SendTo, ViewParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.update_types.updatetype import UpdateType
@@ -50,7 +50,9 @@ class CommitRenderedViewStepFactory(
                         else ""
                     )
 
-                    if view_params.send_via_bot is not None:
+                    message_requires_bot = context.rendered_message.requires_bot
+
+                    if view_params.send_via_bot is not None and message_requires_bot:
                         log.debug(
                             f"Sending rendered message via bot client to {target.peer_id}{reply_log}"
                         )
@@ -63,6 +65,13 @@ class CommitRenderedViewStepFactory(
                         context.response_identity = sent
                     else:
                         log.debug(f"Sending rendered message to {target}{reply_log}")
+
+                        if message_requires_bot:
+                            log.debug(
+                                f"Message to be sent has features incompatible with user clients. Use `send_via_bot` "
+                                f"to use inline mode for a message with e.g. reply markup."
+                            )
+
                         sent = await client.send_rendered_message(
                             peer=target.peer_id,
                             rendered=context.rendered_message,

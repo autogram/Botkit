@@ -19,7 +19,7 @@ from telethon.sessions import StringSession
 
 from botkit.configuration import *
 from botkit.configuration.client_config import APIConfig
-from botkit.libraries._checks import SupportedLibraries
+from botkit.agnostic._checks import SupportedLibraries
 from tests.configuration.client_config_test_data import (
     TOKEN,
     all_libs_test_configs,

@@ -9,7 +9,7 @@ from haps.application import Application
 from pyrogram import Client as PyrogramClient
 
 from botkit.core.modules.activation import ModuleLoader
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 
 try:
@@ -56,6 +56,7 @@ class Startup(Application, ABC):
 
         me = await client.get_me()
         client.own_user_id = me.id
+        client.own_username = me.username
 
         self.log.info(f"Started {user_or_display_name(me)} as {client.__class__.__name__}.")
 

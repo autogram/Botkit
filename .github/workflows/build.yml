@@ -1,3 +1,4 @@
+# TODO: https://github.com/marketplace/actions/automatic-releases
 name: Build Botkit Master
 on:
   push:

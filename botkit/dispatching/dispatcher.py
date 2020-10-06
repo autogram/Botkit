@@ -1,9 +1,7 @@
 from logging import Logger
 from typing import Any, Dict, List, Union
 
-from ensure import ensure
 from haps import SINGLETON_SCOPE, base, egg, scope
-from pyrogram import Client
 from pyrogram.handlers.handler import Handler
 from typing_extensions import Literal
 
@@ -12,7 +10,7 @@ from botkit.core.modules import Module
 from botkit.dispatching.deeplinkstartactiondispatcher import DeepLinkStartActionDispatcher
 from botkit.routing.route import RouteHandler
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 
 

@@ -11,7 +11,7 @@ from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.settings import botkit_settings
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 
 
 def notests(func):

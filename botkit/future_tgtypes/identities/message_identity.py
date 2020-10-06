@@ -21,6 +21,11 @@ class _MessageUpdate(Protocol):
 
 
 @runtime_checkable
+class _AnyUpdateWithMessageProperty(Protocol):
+    message: _MessageUpdate
+
+
+@runtime_checkable
 class _ChosenInlineResultUpdate(Protocol):
     inline_message_id: str
 
@@ -48,6 +53,9 @@ class MessageIdentity:
             return MessageIdentity(
                 chat_id=None, message_id=update.inline_message_id, is_inline=True,
             )
+        elif isinstance(update, _AnyUpdateWithMessageProperty) and update.message:
+            return cls.from_message(update.message)
+
         log.error(f"Could not extract a message location from update.")
 
     @classmethod

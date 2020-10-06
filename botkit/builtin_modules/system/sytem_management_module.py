@@ -11,14 +11,14 @@ from typing import Optional, List, Any, Literal, Union
 from botkit.builders import ViewBuilder
 from botkit.builtin_modules.system.system_tests import notests
 from botkit.core.modules.activation import ModuleLoader, ModuleStatus
-from botkit.libraries.annotations import IClient
+from botkit.agnostic.annotations import IClient
 from botkit.persistence.callback_store import (
     RedisCallbackManager,
     ICallbackStore,
 )
 from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
-from botkit.routing.pipelines.execution_plan import SendTo
+from botkit.routing.pipelines.executionplan import SendTo
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.settings import botkit_settings
 from botkit.utils.botkit_logging.setup import create_logger

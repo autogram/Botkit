@@ -145,7 +145,7 @@ class TestEasy:
         """
         Test 'exactly'
         """
-        reg = Easy().startOfLine().exactly(3).of("x").endOfLine().get_regex()
+        reg = Easy().startOfLine().exactly(3).of("x").end_of_line().get_regex()
 
         test = "xx"
         assert len(re.findall(reg, test)) == 0
@@ -158,7 +158,7 @@ class TestEasy:
         """
         Test 'max'
         """
-        reg = Easy().startOfLine().max(3).of("x").endOfLine().get_regex()
+        reg = Easy().startOfLine().max(3).of("x").end_of_line().get_regex()
 
         test = "xx"
         assert len(re.findall(reg, test)) == 1
@@ -171,7 +171,7 @@ class TestEasy:
         """
         Test joined Min and Max
         """
-        reg = Easy().startOfLine().min(3).max(5).of("x").endOfLine().get_regex()
+        reg = Easy().startOfLine().min(3).max(5).of("x").end_of_line().get_regex()
 
         test = "xx"
         assert len(re.findall(reg, test)) == 0
@@ -188,7 +188,7 @@ class TestEasy:
         """
         Test of
         """
-        easy = Easy().startOfLine().exactly(2).of("p p p ").endOfLine()
+        easy = Easy().startOfLine().exactly(2).of("p p p ").end_of_line()
 
         test = "p p p p p p "
         assert easy.test(test)
@@ -199,7 +199,7 @@ class TestEasy:
         """
         Test ofAny
         """
-        easy = Easy().startOfLine().exactly(3).ofAny().endOfLine()
+        easy = Easy().startOfLine().exactly(3).ofAny().end_of_line()
 
         assert easy.test("abc")
         assert not easy.test("ac")
@@ -218,7 +218,7 @@ class TestEasy:
             .of("q")
             .exactly(1)
             .ofGroup(1)
-            .endOfLine()
+            .end_of_line()
         )
 
         assert easy.test("pppqppp")
@@ -238,7 +238,7 @@ class TestEasy:
             .of("q")
             .exactly(1)
             .ofGroup(1)
-            .endOfLine()
+            .end_of_line()
         )
 
         assert easy.test("pppqppp")

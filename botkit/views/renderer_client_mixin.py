@@ -13,7 +13,7 @@ except ImportError as e:
         "The Pyrogram library does not seem to be installed, so using Botkit in Pyrogram flavor is not possible. "
     ) from e
 
-from botkit.types.client import IClient
+from botkit.clients.client import IClient
 from botkit.views.base import InlineResultViewBase
 from botkit.views.types import TViewState
 from botkit.views.rendered_messages import (
@@ -36,13 +36,13 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
         reply_to: Optional[int] = None,
         schedule_date: Optional[int] = None,
     ) -> Message:
-        if self.is_bot and rendered.reply_markup:
+        if self.is_bot and getattr(rendered, "reply_markup", None):
             log.warning("Attempting to send reply markup with a user client.")
 
         if isinstance(rendered, RenderedTextMessage):
             return await self.send_message(
                 peer,
-                text=rendered.text,
+                text=rendered.text[:4096],
                 parse_mode=rendered.parse_mode,
                 disable_web_page_preview=rendered.disable_web_page_preview,
                 reply_markup=rendered.inline_keyboard_markup,
@@ -88,7 +88,7 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
         elif isinstance(rendered, RenderedMediaMessage):
             # TODO: implement in pyro
             # await self.edit_message_media(
-            #     peer,
+            #     user,
             #     messages,
             #     photo=rendered.photo,
             #     reply_markup=rendered.inline_keyboard_markup,
@@ -102,7 +102,7 @@ class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
             )
         # elif isinstance(view, ReplyTextView):
         #     return await self.edit_message_text(
-        #         peer,
+        #         user,
         #         message,
         #         text=rendered_message.text,
         #         parse_mode=rendered_message.parse_mode,

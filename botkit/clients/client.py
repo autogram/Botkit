@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, Protocol, TypeVar, Union
+from typing import Generic, Iterable, Optional, Protocol, TypeVar, Union
 
+from botkit.future_tgtypes.descriptors.base import Descriptor
 from botkit.views.sender_interface import IViewSender, Message
 
 
@@ -14,6 +15,7 @@ User = TypeVar("User", bound=IdentifiableUser)
 
 class IClient(IViewSender[Message], ABC, Generic[Message, User]):
     own_user_id: int
+    own_username: Optional[str]
 
     @property
     @abstractmethod

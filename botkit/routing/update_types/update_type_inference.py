@@ -1,6 +1,6 @@
 from typing import Set
 
-from botkit.libraries.pyro_types._pyrogram_update_type_inference import (
+from botkit.agnostic.pyrogram_impl._pyrogram_update_type_inference import (
     determine_pyrogram_handler_update_types,
 )
 from botkit.routing.update_types.updatetype import UpdateType
