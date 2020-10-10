@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal, Optional
 
-from logzero import LogFormatter
-
 
 _BOTKIT_DEFAULT_LOG_LEVEL = "INFO"
 
@@ -51,9 +49,6 @@ class _BotkitSettings:
     # region Logging
 
     _current_log_level: str = _BOTKIT_DEFAULT_LOG_LEVEL
-    log_formatter = LogFormatter(
-        fmt="%(color)s[%(levelname)1.1s %(asctime)s %(name)s:%(lineno)d]%(end_color)s %(message)s"
-    )
 
     @property
     def log_level(self) -> str:

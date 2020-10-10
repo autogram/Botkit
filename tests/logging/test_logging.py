@@ -33,7 +33,7 @@ def caplog(_caplog):
 # region tests
 
 
-def test_botkit_logzero_can_log_when_level_set_before_creation(caplog):
+def test_botkit_loguru_can_log_when_level_set_before_creation(caplog):
     botkit_settings.log_level = "DEBUG"
 
     log = create_logger("test_logging")
@@ -45,7 +45,7 @@ def test_botkit_logzero_can_log_when_level_set_before_creation(caplog):
         ]
 
 
-def test_botkit_logzero_can_log_when_level_set_after_creation(caplog):
+def test_botkit_loguru_can_log_when_level_set_after_creation(caplog):
     log = create_logger("test_logging")
 
     botkit_settings.log_level = "DEBUG"
@@ -56,7 +56,7 @@ def test_botkit_logzero_can_log_when_level_set_after_creation(caplog):
         ]
 
 
-def test_botkit_logzero_sub_logger_can_log_when_level_set_before_creation(caplog):
+def test_botkit_loguru_sub_logger_can_log_when_level_set_before_creation(caplog):
     botkit_settings.log_level = "DEBUG"
 
     log = create_logger("test")
@@ -66,7 +66,7 @@ def test_botkit_logzero_sub_logger_can_log_when_level_set_before_creation(caplog
         assert caplog.record_tuples == [("test_logging", 10, "debug {'name': 'botkit.test'}")]
 
 
-def test_botkit_logzero_sub_logger_can_log_when_level_set_after_creation(caplog):
+def test_botkit_loguru_sub_logger_can_log_when_level_set_after_creation(caplog):
     log = create_logger("test")
 
     with caplog.at_level(logging.DEBUG):
@@ -75,7 +75,7 @@ def test_botkit_logzero_sub_logger_can_log_when_level_set_after_creation(caplog)
         assert caplog.record_tuples == [("test_logging", 10, "debug {'name': 'botkit.test'}")]
 
 
-def test_botkit_logzero_sub_logger_level_can_be_increased_from_root_before_creation(caplog,):
+def test_botkit_loguru_sub_logger_level_can_be_increased_from_root_before_creation(caplog,):
     botkit_settings.log_level = "INFO"
     with caplog.at_level(logging.INFO):
         sub_log = create_logger("sub")
