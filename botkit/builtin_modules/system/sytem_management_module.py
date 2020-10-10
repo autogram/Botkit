@@ -13,7 +13,7 @@ from botkit.builtin_modules.system.system_tests import notests
 from botkit.core.modules.activation import ModuleLoader, ModuleStatus
 from botkit.agnostic.annotations import IClient
 from botkit.persistence.callback_store import (
-    RedisCallbackManager,
+    RedisCallbackStore,
     ICallbackStore,
 )
 from botkit.core.modules._module import Module
@@ -138,9 +138,7 @@ class SystemManagementModule(Module):
         self.paused_modules = loaded_modules
 
         try:
-            callback_manager: RedisCallbackManager = Container().get_object(
-                ICallbackStore, "redis"
-            )
+            callback_manager: RedisCallbackStore = Container().get_object(ICallbackStore, "redis")
             callback_manager.callbacks.sync()
             self.log.info("Callbacks synced.")
         except:

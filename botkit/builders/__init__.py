@@ -1,6 +1,6 @@
 from typing import Any, TYPE_CHECKING
 
-from haps import Container
+from haps import Container, inject
 
 from .callbackbuilder import CallbackBuilder
 
@@ -37,9 +37,11 @@ class ViewBuilder:
 
     def render(self) -> RenderedMessage:
         # TODO: implement the other message types aswell
+        html_text = self.html.render_html()
+        rendered_menu = self.menu.render()
         return RenderedTextMessage(
-            text=self.html.render_html(),
-            inline_buttons=self.menu.render(),
+            text=html_text,
+            inline_buttons=rendered_menu,
             title=self.meta.title,
             description=self.meta.description,
         )

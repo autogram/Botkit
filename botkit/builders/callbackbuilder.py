@@ -2,11 +2,13 @@ from contextlib import contextmanager
 from typing import Any, Literal, Optional
 
 from botkit.abstractions._named import INamed
+from botkit.core.services import service
 from botkit.dispatching.types import CallbackActionType
 from botkit.persistence.callback_store import CallbackActionContext, ICallbackStore
 from botkit.routing.types import TViewState
 
 
+@service
 class CallbackBuilder:
     _SEPARATOR = "##"
 

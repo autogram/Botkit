@@ -1,19 +1,15 @@
 import asyncio
-import pytz
-import logging
-import logzero
 from datetime import datetime, timedelta
+from typing import List, Literal, Optional, Union
+
+import pytz
 from pydantic import BaseModel
 from pyrogram import Client
-from typing import Literal
-from typing import Optional, Union, List
-from typing import cast
-
 from pyrogram.types import Message
-from typing_extensions import AsyncGenerator
 
 from botkit.builtin_modules.system.sytem_management_module import ToggleSystemStateCommand
 from botkit.builtin_services.eventing import command_bus
+from botkit.utils.botkit_logging.setup import create_logger
 
 
 class Ping(BaseModel):
@@ -38,7 +34,7 @@ class StatusPings:
         self.last_ping_msg: Optional[Message] = None
         self.priority = environment_priority
         self.status: Literal["active", "waiting"] = "active"
-        self.log = logzero.setup_logger(self.__class__.__name__, level=logging.INFO)
+        self.log = create_logger(self.__class__.__name__)
 
     def run(self) -> None:
         asyncio.ensure_future(self.ping_loop())

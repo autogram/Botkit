@@ -39,12 +39,13 @@ class ChatDescriptor(Descriptor[ChatIdentity]):
             ):
                 return identity
 
-            if self.title_regex and (
-                identity := await resolve_chat_by_title_regex(
-                    client, re.compile(self.title_regex), context
-                )
-            ):
-                return identity
+            if self.title_regex:
+                if (
+                    identity := await resolve_chat_by_title_regex(
+                        client, re.compile(self.title_regex), context
+                    )
+                ) :
+                    return identity
         except Exception as ex:
             raise ValueError(f"Could not resolve chat identity of {self}.", self) from ex
 

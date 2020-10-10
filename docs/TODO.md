@@ -1,7 +1,7 @@
 # Botkit TODOs
 
 ## Important / ASAP
--
+- Switch to new dependency injection lib
 - Add global cache for things like "how long is slow mode in this group", message id mappings in companionbots, ...
 
 ## Sometime

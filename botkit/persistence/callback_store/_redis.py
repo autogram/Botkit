@@ -40,12 +40,12 @@ def create_redis_callback_manager() -> ICallbackStore:
             "you must provide an instantiated `Redis` client to the dependency "
             "injection. Refer to the `callback_manager_qualifier` setting documentation."
         ) from e
-    redis_cbm = RedisCallbackManager(redis, "callbacks", maxsize=10)
+    redis_cbm = RedisCallbackStore(redis, "callbacks", maxsize=10)
     redis_cbm.remove_outdated(botkit_settings.callbacks_ttl_days)
     return redis_cbm
 
 
-class RedisCallbackManager(ICallbackStore):
+class RedisCallbackStore(ICallbackStore):
     """
     # TODO: Try use json instead of pickled dicts? https://github.com/honzajavorek/redis-collections/issues/122
     # TODO: Force pydantic models?
