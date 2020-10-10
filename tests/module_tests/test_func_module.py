@@ -29,6 +29,7 @@ def get_single_module() -> Callable[[], Any]:
     egg.factories = []
 
 
+@pytest.mark.xfail  # TODO: Not implemented yet
 def test_func_can_be_decorated(get_single_module):
     @module("OpenInBrowserModule")
     def _(routes: RouteBuilder) -> None:
@@ -76,7 +77,7 @@ def test_func_decorator_missing_route_builder_fails(get_single_module):
 
     actual = get_single_module()
 
-    instance = actual.type()
+    instance = actual.type_
 
     with pytest.raises(TypeError) as ex:
         instance.register(RouteBuilder())

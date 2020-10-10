@@ -17,6 +17,11 @@ def reset_botkit_logger_before_every_test():
     yield
 
 
+# https://loguru.readthedocs.io/en/stable/resources/migration.html
+# noinspection PyUnresolvedReferences
+from _pytest.logging import caplog as _caplog
+
+
 @pytest.fixture
 def caplog(_caplog):
     class PropogateHandler(logging.Handler):
@@ -41,7 +46,7 @@ def test_botkit_loguru_can_log_when_level_set_before_creation(caplog):
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
         assert caplog.record_tuples == [
-            ("test_logging", 10, "debug {'name': 'botkit.test_logging'}")
+            ("test_logging", 10, "debug {'identity': 'botkit.test_logging', 'botkit': True}")
         ]
 
 
@@ -52,7 +57,7 @@ def test_botkit_loguru_can_log_when_level_set_after_creation(caplog):
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
         assert caplog.record_tuples == [
-            ("test_logging", 10, "debug {'name': 'botkit.test_logging'}")
+            ("test_logging", 10, "debug {'identity': 'botkit.test_logging', 'botkit': True}")
         ]
 
 
@@ -63,7 +68,7 @@ def test_botkit_loguru_sub_logger_can_log_when_level_set_before_creation(caplog)
 
     with caplog.at_level(logging.DEBUG):
         log.debug("debug")
-        assert caplog.record_tuples == [("test_logging", 10, "debug {'name': 'botkit.test'}")]
+        assert caplog.record_tuples == [("test_logging", 10, "debug {'identity': 'botkit.test', 'botkit': True}")]
 
 
 def test_botkit_loguru_sub_logger_can_log_when_level_set_after_creation(caplog):
@@ -72,10 +77,10 @@ def test_botkit_loguru_sub_logger_can_log_when_level_set_after_creation(caplog):
     with caplog.at_level(logging.DEBUG):
         botkit_settings.log_level = "DEBUG"
         log.debug("debug")
-        assert caplog.record_tuples == [("test_logging", 10, "debug {'name': 'botkit.test'}")]
+        assert caplog.record_tuples == [("test_logging", 10, "debug {'identity': 'botkit.test', 'botkit': True}")]
 
 
-def test_botkit_loguru_sub_logger_level_can_be_increased_from_root_before_creation(caplog,):
+def test_botkit_loguru_sub_logger_level_can_be_increased_from_root_before_creation(caplog, ):
     botkit_settings.log_level = "INFO"
     with caplog.at_level(logging.INFO):
         sub_log = create_logger("sub")
@@ -96,11 +101,10 @@ def test_botkit_loguru_sub_logger_level_can_be_increased_from_root_before_creati
 )
 def test_create_logger_name(name, exp_name):
     def bind_mock(**kwargs):
-        assert "name" in kwargs
-        assert kwargs["name"] == exp_name
+        assert "identity" in kwargs
+        assert kwargs["identity"] == exp_name
 
     with mock.patch.object(logger, "bind", bind_mock):
         create_logger(name)
-
 
 # endregion
