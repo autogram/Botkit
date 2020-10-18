@@ -48,7 +48,7 @@ Python. Botkit makes it easy to combine multiple Bot API or MTProto clients from
 
 ### Implemented features
 
-- [ ] One config to rule them all: [https://github.com/autogram/Botkit/blob/81cf9ec49ca0bde1a541605b62ca0bf9e2b055ef/botkit/configuration/client_config.py](Pyrogram and Telethon clients can be instantiated from a common `ClientConfig`)
+- [ ] One config to rule them all: [Pyrogram and Telethon clients can be instantiated from a common `ClientConfig`](https://github.com/autogram/Botkit/blob/81cf9ec49ca0bde1a541605b62ca0bf9e2b055ef/botkit/configuration/client_config.py)
 
 ### In progress
 
