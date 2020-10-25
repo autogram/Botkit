@@ -10,6 +10,8 @@ from botkit.agnostic.annotations import (
     TPoll,
 )
 
+from .pyrogram_view_sender import PyrogramViewSender
+
 __all__ = [
     "TClient",
     "TMessage",
@@ -20,4 +22,5 @@ __all__ = [
     "ReturnType",
     "TArg",
     "HandlerSignature",
+    "PyrogramViewSender",
 ]

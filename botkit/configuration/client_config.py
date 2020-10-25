@@ -96,10 +96,10 @@ class ClientConfig:
 
     @property
     def full_session_path(self) -> Optional[FilePath]:
-        if self.session_string or not self.effective_session_location_arg:
+        if self.session_string or not self.effective_session_location:
             return None
         # noinspection PydanticTypeChecker
-        return Path(f"{self.effective_session_location_arg}.session")
+        return Path(f"{self.effective_session_location}.session")
 
     @property
     def description(self) -> str:
@@ -108,11 +108,11 @@ class ClientConfig:
         if self.session_string:
             result += "using a string session"
         elif self.session_file:
-            result += f"using session file at {self.session_file}"
+            result += f"using session file {self.session_file}"
         return result
 
     @property
-    def effective_session_location_arg(self):
+    def effective_session_location(self):
         if self.session_string:
             if self.flavor == "telethon":
                 # noinspection PyUnresolvedReferences
@@ -122,6 +122,7 @@ class ClientConfig:
             return self.session_string
         if self.session_file:
             return str(self.session_root_dir / self.session_file)
+
         raise ValueError("Could not find a valid session")
 
     # TODO: add validators for item combinations
@@ -135,13 +136,15 @@ class ClientConfig:
                 result["bot_token"] = self.bot_token
 
         if self.flavor == "pyrogram":
-            result["session_name"] = self.effective_session_location_arg
             if self.is_local_file_session:
+                result["session_name"] = self.session_file
                 result["workdir"] = self.full_session_path.parent
+            else:
+                result["session_name"] = self.effective_session_location
         else:
-            result["session"] = self.effective_session_location_arg
+            result["session"] = self.effective_session_location
 
-        if self.flavor == "pyrogram":
+        if self.flavor == "pyrogram" and self.phone_number:
             result["phone_number"] = str(self.phone_number)
         # Note: Phone number gets passed to Telethon clients in `start`
 
@@ -155,7 +158,7 @@ class ClientConfig:
             return {}
         if self.flavor == "telethon":
             if self.phone_number:
-                return {"phone_number": self.phone_number}
+                return {"phone": self.phone_number}
             if self.bot_token:
                 return {"bot_token": self.bot_token}
             return {}

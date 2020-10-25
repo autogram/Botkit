@@ -239,6 +239,12 @@ class ConditionsExpression(IExpressionWithCallMethod):
         self._plan = ExecutionPlan(self._route_collection.current_client)
         self._triggers = RouteTriggers(filters=filters, condition=condition, action=None)
 
+    def call_with_traits(self, handler: Callable) -> RouteExpression:
+        self._plan.set_handler(handler)
+        route = RouteDefinition(triggers=self._triggers, plan=self._plan)
+        self._route_collection.add_for_current_client(route)
+        return RouteExpression(self._route_collection, route)
+
     def call(self, handler: HandlerSignature) -> RouteExpression:
         self._plan.set_handler(handler)
         route = RouteDefinition(triggers=self._triggers, plan=self._plan)

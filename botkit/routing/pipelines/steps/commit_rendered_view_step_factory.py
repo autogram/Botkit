@@ -68,7 +68,7 @@ class CommitRenderedViewStepFactory(
 
                         if message_requires_bot:
                             log.debug(
-                                f"Message to be sent has features incompatible with user clients. Use `send_via_bot` "
+                                f"view_sender_interface to be sent has features incompatible with user clients. Use `send_via_bot` "
                                 f"to use inline mode for a message with e.g. reply markup."
                             )
 
@@ -110,7 +110,7 @@ class CommitRenderedViewStepFactory(
                         except MessageIdInvalid:
                             # TODO should be fixed, remove as soon as Dan has published
                             # Then replace with proper error handling..?
-                            log.exception("Message ID invalid bug encountered.")
+                            log.exception("view_sender_interface ID invalid bug encountered.")
                             return None
 
                     # We need to differentiate button clicks on regular and inline (query) messages:
@@ -120,7 +120,7 @@ class CommitRenderedViewStepFactory(
                         chat_id = message.chat.id
                         message_id = message.message_id
                     elif hasattr(context.update, "message_id"):
-                        # Message update
+                        # view_sender_interface update
                         chat_id = context.chat.id
                         message_id = context.update.message_id
                     else:

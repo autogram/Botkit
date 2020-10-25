@@ -48,6 +48,7 @@ ensure = "^1.0.0"
 telethon = {version = "^1.16.4", optional = true}
 loguru = "^0.5.3"
 paraminjector = "^0.1.0"
+decompyle3 = {git = "https://github.com/rocky/python-decompile3"}
 
 [tool.poetry.extras]
 redis = ["redis-collections"]

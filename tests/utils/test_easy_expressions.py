@@ -7,17 +7,17 @@ from botkit.utils.easy_expressions import Easy
 
 class TestEasy:
     def test_easy_test(self):
-        easy = Easy().startOfLine().exactly(1).of("p")
+        easy = Easy().start_of_line().exactly(1).of("p")
         assert easy.test("p")
         assert not easy.test("qp")
 
     def test_match(self):
-        easy = Easy().startOfLine().exactly(1).of("p")
+        easy = Easy().start_of_line().exactly(1).of("p")
         assert easy.match("q") is None
         assert easy.match("p") is not None
 
     def test_search(self):
-        easy = Easy().startOfLine().exactly(1).of("p")
+        easy = Easy().start_of_line().exactly(1).of("p")
         assert easy.search("q") is None
         assert easy.search("p") is not None
 
@@ -136,7 +136,7 @@ class TestEasy:
         Start of Line test.
         """
 
-        reg = Easy().startOfLine().exactly(1).of("p").get_regex()
+        reg = Easy().start_of_line().exactly(1).of("p").get_regex()
 
         test = "p"
         assert len(re.findall(reg, test)) == 1
@@ -148,7 +148,7 @@ class TestEasy:
         """
         Test 'exactly'
         """
-        reg = Easy().startOfLine().exactly(3).of("x").end_of_line().get_regex()
+        reg = Easy().start_of_line().exactly(3).of("x").end_of_line().get_regex()
 
         test = "xx"
         assert len(re.findall(reg, test)) == 0
@@ -161,7 +161,7 @@ class TestEasy:
         """
         Test 'max'
         """
-        reg = Easy().startOfLine().max(3).of("x").end_of_line().get_regex()
+        reg = Easy().start_of_line().max(3).of("x").end_of_line().get_regex()
 
         test = "xx"
         assert len(re.findall(reg, test)) == 1
@@ -174,7 +174,7 @@ class TestEasy:
         """
         Test joined Min and Max
         """
-        reg = Easy().startOfLine().min(3).max(5).of("x").end_of_line().get_regex()
+        reg = Easy().start_of_line().min(3).max(5).of("x").end_of_line().get_regex()
 
         test = "xx"
         assert len(re.findall(reg, test)) == 0
@@ -191,7 +191,7 @@ class TestEasy:
         """
         Test of
         """
-        easy = Easy().startOfLine().exactly(2).of("p p p ").end_of_line()
+        easy = Easy().start_of_line().exactly(2).of("p p p ").end_of_line()
 
         test = "p p p p p p "
         assert easy.test(test)
@@ -202,7 +202,7 @@ class TestEasy:
         """
         Test ofAny
         """
-        easy = Easy().startOfLine().exactly(3).ofAny().end_of_line()
+        easy = Easy().start_of_line().exactly(3).ofAny().end_of_line()
 
         assert easy.test("abc")
         assert not easy.test("ac")
@@ -213,14 +213,14 @@ class TestEasy:
         """
         easy = (
             Easy()
-            .startOfLine()
+            .start_of_line()
             .exactly(3)
             .of("p")
             .as_group()
             .exactly(1)
             .of("q")
             .exactly(1)
-            .ofGroup(1)
+            .of_group(1)
             .end_of_line()
         )
 
@@ -233,16 +233,30 @@ class TestEasy:
         """
         easy = (
             Easy()
-            .startOfLine()
+            .start_of_line()
             .exactly(3)
             .of("p")
             .as_group()
             .exactly(1)
             .of("q")
             .exactly(1)
-            .ofGroup(1)
+            .of_group(1)
             .end_of_line()
         )
 
         assert easy.test("pppqppp")
         assert not easy.test("pxpqppp")
+
+    def test_ptbchat_example(self):
+        easy = (
+            Easy()
+            .start_of_line()
+            .exactly(1)
+            .of("-")
+            .whitespace()
+            .anything()
+            .as_group()
+            .add_flag("DOTALL")
+        )
+
+        assert easy.search("- abc").group(1).strip() == "abc"

@@ -1,7 +1,7 @@
 import traceback
 from asyncio import Event
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Generic, Optional, TypeVar, Union
+from typing import AsyncIterator, Generic, Optional, TypeVar, Union, cast
 from uuid import uuid4
 
 from haps import SINGLETON_SCOPE, base, scope
@@ -123,7 +123,8 @@ class CompanionBotService:
         async def answer_inline_query(client: IClient, query: InlineQuery):
 
             # TODO: implement the other types
-            if isinstance(rendered, RenderedMediaMessage):
+            if getattr(rendered, "media"):
+                rendered = cast(RenderedMediaMessage, rendered)
                 result = InlineQueryResultPhoto(
                     photo_url=rendered.media,
                     thumb_url=rendered.thumb_url,
@@ -135,7 +136,8 @@ class CompanionBotService:
                     reply_markup=rendered.inline_keyboard_markup,
                     input_message_content=None,
                 )
-            elif isinstance(rendered, RenderedTextMessage):
+            else:
+                rendered = cast(RenderedTextMessage, rendered)
                 result = InlineQueryResultArticle(
                     title="sent via userbot",
                     input_message_content=InputTextMessageContent(
@@ -149,8 +151,6 @@ class CompanionBotService:
                     description=None,
                     thumb_url=None,
                 )
-            else:
-                raise NotImplementedError(f"Sending {rendered} is not yet possible.")
 
             # noinspection PyTypeChecker
             await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=1)
@@ -230,7 +230,7 @@ class CompanionBotService:
         silent: bool = False,
         hide_via: bool = False,
     ) -> Message:
-        rendered: RenderedMessage = view.render()
+        rendered: RenderedMessageBase = view.render()
         return await self.send_rendered_message_via(
             chat_id=chat_id,
             rendered=rendered,

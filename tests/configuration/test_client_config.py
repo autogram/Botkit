@@ -103,7 +103,7 @@ class TestPyrogramClientConfig:
             phone_number=phone,
         )
 
-        assert conf.effective_session_location_arg == "mysession"
+        assert conf.effective_session_location == "mysession"
         assert isinstance(conf.full_session_path, Path)
 
         client = TelethonClient(**conf.init_kwargs(api_config=api_config))

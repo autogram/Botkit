@@ -48,7 +48,7 @@ async def resolve_chat_by_id(
 async def resolve_chat_by_title_regex(
     client: IClient, title_regex: PatternType, _: AsyncLazyDict
 ) -> ChatIdentity:
-    LIMIT = 100
+    LIMIT = 1000
 
     if client_is_instance(client, "pyrogram"):
         client = cast(PyrogramClient, client)

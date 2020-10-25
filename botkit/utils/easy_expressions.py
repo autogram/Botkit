@@ -178,7 +178,7 @@ class Easy(object):
         self._literals.append("(?:^)")
         return self
 
-    def startOfLine(self):
+    def start_of_line(self):
         """
         """
         self.multi_line()
@@ -273,7 +273,7 @@ class Easy(object):
         self._of_any = True
         return self
 
-    def ofGroup(self, n):
+    def of_group(self, n):
         self._of_group = n
         return self
 

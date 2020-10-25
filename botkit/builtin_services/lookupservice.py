@@ -27,15 +27,15 @@ from botkit.utils.strutils import string_similarity
 #         pass
 #
 #     @abstractmethod
-#     async def get_message_by_id(self, chat: Any, message_id: int) -> Message:
+#     async def get_message_by_id(self, chat: Any, message_id: int) -> view_sender_interface:
 #         pass
 #
 #     @abstractmethod
-#     async def get_previous_messages(self, event: Event, n: int = 1) -> List[Message]:
+#     async def get_previous_messages(self, event: Event, n: int = 1) -> List[view_sender_interface]:
 #         pass
 #
 #     @abstractmethod
-#     async def get_last_message_in_chat(self, input_chat: Any) -> Message:
+#     async def get_last_message_in_chat(self, input_chat: Any) -> view_sender_interface:
 #         pass
 #
 #
@@ -105,12 +105,12 @@ from botkit.utils.strutils import string_similarity
 #         else:
 #             return None
 #
-#     async def get_message_by_id(self, chat: Any, message_id: int) -> Message:
+#     async def get_message_by_id(self, chat: Any, message_id: int) -> view_sender_interface:
 #         raise NotImplemented  # TODO
 #
-#     async def get_previous_messages(self, event: Event, n: int = 1) -> List[Message]:
+#     async def get_previous_messages(self, event: Event, n: int = 1) -> List[view_sender_interface]:
 #         limit = n + 1
 #         return (await self.client.get_messages(entity=event.input_chat, limit=limit))[:-1]
 #
-#     async def get_last_message_in_chat(self, input_chat: Any) -> Message:
+#     async def get_last_message_in_chat(self, input_chat: Any) -> view_sender_interface:
 #         return (await self.client.get_messages(input_chat, limit=1))[0]

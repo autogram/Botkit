@@ -13,6 +13,34 @@ from botkit.routing.route_builder.state_route_builder import StateRouteBuilder
 client: IClient = Mock(IClient)
 
 
+def test_stuff():
+    routes = RouteBuilder()
+    routes.use(client)
+
+    dontuse = 7
+    a, b, c = routes.state_machine()
+
+    a.on()
+
+    d, e = routes.state_machine()
+
+    assert a.name == "a"
+    assert b.name == "b"
+    assert c.name == "c"
+
+
+def test_state_machine_initialization_via_ast():
+    routes = RouteBuilder()
+    routes.use(client)
+
+    entry_point, a, b, done = routes.state_machine(4)
+
+    assert isinstance(entry_point, StateRouteBuilder)
+    assert isinstance(a, StateRouteBuilder)
+    assert isinstance(b, StateRouteBuilder)
+    assert isinstance(done, StateRouteBuilder)
+
+
 def test_state_machine_initialization_via_num_arguments():
     routes = RouteBuilder()
     routes.use(client)
@@ -65,7 +93,7 @@ class StateMachineTestModule(Module):
 
 
 def test_state_machine_routing():
-    pass  # TODO: implement
+    pass
     # module = StateMachineTestModule()
     # dispatcher = BotkitDispatcher()
     #
@@ -73,7 +101,7 @@ def test_state_machine_routing():
     #
     # relevant_routes: List[Route] = collection.routes_by_client[client]
     #
-    # message = Mock(Message)
+    # message = Mock(view_sender_interface)
     # message.configure_mock(text="henlo")
     #
     # assert len(relevant_routes) == 2

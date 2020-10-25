@@ -8,6 +8,7 @@ from haps import Inject, base
 from haps.application import Application
 from pyrogram import Client as PyrogramClient
 
+from botkit.configuration import ClientConfig
 from botkit.core.modules.activation import ModuleLoader
 from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
@@ -51,8 +52,11 @@ class Startup(Application, ABC):
         await asyncio.gather(*start_tasks)
 
     async def __start_client(self, client: Union[IClient, Any]):
-        self.log.debug(f"Starting {client.config.description}...")
-        await client.start()
+        # TODO(XXX): This forces the client instances to have a `config` property, which is not reflected in `IClient`.
+        self.log.debug(f"Starting {client.__class__.__name__}, {client.config.description}...")
+        kwargs =client.config.start_kwargs()
+        self.log.warning(kwargs)
+        await client.start(**kwargs)
 
         me = await client.get_me()
         client.own_user_id = me.id

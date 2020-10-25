@@ -8,7 +8,7 @@ from pyrogram.types import Message
 
 def get_message_date(message: Message, including_edits: bool = True) -> datetime:
     if message is None:
-        raise ValueError("Message cannot be None.")
+        raise ValueError("view_sender_interface cannot be None.")
 
     if message.edit_date and including_edits:
         return timestamp_to_datetime(message.edit_date)

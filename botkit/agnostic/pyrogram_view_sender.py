@@ -28,7 +28,7 @@ from botkit.views.views import MessageViewBase
 log = create_logger("view_sender")
 
 
-class PyroRendererClientMixin(Client, IClient[Message, User], ABC):
+class PyrogramViewSender(Client, IClient[Message], ABC):
     async def send_rendered_message(
         self,
         peer: Union[int, str],

@@ -18,6 +18,7 @@ from botkit.views.base import (
 )
 from botkit.views.types import TViewState
 from botkit.views.rendered_messages import (
+    RenderedMediaMessage,
     RenderedMessage,
     RenderedMessageMarkup,
     RenderedPollMessage,

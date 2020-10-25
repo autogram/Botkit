@@ -166,8 +166,7 @@ class StatusPings:
     @staticmethod
     def timestamp_older_than(dt: datetime, seconds: int) -> bool:
         now = datetime.now(tz=pytz.UTC)
-        result = now > (dt + timedelta(seconds=seconds))
-        return result
+        return now > (dt + timedelta(seconds=seconds))
 
     @staticmethod
     def timestamp_between(dt: datetime, min_seconds: int, max_seconds: int):

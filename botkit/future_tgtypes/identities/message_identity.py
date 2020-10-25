@@ -86,7 +86,7 @@ class MessageIdentity:
 #
 #     @classmethod
 #     async def from_message(
-#         cls, message: Union[Message, "MessageIdentity"], client: ConfiguredClient = None
+#         cls, message: Union[view_sender_interface, "MessageIdentity"], client: ConfiguredClient = None
 #     ) -> "MessageIdentity":
 #         if isinstance(message, MessageIdentity):
 #             return message
