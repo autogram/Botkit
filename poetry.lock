@@ -385,6 +385,14 @@ colorama = ">=0.3.4"
 win32-setctime = ">=1.0.0"
 
 [[package]]
+name = "loguru-mypy"
+version = "0.0.2"
+description = ""
+category = "dev"
+optional = false
+python-versions = ">=3.6.0"
+
+[[package]]
 name = "markupsafe"
 version = "1.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -950,7 +958,7 @@ hmr = ["watchgod"]
 
 [metadata]
 python-versions = "^3.8"
-content-hash = "87fab31909f3788ca594da2ed68fb911c9547b642b94095021b295762062eb7f"
+content-hash = "e259447127293a4246a6a2124ef4463460cf7e2ae6f371b4042e5a986370fdc1"
 
 [metadata.files]
 appdirs = [
@@ -1113,6 +1121,10 @@ littleutils = [
 loguru = [
     {file = "loguru-0.5.3-py3-none-any.whl", hash = "sha256:f8087ac396b5ee5f67c963b495d615ebbceac2796379599820e324419d53667c"},
     {file = "loguru-0.5.3.tar.gz", hash = "sha256:b28e72ac7a98be3d28ad28570299a393dfcd32e5e3f6a353dec94675767b6319"},
+]
+loguru-mypy = [
+    {file = "loguru-mypy-0.0.2.tar.gz", hash = "sha256:871c772b7e99eb3e71f2952070fcb1b960cfabbe55e5edf17ae5830ab048f1bf"},
+    {file = "loguru_mypy-0.0.2-py3.8.egg", hash = "sha256:3da435dcc34b1552abfa6a4555b36ac9b9568669e3c3c024947cdb42369aec7c"},
 ]
 markupsafe = [
     {file = "MarkupSafe-1.1.1-cp27-cp27m-macosx_10_6_intel.whl", hash = "sha256:09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161"},

@@ -99,6 +99,7 @@ class UpdateFieldExtractor:
                 return replied_to.text
         return None
 
+    quoted = replied_to_message
     quoted_text = replied_to_message_text
 
     @property

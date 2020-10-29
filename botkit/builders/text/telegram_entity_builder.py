@@ -2,7 +2,7 @@ from typing import Any, Iterable, Literal, Optional, TYPE_CHECKING, Union
 from urllib.parse import quote_plus
 
 from boltons import strutils
-from pyrogram.emoji import BUST_IN_SILHOUETTE
+from pyrogram.emoji import BUST_IN_SILHOUETTE, BUSTS_IN_SILHOUETTE
 
 from botkit.builders.text.htmltextbuilder import _HtmlTextBuilder
 from botkit.routing.triggers import ActionIdType
@@ -23,6 +23,14 @@ class EntityBuilder(_HtmlTextBuilder):
 
     def user(self, user: Any, end: Optional[str] = " "):
         return self._append_with_end(self.as_user(user=user), end)
+
+    @classmethod
+    def as_chat(cls, user: Any):
+        link = cls.as_link(display_name(user), direct_link_user(user))
+        return f"{BUSTS_IN_SILHOUETTE} {link}"
+
+    def chat(self, user: Any, end: Optional[str] = " "):
+        return self._append_with_end(self.as_chat(user=user), end)
 
     @classmethod
     def as_command(cls, name: str, to_lower: bool = False):

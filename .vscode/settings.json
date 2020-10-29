@@ -6,4 +6,6 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.pytestEnabled": true,
+    "python.pythonPath": "c:\\Users\\INT002327\\AppData\\Local\\pypoetry\\Cache\\virtualenvs\\botkit-H3ZeT93G-py3.8\\Scripts\\python.exe",
+    "python.formatting.provider": "black",
 }

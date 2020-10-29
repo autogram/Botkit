@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, NoReturn, Optional, Union
 
@@ -35,9 +36,9 @@ class Module(IAsyncLoadUnload):  # Not marked as ABC to allow dynamic creation
         return cls.__name__
 
     @property
-    def log(self) -> Logger:
+    def log(self) -> loguru.Logger:
         return loguru.logger
 
     @property
-    def logger(self) -> Logger:
+    def logger(self) -> loguru.Logger:
         return loguru.logger

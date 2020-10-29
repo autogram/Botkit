@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Set, Type
 
 import pyrogram
 from boltons.iterutils import flatten
+from pyrogram.handlers.handler import Handler
 
 from botkit.routing.update_types.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable
@@ -17,7 +18,7 @@ PYROGRAM_UPDATE_TYPES: Dict[Type[pyrogram.types.Update], UpdateType] = {
 }
 
 # noinspection PyUnresolvedReferences
-PYROGRAM_HANDLER_TYPES: Dict[UpdateType, pyrogram.handlers.handler.Handler] = {
+PYROGRAM_HANDLER_TYPES: Dict[UpdateType, Type[Handler]] = {
     UpdateType.message: pyrogram.handlers.MessageHandler,
     UpdateType.callback_query: pyrogram.handlers.CallbackQueryHandler,
     UpdateType.inline_query: pyrogram.handlers.InlineQueryHandler,

@@ -2,7 +2,7 @@ from dataclasses import field
 from dataclasses import field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Type, Union, cast
 
 from boltons.strutils import slugify
 from haps import base
@@ -30,8 +30,8 @@ BotToken = constr(strip_whitespace=True, regex=r"[0-9]{8,10}:AA[a-zA-Z0-9-_]{33}
 PhoneNumber = Union[int, constr(regex=r"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$")]
 
 
-@base
 @dataclass
+# @base
 class ClientConfig:
     client_type: ClientType
     flavor: SupportedLibraryName
@@ -50,7 +50,7 @@ class ClientConfig:
         return flavor
 
     @root_validator
-    def ensure_sufficient_properties_present(cls, values):
+    def ensure_sufficient_properties_present(cls, values: Dict[str, Any]):
         bot_token, phone_number = values.get("bot_token"), values.get("phone_number")
 
         client_type = values.get("client_type")
@@ -99,7 +99,7 @@ class ClientConfig:
         if self.session_string or not self.effective_session_location:
             return None
         # noinspection PydanticTypeChecker
-        return Path(f"{self.effective_session_location}.session")
+        return cast(FilePath, Path(f"{self.effective_session_location}.session"))
 
     @property
     def description(self) -> str:

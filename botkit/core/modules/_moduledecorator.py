@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Type, TypeVar, Union
+from typing import Any, Callable, List, Type, TypeVar, Union, cast
 
 import decorators
 from haps import Egg, egg
@@ -8,9 +8,7 @@ from ._module import Module
 
 # region types
 
-# noinspection PyTypeHints
-egg.factories: List[Egg]
-# endregion
+egg.factories = cast(List[Egg], egg.factories)
 
 
 class ModuleDecorator(decorators.Decorator):
@@ -28,11 +26,11 @@ class ModuleDecorator(decorators.Decorator):
         return cls
 
     def decorate_func(
-        self, func: Callable[[RouteBuilder], Any], name: str = None, *args, **dec_kwargs
+        self, func: Callable[[RouteBuilder], Type[Module]], name: str = None, *args, **dec_kwargs
     ) -> Type[Module]:
         class_name = name if name else format_module_name(func.__name__)
         module_cls = type(
-            class_name, (Module,), {"register": lambda self, routes: func(routes=routes)},
+            class_name, (Module,), {"register": lambda self, routes: func(routes)},
         )
         egg.factories.append(
             Egg(
@@ -50,9 +48,9 @@ class ModuleDecorator(decorators.Decorator):
 module = ModuleDecorator
 
 
-def format_module_name(word):
-    return _snake_to_upper_camel(word)
+def format_module_name(any_str: str):
+    return _snake_to_upper_camel(any_str)
 
 
-def _snake_to_upper_camel(word):
+def _snake_to_upper_camel(word: str):
     return "".join(x.capitalize() or "_" for x in word.split("_"))

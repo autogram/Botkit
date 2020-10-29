@@ -1,10 +1,11 @@
 from haps import base, egg, SINGLETON_SCOPE, scope as haps_scope
 import decorators
-from typing import TypeVar
+from typing import Any, Callable, TypeVar, no_type_check, no_type_check_decorator, overload
 
 T = TypeVar("T")
 
 
+@no_type_check
 class _ServiceDecorator(decorators.ClassDecorator):
 
     """
@@ -28,11 +29,11 @@ class _ServiceDecorator(decorators.ClassDecorator):
     ```
     """
 
-    def decorate(self, cls: T, scope=SINGLETON_SCOPE, **kwargs) -> T:
-        base(cls)
-        egg(cls)
-        haps_scope(scope)(cls)
-        return cls
+    def decorate(self, klass, scope=SINGLETON_SCOPE, **kwargs) -> Any:
+        base(klass)
+        egg(klass)
+        haps_scope(scope)(klass)
+        return klass
 
 
 service = _ServiceDecorator

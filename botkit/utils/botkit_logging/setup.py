@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import *
 import re
 
 from loguru import logger
@@ -13,7 +15,7 @@ from botkit.settings import botkit_settings
 #     )
 
 
-def create_logger(sub_logger_name: str = None, **kwargs) -> Logger:
+def create_logger(sub_logger_name: Optional[str] = None, **kwargs: Any) -> Logger:
     if sub_logger_name:
         name = "botkit." + re.sub(r"^botkit\.?", "", sub_logger_name, re.MULTILINE)
     else:

@@ -1,8 +1,8 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Optional, TypeVar
 
 import loguru
-from loguru._logger import Logger
 
 from botkit.abstractions import IAsyncLoadUnload, IRegisterable
 from botkit.routing.types import TViewState
@@ -15,7 +15,7 @@ TCompState = TypeVar("TCompState")
 
 
 class Component(Generic[TViewState, TCompState], IAsyncLoadUnload, IRegisterable, ABC):
-    _logger: Optional[Logger]
+    _logger: Optional[loguru.Logger]
     _is_registered: bool
 
     _unique_index: Optional[int] = None
@@ -33,9 +33,9 @@ class Component(Generic[TViewState, TCompState], IAsyncLoadUnload, IRegisterable
         ...
 
     @property
-    def log(self) -> Logger:
+    def log(self) -> loguru.Logger:
         return loguru.logger
 
     @property
-    def logger(self) -> Logger:
+    def logger(self) -> loguru.Logger:
         return loguru.logger

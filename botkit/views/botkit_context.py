@@ -2,6 +2,8 @@ from collections.abc import MutableMapping
 from dataclasses import dataclass
 from typing import Any, Generic, Iterator, Optional, TypeVar
 
+from pyrogram.raw.functions.channels import GetInactiveChannels
+
 from botkit.dispatching.types import CallbackActionType
 from botkit.future_tgtypes.update_field_extractor import UpdateFieldExtractor
 from .rendered_messages import RenderedMessage

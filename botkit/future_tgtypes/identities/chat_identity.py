@@ -22,10 +22,13 @@ class ChatIdentity(BaseModel):
         cls, chat: Optional[Chat], user: User, client_user_id: int
     ) -> "Optional[ChatIdentity]":
         if not chat:
-            log.warning("No chat found in update. This is most likely due to an inline message.")
+            log.debug("No chat found in update. This is most likely due to an inline message.")
             return None
         type_ = chat.type
         chat_id = chat.id
+
+        if not user:
+            return ChatIdentity(type=type_, peers=chat_id)
 
         if type_ == "private":
             # Add own client user ID into the mix

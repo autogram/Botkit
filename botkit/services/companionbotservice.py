@@ -120,11 +120,11 @@ class CompanionBotService:
         # - raise early when exception is detected in this method
         query_text = str(uuid4())
 
-        async def answer_inline_query(client: IClient, query: InlineQuery):
+        msg = rendered
 
-            # TODO: implement the other types
-            if getattr(rendered, "media"):
-                rendered = cast(RenderedMediaMessage, rendered)
+        async def answer_inline_query(client: IClient, query: InlineQuery):
+            if hasattr(msg, "media"):
+                rendered = cast(RenderedMediaMessage, msg)
                 result = InlineQueryResultPhoto(
                     photo_url=rendered.media,
                     thumb_url=rendered.thumb_url,
@@ -137,7 +137,7 @@ class CompanionBotService:
                     input_message_content=None,
                 )
             else:
-                rendered = cast(RenderedTextMessage, rendered)
+                rendered = cast(RenderedTextMessage, msg)
                 result = InlineQueryResultArticle(
                     title="sent via userbot",
                     input_message_content=InputTextMessageContent(

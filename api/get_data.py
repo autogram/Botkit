@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable
+from typing import Any, Callable
 
 # from pyrogram.client.methods import Methods
 #
@@ -13,7 +13,7 @@ def format_method_sig(name: str, method: Callable):
     return f"{method.__name__}{str(sig).replace('self, ', '')}"
 
 
-def flt(m) -> bool:
+def flt(m: Any) -> bool:
     if not inspect.isfunction(m):
         return False
     if m.__name__.startswith("_"):
@@ -22,5 +22,5 @@ def flt(m) -> bool:
 
 
 if __name__ == "__main__":
-    for m in inspect.getmembers(APIMethods, predicate=lambda m: flt(m)):
+    for m in inspect.getmembers(APIMethods, predicate=flt):
         print(format_method_sig(*m))
