@@ -5,7 +5,6 @@ from typing import Any, Callable, TypeVar, no_type_check, no_type_check_decorato
 T = TypeVar("T")
 
 
-@no_type_check
 class _ServiceDecorator(decorators.ClassDecorator):
 
     """

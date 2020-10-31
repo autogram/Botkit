@@ -16,4 +16,3 @@ GathererSignatureExamplesStr = """
 - async def () -> TViewState
 - async def (context: Context) -> TViewState
 """.strip()
-GathererSignatureExamplesStr = str(GathererSignature)
