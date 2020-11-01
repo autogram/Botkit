@@ -1,0 +1,8 @@
+# Poetry base image repository:
+# https://github.com/users/JosXa/packages/container/package/python-poetry-base
+FROM       ghcr.io/josxa/python-poetry-base:latest as Build
+
+ENV        PYTHONUNBUFFERED=1
+COPY       pyproject.toml ./
+COPY       . ./
+RUN        poetry install --no-dev

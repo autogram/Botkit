@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "autogram-botkit-tests"
+version = "0.0.0"
+authors = ["A tester"]
+description = "Tests"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+autogram-botkit = { path = "../../", extras = ["redis", "hmr"] }
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
