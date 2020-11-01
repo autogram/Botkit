@@ -8,7 +8,6 @@ description = "Tests"
 python = "^3.8"
 autogram-botkit = { path = "../../", extras = ["redis", "hmr"] }
 
-
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
