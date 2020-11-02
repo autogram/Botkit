@@ -48,6 +48,7 @@ watchgod = { version = "^0.6", optional = true }
 ensure = "^1.0.0"
 loguru = "^0.5.3"
 paraminjector = "^0.1.0"
+typing-extensions = "^3.7.4"
 
 [tool.poetry.extras]
 redis = ["redis-collections"]
