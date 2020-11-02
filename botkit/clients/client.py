@@ -9,7 +9,7 @@ class IdentifiableUser(Protocol):
     username: str
 
 
-Message = TypeVar("view_sender_interface")
+Message = TypeVar("Message")
 
 
 class IClient(IViewSender[Message], ABC, Generic[Message]):

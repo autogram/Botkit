@@ -3,8 +3,6 @@ from typing import Any, Awaitable, Callable, List, Optional, Union
 
 from pyrogram.errors import MessageIdInvalid
 
-from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
-from botkit.future_tgtypes.identities.message_identity import MessageIdentity
 from botkit.routing.pipelines.executionplan import SendTarget, SendTo, ViewParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
@@ -12,6 +10,8 @@ from botkit.routing.update_types.updatetype import UpdateType
 from botkit.services.companionbotservice import CompanionBotService
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.views.botkit_context import Context
+from tgtypes.identities.chat_identity import ChatIdentity
+from tgtypes.identities.message_identity import MessageIdentity
 
 
 class CommitRenderedViewStepError(StepError):

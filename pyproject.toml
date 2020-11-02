@@ -8,7 +8,7 @@ description = "Opinionated, library-agnostic Python framework for rapid developm
 license = "GPL-3.0-or-later"
 authors = ["JosXa <joscha.goetzer@gmail.com>"]
 readme = "README.md"
-repository="https://github.com/autogram/Botkit"
+repository = "https://github.com/autogram/Botkit"
 keywords = ["telegram-bots", "telegram-userbots", "python3", "framework"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -29,6 +29,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
+tgtypes = { git = "https://github.com/autogram/tgtypes", rev = "main" }
 cached_property = "^1.5.1"
 buslane = "^0.0.u"
 python-decouple = "3.3"
@@ -36,7 +37,7 @@ more-itertools = "^8.2.0"
 unsync = "^1.2.1"
 haps = "^1.1.2"
 typing-inspect = ">=0.5.0"
-pydantic = {extras = ["dotenv"], version = "^1.6.1"}
+pydantic = { extras = ["dotenv"], version = "^1.6.1" }
 ordered_set = "^3.1.1"
 decorators = "^0.1.1"
 pyhumps = "^1.3.1"
@@ -53,7 +54,7 @@ redis = ["redis-collections"]
 hmr = ["watchgod"]
 
 [tool.poetry.dev-dependencies]
-black = {version = ">=20.8b1", python = "^3.8", markers = "platform_python_implementation == 'CPython'"}
+black = { version = ">=20.8b1", python = "^3.8", markers = "platform_python_implementation == 'CPython'" }
 mypy = ">0.770"
 birdseye = "^0.8.3"
 mkinit = "^0.2.0"
@@ -62,7 +63,7 @@ pytest = "*"
 pytest-asyncio = "*"
 pytest-cov = "^2.10.1"
 pre-commit = "^2.7.1"
-devtools = {extras = ["pygments"], version = "^0.6"}
+devtools = { extras = ["pygments"], version = "^0.6" }
 pyrogram = "1.*"
 telethon = "1.*"
 loguru-mypy = "^0.0.2"

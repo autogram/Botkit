@@ -820,6 +820,23 @@ pyaes = "*"
 rsa = "*"
 
 [[package]]
+name = "tgtypes"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "^3.7"
+
+[package.dependencies]
+loguru = "^0.5.3"
+pydantic = "^1.6.1"
+
+[package.source]
+url = "https://github.com/autogram/tgtypes"
+reference = "af6144c776c2ab630aaedf0316aaea347d8f35f0"
+type = "git"
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -960,7 +977,7 @@ hmr = ["watchgod"]
 
 [metadata]
 python-versions = "^3.8"
-content-hash = "8e3b2ac9dbdbd881d56e7eee6dd7b4e5c782b93a7c7e59e13f63021a24522e0b"
+content-hash = "925d8a21ada54efd61665a9e1c530a05fb23d148f3250782aa80390132e21f8e"
 
 [metadata.files]
 appdirs = [
@@ -1432,6 +1449,7 @@ telethon = [
     {file = "Telethon-1.17.5-py3-none-any.whl", hash = "sha256:8763f35908d694e08a33a9d9354fc74751a50e1410d2006b2c595797ff7c87f6"},
     {file = "Telethon-1.17.5.tar.gz", hash = "sha256:958432bb3849d3e1fecfb45e211832a579fb4340a1d2b21b0d1a7d30407e39ec"},
 ]
+tgtypes = []
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},

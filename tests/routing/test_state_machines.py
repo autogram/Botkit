@@ -5,14 +5,15 @@ import pytest
 from pyrogram import filters
 from pyrogram.types import Message
 
-from botkit.core.modules import Module
 from botkit.agnostic.annotations import IClient
+from botkit.core.modules import Module
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.routing.route_builder.state_route_builder import StateRouteBuilder
 
 client: IClient = Mock(IClient)
 
 
+@pytest.mark.xfail
 def test_stuff():
     routes = RouteBuilder()
     routes.use(client)

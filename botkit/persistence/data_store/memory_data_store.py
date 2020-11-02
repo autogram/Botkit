@@ -3,10 +3,10 @@ from typing import Optional
 
 from haps import SINGLETON_SCOPE, egg, scope
 
-from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
-from botkit.future_tgtypes.identities.message_identity import MessageIdentity
 from botkit.persistence.data_store import DataStoreBase
 from botkit.views.botkit_context import Context
+from tgtypes.identities.chat_identity import ChatIdentity
+from tgtypes.identities.message_identity import MessageIdentity
 
 
 @egg

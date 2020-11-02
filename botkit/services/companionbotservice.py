@@ -22,9 +22,8 @@ from pyrogram.types import (
     Photo,
 )
 
-from botkit.future_tgtypes.identities.message_identity import MessageIdentity
-from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 from botkit.clients.client import IClient
+from botkit.inlinequeries.inlineresultgenerator import InlineResultGenerator
 from botkit.views.base import InlineResultViewBase
 from botkit.views.rendered_messages import (
     RenderedMediaMessage,
@@ -32,6 +31,7 @@ from botkit.views.rendered_messages import (
     RenderedMessageBase,
     RenderedTextMessage,
 )
+from tgtypes.identities.message_identity import MessageIdentity
 
 
 @base

@@ -3,12 +3,12 @@ from unittest.mock import Mock
 import pytest
 from pyrogram.types import Chat, Message, User
 
-from botkit.future_tgtypes.identities.chat_identity import ChatIdentity
+from botkit.clients.client import IClient
 from botkit.routing.pipelines.executionplan import SendTo
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import evaluate_send_target
 from botkit.routing.update_types.updatetype import UpdateType
-from botkit.clients.client import IClient
 from botkit.views.botkit_context import Context
+from tgtypes.identities.chat_identity import ChatIdentity
 
 SAME_CHAT_ID = 123
 USER_ID = 321
