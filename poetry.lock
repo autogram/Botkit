@@ -986,7 +986,7 @@ hmr = ["watchgod"]
 
 [metadata]
 python-versions = "^3.8"
-content-hash = "1e72eee8dbff09b6beaa895ed8e1e529fe7fac52b3007fa7d7e6656907e0a459"
+content-hash = "03b6afcb4c3d9742abc3e1a3fbe41b633e8e7e47f336f17ce564dbf31b9b9370"
 
 [metadata.files]
 appdirs = [
