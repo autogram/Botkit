@@ -29,7 +29,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-tgtypes = { git = "https://github.com/autogram/tgtypes", rev = "main" }
+tgtypes = "*"
 cached_property = "^1.5.1"
 python-decouple = "3.3"
 more-itertools = "^8.2.0"
