@@ -10,6 +10,7 @@ from pyrogram.types import Message
 from botkit.builtin_modules.system.sytem_management_module import ToggleSystemStateCommand
 from botkit.builtin_services.eventing import command_bus
 from botkit.utils.botkit_logging.setup import create_logger
+from tgtypes.descriptors.chat_descriptor import ChatDescriptor
 
 
 class Ping(BaseModel):
@@ -62,8 +63,7 @@ class StatusPings:
         if self.status == "active":
             if not queried_ping:
                 self.log.warning(
-                    "We were looking for pings but couldn't find any even though the system is active. "
-                    "Probably a bug."
+                    "We were looking for pings but couldn't find a message even though the system is active."
                 )
                 return
             if other_detected:

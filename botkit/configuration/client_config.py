@@ -31,7 +31,6 @@ PhoneNumber = Union[int, constr(regex=r"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-
 
 
 @dataclass
-# @base
 class ClientConfig:
     client_type: ClientType
     flavor: SupportedLibraryName
@@ -180,7 +179,7 @@ class ClientConfigurationError(Exception):
     def __str__(self) -> str:
         # TODO: refactor
         msg = "Configuration failed for "
-        msg += self.client_type
+        msg += str(self.client_type)
         # if hasattr(self.client_type, "__class__"):
         #     msg += self.client_type.__class__.__name__
         # else:
