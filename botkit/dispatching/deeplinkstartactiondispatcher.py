@@ -10,11 +10,11 @@ from pyrogram.types import Message
 from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.route import RouteHandler
 from botkit.routing.triggers import ActionIdType
-from botkit.routing.update_types.updatetype import UpdateType
-from botkit.settings import botkit_settings
+from tgtypes.updatetype import UpdateType
+from botkit import botkit_settings
 from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 START_WITH_UUID4_ARG_REGEX = re.compile(r"^/start ([0-9a-f-]{36})$", re.MULTILINE)
 
@@ -63,4 +63,4 @@ class DeepLinkStartActionDispatcher:
 
     @cached_property
     def callback_manager(self) -> ICallbackStore:
-        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
+        return Container().get_object(ICallbackStore, botkit_settings.callback_store_qualifier)

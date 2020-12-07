@@ -34,7 +34,7 @@ cached_property = "^1.5.1"
 python-decouple = "3.3"
 more-itertools = "^8.2.0"
 unsync = "^1.2.1"
-haps = "^1.1.2"
+haps = { git = "https://github.com/JosXa/haps" }
 typing-inspect = ">=0.5.0"
 pydantic = { extras = ["dotenv"], version = "^1.6.1" }
 ordered_set = "^3.1.1"
@@ -48,6 +48,10 @@ ensure = "^1.0.0"
 loguru = "^0.5.3"
 paraminjector = "^0.1.0"
 buslane = "^0.0.5"
+lambdas = "^0.1.0"
+returns = "^0.15.0"
+injector = "^0.18.4"
+aiofiles = "^0.6.0"
 
 [tool.poetry.extras]
 redis = ["redis-collections"]

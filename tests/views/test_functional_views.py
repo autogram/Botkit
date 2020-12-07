@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from botkit.builders import ViewBuilder
+from botkit.builders.viewbuilder import ViewBuilder
 from botkit.persistence import callback_store
 from botkit.persistence.callback_store import MemoryDictCallbackStore
 from botkit.views.functional_views import render_functional_view, view

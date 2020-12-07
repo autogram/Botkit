@@ -8,10 +8,10 @@ from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.pipelines.executionplan import ViewParameters
 from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
-from botkit.routing.update_types.updatetype import UpdateType
-from botkit.settings import botkit_settings
+from tgtypes.updatetype import UpdateType
+from botkit import botkit_settings
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 from botkit.views.functional_views import (
     quacks_like_view_render_func,
     render_functional_view,
@@ -46,7 +46,7 @@ class RenderViewStepFactory(
         )
 
         callback_store = Container().get_object(
-            ICallbackStore, botkit_settings.callback_manager_qualifier
+            ICallbackStore, botkit_settings.callback_store_qualifier
         )
 
         log = create_logger("renderer")

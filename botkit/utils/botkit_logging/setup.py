@@ -5,8 +5,6 @@ import re
 from loguru import logger
 from loguru._logger import Logger
 
-from botkit.settings import botkit_settings
-
 
 # def botkit_log_filter(record):
 #     return (

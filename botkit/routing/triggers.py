@@ -5,7 +5,7 @@ from typing import Optional, Callable, Set, Union, Awaitable
 from boltons.iterutils import is_collection
 from pyrogram.filters import Filter
 
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 
 ActionIdType = Union[int, str]
 

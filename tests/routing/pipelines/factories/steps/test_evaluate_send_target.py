@@ -6,8 +6,8 @@ from pyrogram.types import Chat, Message, User
 from botkit.clients.client import IClient
 from botkit.routing.pipelines.executionplan import SendTo
 from botkit.routing.pipelines.steps.commit_rendered_view_step_factory import evaluate_send_target
-from botkit.routing.update_types.updatetype import UpdateType
-from botkit.views.botkit_context import Context
+from tgtypes.updatetype import UpdateType
+from botkit.botkit_context import Context
 from tgtypes.identities.chat_identity import ChatIdentity
 
 SAME_CHAT_ID = 123

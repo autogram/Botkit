@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from botkit.core.components import Component
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 
 class Questionnaire(BaseModel):

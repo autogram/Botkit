@@ -2,7 +2,7 @@ import inspect
 from typing import Awaitable, Callable, Union, List
 
 from botkit.routing.types import TViewState
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 ReducerSignature = Union[
     Callable[[TViewState, Context], Union[TViewState, Awaitable[TViewState]]],

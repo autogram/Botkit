@@ -20,10 +20,10 @@ from botkit.routing.pipelines.steps.reduce_step_factory import ReduceStepFactory
 from botkit.routing.pipelines.steps.remove_trigger_step_factory import RemoveTriggerStepFactory
 from botkit.routing.pipelines.steps.render_view_step_factory import RenderViewStepFactory
 from botkit.routing.triggers import RouteTriggers
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 
 class UpdatePipelineFactory:

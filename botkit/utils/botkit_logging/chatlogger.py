@@ -4,12 +4,12 @@ from dataclasses import dataclass
 from logging import Handler, LogRecord
 from typing import Tuple, Union
 
-from botkit.builders import ViewBuilder
+from botkit.builders.viewbuilder import ViewBuilder
 from botkit.core.components import Component
 from botkit.agnostic.annotations import IClient
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.settings import botkit_settings
-from botkit.views.botkit_context import Context
+from botkit import botkit_settings
+from botkit.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature, render_functional_view
 
 

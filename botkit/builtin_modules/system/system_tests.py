@@ -9,9 +9,10 @@ from botkit.core.modules.activation import ModuleLoader
 from botkit.persistence.callback_store import ICallbackStore
 from botkit.routing.route import RouteDefinition, RouteHandler
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.routing.update_types.updatetype import UpdateType
-from botkit.settings import botkit_settings
+from tgtypes.updatetype import UpdateType
+from botkit import botkit_settings
 from botkit.clients.client import IClient
+from injector import inject
 
 
 def notests(func):
@@ -22,18 +23,14 @@ def notests(func):
 class SelftestModule(Module):
     loader: ModuleLoader = Inject()
 
+    @inject
+    def __init__(self, callback_store: ICallbackStore) -> None:
+        self.callback_store = callback_store
+
     def register(self, routes: RouteBuilder):
         pass
 
     async def load(self) -> None:
-        try:
-            Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
-        except Exception as ex:
-            self.log.exception("Callback manager could not be instantiated.")
-            if botkit_settings.callback_manager_qualifier != "memory":
-                self.log.warning("Falling back to `memory` callback manager.")
-                botkit_settings.callback_manager_qualifier = "memory"
-
         return  # TODO: implement
         for m in self.loader.modules:
 

@@ -2,8 +2,10 @@ from enum import IntEnum
 
 from pyrogram import Client
 from pyrogram.raw.types import Channel
-from pyrogram.types import Message, User, Chat
+from pyrogram.types import Message, Chat
 from typing import Optional, Union, cast, Dict
+
+from tgtypes.protocols.user import User
 
 _links_cache: Dict[int, str] = {}
 
@@ -18,11 +20,11 @@ class Platform(IntEnum):
 async def direct_link_to_message(
     reference: Message, platform: Optional[Platform] = Platform.android
 ) -> str:
-    entity_link = await direct_link(reference._client, reference.chat, platform)
+    entity_link = await direct_link_with_invite(reference._client, reference.chat, platform)
     return f"{entity_link}/{reference.message_id}"
 
 
-async def direct_link(
+async def direct_link_with_invite(
     client: Client,
     peer: Union[User, Chat, Channel],
     platform: Optional[Platform] = Platform.android,
@@ -44,11 +46,30 @@ async def direct_link(
         return invite_link
 
 
+def direct_link(
+    peer: Union[User, Chat, Channel], platform: Optional[Platform] = Platform.android,
+) -> str:
+    if getattr(peer, "username", False):
+        return f"https://t.me/{peer.username}"
+
+    if isinstance(peer, User):
+        return direct_link_user(peer, platform)
+
+    peer_id = peer.id
+    if isinstance(peer, Channel):
+        return f"https://t.me/c/{peer_id}"
+    invite_link: str = _links_cache.get(peer_id, None)
+    if invite_link:
+        return invite_link
+    raise ValueError(f"Could not create direct link for peer {peer}.")
+
+
 def direct_link_user(user: User, platform: Optional[Platform] = Platform.android):
     if user.username:
         return f"https://t.me/{user.username}"
 
     if platform == Platform.android:
+        # Also possible: tg://user?id=23122162
         return f"tg://openmessage?user_id={user.id}"
     elif platform == Platform.ios:
         return f"t.me/@{user.id}"

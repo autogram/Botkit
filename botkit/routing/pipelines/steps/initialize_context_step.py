@@ -8,9 +8,9 @@ from typing import (
     Optional,
 )
 
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 
 class InitializeContextStep(IPipelineStep):

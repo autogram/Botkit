@@ -6,7 +6,7 @@ import loguru
 
 from botkit.abstractions import IAsyncLoadUnload, IRegisterable
 from botkit.routing.types import TViewState
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 # TODO: make sure components get properly destroyed/garbage collected when they're not needed anymore
 # TODO: components can only have parameterless constructor..???

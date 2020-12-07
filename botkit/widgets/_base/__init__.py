@@ -15,8 +15,8 @@ class Widget(Generic[TViewState, TWidgetState], HtmlWidget, MenuWidget, MetaWidg
     - no load/unload (nothing async)
 
     ## Problems:
-    - how to register views? autoregistration?
-    - (how) can widgets be used by views?
+    If widgets get associated by doing e.g. `html.add(MyNewWidget())`, they won't be routable anymore.
+    --> how to register views?
     """
 
     def mutate(self):

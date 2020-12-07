@@ -29,7 +29,7 @@ from botkit.routing.route_builder.expressions._base import IExpressionWithCallMe
 from botkit.routing.route_builder.webhook_action_expression import WebhookActionExpressionMixin
 from botkit.routing.triggers import RouteTriggers
 from botkit.routing.types import TViewState
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.clients.client import IClient
 from botkit.views.base import InlineResultViewBase
 

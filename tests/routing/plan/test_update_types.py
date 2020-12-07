@@ -5,7 +5,7 @@ from pyrogram.types import CallbackQuery, Message
 
 from botkit.agnostic.annotations import IClient
 from botkit.agnostic._pyrogram_update_type_inference import determine_pyrogram_handler_update_types
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable
 
 

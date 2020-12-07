@@ -29,6 +29,7 @@ class StatusPings:
         self.log_chat = log_chat
         self.environment = environment
         self.client = client
+        self.expect_msg_in_last: int = 30
         self.ping_interval: int = 6
         self.reactivate_after_seconds: int = 20  # minimum 20
         self.last_sent_ping: Optional[Ping] = None
@@ -135,7 +136,7 @@ class StatusPings:
 
     async def query_most_recent_ping(self) -> Optional[Ping]:
         found = None
-        async for m in self.client.iter_history(self.log_chat, limit=100):
+        async for m in self.client.iter_history(self.log_chat, limit=self.expect_msg_in_last):
             if not m or not m.text:
                 continue
             if not m.text.startswith("{"):

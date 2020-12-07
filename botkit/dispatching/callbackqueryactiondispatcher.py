@@ -13,10 +13,10 @@ from botkit.core.modules import Module
 from botkit.persistence.callback_store import CallbackActionContext, ICallbackStore
 from botkit.routing.route import RouteHandler
 from botkit.routing.triggers import ActionIdType
-from botkit.routing.update_types.updatetype import UpdateType
-from botkit.settings import botkit_settings
+from tgtypes.updatetype import UpdateType
+from botkit import botkit_settings
 from botkit.clients.client import IClient
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 from botkit.widgets import Widget
 
 
@@ -92,7 +92,7 @@ class CallbackQueryActionDispatcher:
 
     @cached_property
     def callback_manager(self) -> ICallbackStore:
-        return Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier)
+        return Container().get_object(ICallbackStore, botkit_settings.callback_store_qualifier)
 
     async def _get_context_or_respond(
         self, callback_query: CallbackQuery

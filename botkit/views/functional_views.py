@@ -9,10 +9,10 @@ from typing import (
 
 from decorators import FuncDecorator
 
-from botkit.builders import CallbackBuilder, HtmlBuilder, MenuBuilder, MetaBuilder, ViewBuilder
+from botkit.builders import CallbackBuilder, HtmlBuilder, MenuBuilder, MetaBuilder
+from botkit.builders.viewbuilder import ViewBuilder
 from botkit.persistence.callback_store import ICallbackStore
 from botkit.views.rendered_messages import RenderedMessage
-from paraminjector import call_with_args
 
 T = TypeVar("T")
 

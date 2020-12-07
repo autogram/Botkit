@@ -2,7 +2,7 @@ from typing import Any, Optional, Union
 
 
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 
 def my_func_1(ctx: Context[Any, Any], test_int: int = 1, test_none: Optional[str] = None) -> Any:
@@ -37,7 +37,7 @@ def test_regular_function_properties():
         "ctx": Context[Any, Any],
         "test_int": int,
         "test_none": Optional[str],
-        "return": Any
+        "return": Any,
     }
 
 

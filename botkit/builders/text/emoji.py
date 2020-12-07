@@ -1274,6 +1274,8 @@ unicode_alias = {
 }
 
 aliases_unicode = {
+    ":duck:": "🦆",
+    ":crossed_fingers:": "🤞",
     ":turtle:": "🐢",
     ":bike:": "🚲",
     ":family_mwg:": "👨👩👧",
@@ -6373,7 +6375,7 @@ def contains_emoji(text: str):
     return False
 
 
-def replace_aliases(sentence: str):
+def replace_emoji_aliases(sentence: str):
     pattern = r"(:[A-Za-z0-9_-]+:)"
     matches = re.search(pattern, sentence)
     if matches is None:

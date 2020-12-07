@@ -14,9 +14,9 @@ from botkit.persistence.callback_store import ICallbackStore, MemoryDictCallback
 from botkit.persistence.data_store import DataStoreBase, MemoryDataStore
 from botkit.routing.route import RouteDefinition
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.routing.update_types.updatetype import UpdateType
-from botkit.settings import botkit_settings
-from botkit.views.botkit_context import Context
+from tgtypes.updatetype import UpdateType
+from botkit import botkit_settings
+from botkit.botkit_context import Context
 
 client: IClient = Mock(IClient)
 callback_query: CallbackQuery = Mock(CallbackQuery)
@@ -29,7 +29,7 @@ def configure_data_stores():
             Egg(
                 ICallbackStore,
                 ICallbackStore,
-                botkit_settings.callback_manager_qualifier,
+                botkit_settings.callback_store_qualifier,
                 MemoryDictCallbackStore,
             ),
             Egg(DataStoreBase, DataStoreBase, None, MemoryDataStore,),

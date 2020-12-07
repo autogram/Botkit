@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from typing import Any, Generic, Iterator, Optional, TypeVar
 
 from botkit.dispatching.types import CallbackActionType
+from botkit.views.rendered_messages import RenderedMessage
 from tgtypes.identities.chat_identity import ChatIdentity
 from tgtypes.identities.message_identity import MessageIdentity
-from tgtypes.update_field_extractor import UpdateFieldExtractor
-from .rendered_messages import RenderedMessage
-from ..routing.types import TViewState
-from ..routing.update_types.updatetype import UpdateType
+from botkit.dispatching.update_field_extractor import UpdateFieldExtractor
+from tgtypes.updatetype import UpdateType
+from botkit.routing.types import TViewState
 
 TPayload = TypeVar("TPayload")
 
@@ -46,14 +46,14 @@ class UserState(_ScopedState):
 
 
 @dataclass
-class Context(Generic[TViewState, TPayload], UpdateFieldExtractor):  # TODO: maybe `RouteContext`?
+class Context(UpdateFieldExtractor):  # TODO: maybe `RouteContext`?
     # TODO: rename to `view_state`?
     # TODO: maybe this shouldn't even be part of the context but always be passed separately (because of reducers)?
     update_type: UpdateType
-    view_state: TViewState
+    view_state: Any
 
     action: Optional[CallbackActionType] = None
-    payload: Optional[TPayload] = None
+    payload: Optional[Any] = None
 
     message_state: Optional[Any] = None  # TODO: wtf
     user_state: Optional[UserState] = None

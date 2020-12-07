@@ -8,7 +8,7 @@ from botkit.builders.htmlbuilder import HtmlBuilder
 from botkit.builders.menubuilder import MenuBuilder
 from botkit.builders.quizbuilder import QuizBuilder
 from botkit.persistence.callback_store import ICallbackStore
-from botkit.settings import botkit_settings
+from botkit import botkit_settings
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import (
     IRegisterable,
@@ -40,7 +40,7 @@ class MessageViewBase(InlineResultViewBase[TViewState], RenderMarkupBase):
 
 
 class TextView(MessageViewBase[TViewState], RenderMarkupBase):
-    _callback_store: ICallbackStore = Inject(botkit_settings.callback_manager_qualifier)
+    _callback_store: ICallbackStore = Inject(botkit_settings.callback_store_qualifier)
 
     @abstractmethod
     def render_body(self, builder: HtmlBuilder) -> None:
@@ -59,7 +59,7 @@ class TextView(MessageViewBase[TViewState], RenderMarkupBase):
 
 
 class MediaView(MessageViewBase[TViewState]):
-    _callback_store: ICallbackStore = Inject(botkit_settings.callback_manager_qualifier)
+    _callback_store: ICallbackStore = Inject(botkit_settings.callback_store_qualifier)
 
     def __init__(self, state: TViewState):
         super().__init__(state)
@@ -152,7 +152,7 @@ def _render_message_markup(obj: Union[ModelViewBase, RenderMarkupBase]) -> Rende
         menu_builder = MenuBuilder(
             CallbackBuilder(
                 obj.state,
-                Container().get_object(ICallbackStore, botkit_settings.callback_manager_qualifier),
+                Container().get_object(ICallbackStore, botkit_settings.callback_store_qualifier),
             )
         )
         obj.render_markup(menu_builder)

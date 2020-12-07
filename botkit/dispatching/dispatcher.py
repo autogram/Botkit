@@ -9,7 +9,7 @@ from botkit.dispatching.callbackqueryactiondispatcher import CallbackQueryAction
 from botkit.core.modules import Module
 from botkit.dispatching.deeplinkstartactiondispatcher import DeepLinkStartActionDispatcher
 from botkit.routing.route import RouteHandler
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 

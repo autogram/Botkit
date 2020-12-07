@@ -1,7 +1,9 @@
 import logging
 from pprint import pprint
 
-from botkit.settings import botkit_settings
+from injector import NoInject, inject
+
+from ... import botkit_settings
 from ...utils.botkit_logging.setup import create_logger
 
 from haps import Container, SINGLETON_SCOPE, egg, scope
@@ -29,37 +31,21 @@ class RedisClientUnavailableException(Exception):
     pass
 
 
-@egg("redis")
-@scope(SINGLETON_SCOPE)
-def create_redis_callback_manager() -> ICallbackStore:
-    try:
-        redis = Container().get_object(Redis)
-    except Exception as e:
-        raise RedisClientUnavailableException(
-            "If `redis` is chosen as the qualifier for the botkit callback manager, "
-            "you must provide an instantiated `Redis` client to the dependency "
-            "injection. Refer to the `callback_manager_qualifier` setting documentation."
-        ) from e
-    redis_cbm = RedisCallbackStore(redis, "callbacks", maxsize=10)
-    redis_cbm.remove_outdated(botkit_settings.callbacks_ttl_days)
-    return redis_cbm
-
-
 class RedisCallbackStore(ICallbackStore):
     """
     # TODO: Try use json instead of pickled dicts? https://github.com/honzajavorek/redis-collections/issues/122
     # TODO: Force pydantic models?
     """
 
+    @inject
     def __init__(
         self,
         redis_client: Redis,
         key: str = "callbacks",
-        storage_type: Literal["lru", "normal"] = "normal",
+        storage_type: NoInject[Literal["lru", "normal"]] = "normal",
         maxsize: int = 2000,
     ):
         """
-
         :param redis_client:
         :type redis_client:
         :param key:
@@ -69,6 +55,7 @@ class RedisCallbackStore(ICallbackStore):
         :param maxsize: Ignored if storage_type is "normal".
         :type maxsize:
         """
+
         # TODO: Add documentation that LRU should be used in production
         if storage_type == "lru":
             self.callbacks: LRUDict[str, Dict] = LRUDict(

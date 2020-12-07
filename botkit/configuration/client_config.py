@@ -1,11 +1,9 @@
 from dataclasses import field
-from dataclasses import field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Optional, Type, Union, cast
 
 from boltons.strutils import slugify
-from haps import base
 from pydantic import DirectoryPath, FilePath, constr, root_validator, validator
 from pydantic.dataclasses import dataclass
 
@@ -30,8 +28,10 @@ BotToken = constr(strip_whitespace=True, regex=r"[0-9]{8,10}:AA[a-zA-Z0-9-_]{33}
 PhoneNumber = Union[int, constr(regex=r"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$")]
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class ClientConfig:
+    name: str
+
     client_type: ClientType
     flavor: SupportedLibraryName
 
@@ -102,12 +102,12 @@ class ClientConfig:
 
     @property
     def description(self) -> str:
-        result = f"{self.flavor} {self.client_type.value} client "
+        result = f"a {self.flavor.title()} {self.client_type.value} client "
 
         if self.session_string:
-            result += "using a string session"
+            result += "with a string session"
         elif self.session_file:
-            result += f"using session file {self.session_file}"
+            result += f"with session file '{self.session_file}'"
         return result
 
     @property

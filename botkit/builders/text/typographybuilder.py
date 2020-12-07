@@ -18,23 +18,33 @@ class TypographyBuilder(_HtmlTextBuilder, IconographyBuilder):
     icons = IconSettings
 
     def h1(self, title: str, breaks: int = 2):
+        self.br()
+        self.bold_and_underline(title)
+        self.br(breaks)
+        return self
+
+    def h2(self, title: str, breaks: int = 2):
+        self.br()
         self.parts.append(f"▶️ ")
         self.bold(title)
         self.br(breaks)
         return self
 
-    def h2(self, title: str, breaks: int = 2):
-        self.bold_and_underline(title)
-        self.br(breaks)
+    def h3(self, title: str):
+        self.br()
+        self.underline(title)
         return self
 
-    def h3(self, title: str):
+    def h4(self, title: str):
         self.bold(title.upper(), end=" — ")
         return self
 
     def desc(self, key: str, value: str):
         self.bold(key.rstrip(": "), end=": ").raw(value).br()
         return self
+
+    def link_info(self, name_to_upper: str, link: str, desc: str):
+        return self.bold(self.as_link(name_to_upper.upper(), link)).raw(" ℹ️ ").text(desc).br()
 
     def headline(self, title: str, level: int):
         if level == 1:
