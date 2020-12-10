@@ -9,7 +9,7 @@ from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.routing.route_builder.builder import RouteBuilder
 from botkit.routing.route_builder.expressions import RouteBuilderContext
 from botkit.routing.route_builder.route_collection import RouteCollection
-from botkit.settings import botkit_settings
+from botkit import botkit_settings
 from botkit.core.modules._module import Module
 from ._module_status import ModuleStatus
 
@@ -18,7 +18,9 @@ from ._module_status import ModuleStatus
 @egg
 @scope(SINGLETON_SCOPE)
 class ModuleActivator:
-    def __init__(self, dispatcher: BotkitDispatcher = None):
+    def __init__(
+        self, dispatcher: BotkitDispatcher = None,
+    ):
         self.dispatcher = dispatcher or Container().get_object(BotkitDispatcher)
         self.route_builder_class: Type[
             RouteBuilder

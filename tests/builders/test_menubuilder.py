@@ -9,7 +9,7 @@ from botkit.persistence.callback_store import (
     MemoryDictCallbackStore,
 )
 from botkit.persistence.callback_store._simple import lookup_callback
-from botkit.settings import botkit_settings
+from botkit import botkit_settings
 
 
 @pytest.fixture(scope="function")

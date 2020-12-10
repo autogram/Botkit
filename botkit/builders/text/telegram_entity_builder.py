@@ -6,8 +6,10 @@ from pyrogram.emoji import BUST_IN_SILHOUETTE, BUSTS_IN_SILHOUETTE
 
 from botkit.builders.text.htmltextbuilder import _HtmlTextBuilder
 from botkit.routing.triggers import ActionIdType
-from botkit.tghelpers.direct_links import direct_link, direct_link_user
+from botkit.tghelpers.direct_links import direct_link, direct_link_with_invite, direct_link_user
 from botkit.tghelpers.names import display_name
+from tgtypes.protocols.chat import Chat
+from tgtypes.protocols.user import User
 
 if TYPE_CHECKING:
     from botkit.clients.client import IClient
@@ -17,20 +19,28 @@ else:
 
 class EntityBuilder(_HtmlTextBuilder):
     @classmethod
-    def as_user(cls, user: Any):
+    def as_user(cls, user: User):
         link = cls.as_link(display_name(user), direct_link_user(user))
         return f"{BUST_IN_SILHOUETTE} {link}"
 
-    def user(self, user: Any, end: Optional[str] = " "):
+    def user(self, user: User, end: Optional[str] = " "):
         return self._append_with_end(self.as_user(user=user), end)
 
     @classmethod
-    def as_chat(cls, user: Any):
-        link = cls.as_link(display_name(user), direct_link_user(user))
+    def as_chat(cls, chat: Chat):
+        link = cls.as_link(display_name(chat), direct_link(chat))
         return f"{BUSTS_IN_SILHOUETTE} {link}"
 
-    def chat(self, user: Any, end: Optional[str] = " "):
-        return self._append_with_end(self.as_chat(user=user), end)
+    def chat(self, chat: Chat, end: Optional[str] = " "):
+        return self._append_with_end(self.as_chat(chat=chat), end)
+
+    @classmethod
+    def as_peer(cls, peer: Any):
+        link = cls.as_link(display_name(peer), direct_link(peer))
+        return f"{BUSTS_IN_SILHOUETTE} {link}"
+
+    def peer(self, peer: Any, end: Optional[str] = " "):
+        return self._append_with_end(self.as_peer(peer=peer), end)
 
     @classmethod
     def as_command(cls, name: str, to_lower: bool = False):

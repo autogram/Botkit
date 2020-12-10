@@ -6,7 +6,7 @@ import pyrogram
 from boltons.iterutils import flatten
 from pyrogram.handlers.handler import Handler
 
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable
 
 PYROGRAM_UPDATE_TYPES: Dict[Type[pyrogram.types.Update], UpdateType] = {

@@ -8,10 +8,12 @@ from pyrogram import filters
 from pyrogram.types import Message
 from typing import Optional, List, Any, Literal, Union
 
-from botkit.builders import ViewBuilder
+from botkit.abstractions import IAsyncLoadUnload
+from botkit.builders.viewbuilder import ViewBuilder
 from botkit.builtin_modules.system.system_tests import notests
 from botkit.core.modules.activation import ModuleLoader, ModuleStatus
 from botkit.agnostic.annotations import IClient
+from botkit.core.modules.activation._di import discover_async_loadable
 from botkit.persistence.callback_store import (
     RedisCallbackStore,
     ICallbackStore,
@@ -20,9 +22,9 @@ from botkit.core.modules._module import Module
 from botkit.builtin_services.eventing import command_bus
 from botkit.routing.pipelines.executionplan import SendTo
 from botkit.routing.route_builder.builder import RouteBuilder
-from botkit.settings import botkit_settings
+from botkit import botkit_settings
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 log = create_logger("system_management_module", use_standard_format=False)
 
@@ -55,6 +57,7 @@ class SystemManagementModule(Module):
 
         self.system_paused: bool = False
         self.paused_modules: Optional[List[Module]] = None
+        self.paused_async_loadables: Optional[List[IAsyncLoadUnload]] = None
 
     def register(self, routes: RouteBuilder):
         command_bus.register(_ToggleSystemStateCommandHandler(self))
@@ -123,19 +126,32 @@ class SystemManagementModule(Module):
         await message.reply("Bot paused.")
 
     async def pause_system(self):
-        loaded_modules = [
+        loaded_modules: List[Module] = [
             x
             for x in self.module_loader.modules
             if self.module_loader.get_module_status(x) == ModuleStatus.active
             and not isinstance(x, type(self))
         ]
+        async_loadables: List[IAsyncLoadUnload] = list(discover_async_loadable(Container()))
+        to_unload = [x for x in async_loadables if x not in self.module_loader.modules]
+        unload_tasks = [x.unload() for x in to_unload]
+
+        # TODO: remove debug check
+        print("remove debug check")
+        assert len(async_loadables) != len(to_unload)
+
         self.log.info(
             f"Pausing modules:\n" + "\n".join([m.get_name() for m in loaded_modules]) + "\n..."
         )
         tasks = [self.module_loader.deactivate_module_async(m) for m in loaded_modules]
+
+        self.log.info("Unloading services:\n" + "\n".join([str(m) for m in to_unload]) + "\n...")
+        tasks.extend(unload_tasks)
+
         await asyncio.gather(*tasks, return_exceptions=True)
         self.system_paused = True
         self.paused_modules = loaded_modules
+        self.paused_async_loadables = async_loadables
 
         try:
             callback_manager: RedisCallbackStore = Container().get_object(ICallbackStore, "redis")

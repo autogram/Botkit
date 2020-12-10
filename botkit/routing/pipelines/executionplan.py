@@ -22,11 +22,11 @@ from botkit.routing.pipelines.reducer import (
 )
 from botkit.routing.route_builder.types import TView
 from botkit.routing.update_types.update_type_inference import infer_update_types
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 from botkit.views.functional_views import ViewRenderFuncSignature
 from botkit.views.views import MessageViewBase
 
@@ -87,7 +87,8 @@ class ViewParameters:
 
     send_from: Optional[IClient] = None
     """
-    The (user) client instance to send the response from.
+    The (user) client instance to send the response from. Will use the currently-interacting client, so this value
+    only needs to be given in special cases.
     """
 
     send_via_bot: Optional[IClient] = None

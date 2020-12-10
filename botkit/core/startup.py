@@ -6,10 +6,12 @@ from asyncio.events import AbstractEventLoop
 
 from haps import Inject, base
 from haps.application import Application
+from injector import Injector, inject
 from pyrogram import Client as PyrogramClient
 
 from botkit.configuration import ClientConfig
-from botkit.core.modules.activation import ModuleLoader
+from botkit.core.modules import activation
+from botkit.core.modules.activation import ModuleLoader, configure_module_activation
 from botkit.clients.client import IClient
 from botkit.utils.botkit_logging.setup import create_logger
 
@@ -30,12 +32,14 @@ Client = Union[PyrogramClient, TelethonClient]
 
 @base
 class Startup(Application, ABC):
-    module_loader: ModuleLoader = Inject()
-
-    def __init__(self, clients: List[Client]):
+    def __init__(self, clients: List[Client], module_loader: ModuleLoader = None):
         if not clients:
             raise ValueError("Must pass at least one client for initialization.")
         self.clients = clients
+
+        self.module_loader = module_loader or Injector(configure_module_activation).get(
+            ModuleLoader
+        )
 
         self.log = create_logger("startup")
 
@@ -51,11 +55,15 @@ class Startup(Application, ABC):
         start_tasks = (self.__start_client(c) for c in self.clients)
         await asyncio.gather(*start_tasks)
 
+    async def _stop_clients(self):
+        self.log.debug("Starting clients...")
+        start_tasks = (self.__stop_client(c) for c in self.clients)
+        await asyncio.gather(*start_tasks)
+
     async def __start_client(self, client: Union[IClient, Any]):
         # TODO(XXX): This forces the client instances to have a `config` property, which is not reflected in `IClient`.
-        self.log.debug(f"Starting {client.__class__.__name__}, {client.config.description}...")
-        kwargs =client.config.start_kwargs()
-        self.log.warning(kwargs)
+        self.log.info(f"Starting {client.__class__.__name__}, {client.config.description}...")
+        kwargs = client.config.start_kwargs()
         await client.start(**kwargs)
 
         me = await client.get_me()
@@ -63,6 +71,11 @@ class Startup(Application, ABC):
         client.own_username = me.username
 
         self.log.info(f"Started {user_or_display_name(me)} as {client.__class__.__name__}.")
+
+    async def __stop_client(self, client: Union[IClient, Any]):
+        self.log.info(f"Stopping {client.__class__.__name__}, {client.config.description}...")
+        await client.stop()
+        self.log.info(f"Stopped {client.__class__.__name__}.")
 
     def run(self, loop: AbstractEventLoop = None) -> None:
         self.log.debug("Initializing...")

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 from typing import (
     Any,
     Callable,

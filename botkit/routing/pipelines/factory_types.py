@@ -17,7 +17,7 @@ from typing import (
 
 from boltons.typeutils import classproperty
 
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.utils.typed_callable import TypedCallable
 
 TViewState = TypeVar("TViewState")

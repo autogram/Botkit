@@ -32,6 +32,13 @@ class _HtmlTextBuilder(BaseTextBuilder):
         return cls._wrap_html(cls.as_escaped_html(text), tag, if_)
 
     # endregion internals
+    def __call__(self, *args):
+        if len(args) == 0:
+            self.spc()
+        else:
+            for a in args:
+                self.raw(a)
+        return self
 
     def text(self, text: str, end=""):
         return self._append_with_end(self.as_escaped_html(text), end)
@@ -67,6 +74,13 @@ class _HtmlTextBuilder(BaseTextBuilder):
     @classmethod
     def as_bold_and_underline(cls, text: str, end="") -> str:
         return cls._apply_end(f"<b><u>{cls.as_escaped_html(text)}</u></b>", end)
+
+    def bold_and_italic(self, text: str, end=""):
+        return self._append(self.as_bold_and_italic(text=text, end=end))
+
+    @classmethod
+    def as_bold_and_italic(cls, text: str, end="") -> str:
+        return cls._apply_end(f"<b><i>{cls.as_escaped_html(text)}</i></b>", end)
 
     @classmethod
     def as_mono(cls, text: str, end="", if_: bool = True) -> str:
@@ -110,5 +124,5 @@ class _HtmlTextBuilder(BaseTextBuilder):
         return cls._apply_end(html, end)
 
     def link(self, text: str, href: str, end=""):
-        html = f'<a href="{href}">{self.as_escaped_html(text)}</a>'
+        html = f'<a href="{href}">{text}</a>'
         return self._append_with_end(html, end)

@@ -10,7 +10,7 @@ from typing import Any, Generic, Optional, TypeVar
 from pydantic import BaseModel, Field
 
 from botkit.dispatching.types import CallbackActionType
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 
 TViewState = TypeVar("TViewState")
 

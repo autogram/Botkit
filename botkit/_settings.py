@@ -21,7 +21,7 @@ class _BotkitSettings:
 
     # region Callback manager
 
-    callback_manager_qualifier: Literal["memory", "redis"] = "memory"
+    callback_store_qualifier: Literal["memory", "redis"] = "memory"
     """
     Qualifier key of the kind of callback manager to be used. Should be "memory" for an in-memory store (without
     persistence) and "redis" if you have the `redis_collections` package installed.
@@ -60,6 +60,3 @@ class _BotkitSettings:
         self._current_log_level = value
 
     # endregion
-
-
-botkit_settings = _BotkitSettings()

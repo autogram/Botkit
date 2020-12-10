@@ -53,7 +53,7 @@ class HotModuleReloadWorker:
         self._worker_future: Optional[Future] = None
         self.log = create_logger("hmr")
 
-    def start(self, modules: Iterable[Module]):
+    def start(self, modules: List[Module]):
         if self._worker_future:
             self._worker_future.cancel()
         self._worker_future = asyncio.ensure_future(self.__run(modules))
@@ -61,7 +61,7 @@ class HotModuleReloadWorker:
     def reload_module(self, module: Module) -> None:
         pass
 
-    async def __run(self, modules: Iterable[Module]) -> None:
+    async def __run(self, modules: List[Module]) -> None:
         modules: List[Module] = list(modules)
         try:
             # module_files = self._get_module_dependencies(modules)
@@ -130,7 +130,7 @@ class HotModuleReloadWorker:
             self.log.exception("Error in HMR worker.")
 
     @classmethod
-    def _get_module_dependencies(cls, modules: Iterable[Module]) -> Dict[Module, Set[str]]:
+    def _get_module_dependencies(cls, modules: List[Module]) -> Dict[Module, Set[str]]:
         module_files: Dict[Module, Set[str]] = {}
 
         for module in modules:

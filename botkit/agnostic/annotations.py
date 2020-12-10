@@ -10,7 +10,7 @@ from typing import (
 )
 
 from botkit.agnostic.library_checks import is_installed
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 if TYPE_CHECKING:
     from botkit.clients.client import IClient

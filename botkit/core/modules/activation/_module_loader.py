@@ -1,15 +1,17 @@
 import asyncio
 from asyncio import CancelledError
+from dataclasses import dataclass
 from typing import Callable, Coroutine, Dict, Iterable, List, Optional
 
 from haps import Container, Inject
-from haps.config import Configuration
+from injector import Binder, inject
 
-from botkit.builtin_services.options.base import IOptionStore
+from botkit.abstractions import IAsyncLoadUnload
+from botkit.core.modules._module import Module
 from botkit.core.services import service
 from botkit.dispatching.dispatcher import BotkitDispatcher
 from botkit.utils.botkit_logging.setup import create_logger
-from botkit.core.modules._module import Module
+from ._di import discover_modules
 from ._hmr import HotModuleReloadWorker
 from ._module_activator import ModuleActivator
 from ._module_status import ModuleStatus
@@ -26,6 +28,7 @@ DISABLED_MODULES = [
     "Html5GameModule",
     # end
     "NotionCollectorModule",
+    "ImageModule",
 ]
 
 
@@ -35,10 +38,12 @@ class ModuleLoader:
     activator: ModuleActivator = Inject()
     _hmr_worker: HotModuleReloadWorker = Inject()
 
-    def __init__(self) -> None:
+    @inject
+    def __init__(self, discovered_modules: List[Module]) -> None:
         self.log = create_logger("module_loader")
 
-        discovered_modules: List[Module] = Configuration().get_var("modules")
+        # c = Container()
+        # discovered_modules: List[Module] = list(discover_modules(c))
         self.log.debug(f"{len(discovered_modules)} modules discovered.")
 
         self.__module_statuses: Dict[Module, ModuleStatus] = {
@@ -47,11 +52,11 @@ class ModuleLoader:
         }
 
     @property
-    def modules(self) -> Iterable[Module]:
+    def modules(self) -> List[Module]:
         return self.__module_statuses.keys()
 
     @property
-    def active_modules(self) -> Iterable[Module]:
+    def active_modules(self) -> List[Module]:
         return (m for m, s in self.__module_statuses.items() if s == ModuleStatus.active)
 
     def add_module_without_activation(self, module: Module) -> None:
@@ -118,7 +123,7 @@ class ModuleLoader:
         self.__module_statuses[module] = ModuleStatus.inactive
 
 
-# def run_validation_experiment(modules: Iterable[Module]):
+# def run_validation_experiment(modules: List[Module]):
 #     render_funcs = get_view_renderers(modules)
 #
 #     for view in render_funcs:
@@ -145,7 +150,7 @@ class ModuleLoader:
 #             log.exception("lala", stacklevel=1)
 
 
-def get_view_renderers(modules: Iterable[Module]) -> Iterable[Callable]:
+def get_view_renderers(modules: List[Module]) -> Iterable[Callable]:
     for m in modules:
         if not m.route_collection:
             continue

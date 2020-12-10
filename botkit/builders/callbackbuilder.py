@@ -1,6 +1,8 @@
 from contextlib import contextmanager
 from typing import Any, Literal, Optional
 
+from injector import NoInject, inject
+
 from botkit.abstractions._named import INamed
 from botkit.core.services import service
 from botkit.dispatching.types import CallbackActionType
@@ -12,6 +14,7 @@ from botkit.routing.types import TViewState
 class CallbackBuilder:
     _SEPARATOR = "##"
 
+    @inject
     def __init__(self, state: TViewState, callback_store: ICallbackStore):
         self.state = state
         self._callback_store = callback_store

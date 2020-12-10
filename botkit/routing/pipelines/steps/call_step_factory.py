@@ -6,7 +6,7 @@ from botkit.routing.pipelines.factory_types import IStepFactory
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.utils.typed_callable import TypedCallable
 from botkit.views.base import ModelViewBase
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 
 class HandleStepError(StepError[HandlerSignature]):

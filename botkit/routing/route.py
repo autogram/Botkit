@@ -19,7 +19,7 @@ from botkit.routing.pipelines.executionplan import ExecutionPlan
 from botkit.routing.pipelines.filters import UpdateFilterSignature
 from botkit.routing.pipelines.updates.update_pipeline_factory import UpdatePipelineFactory
 from botkit.routing.triggers import ActionIdType, RouteTriggers
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 
 M = TypeVar("M")
 

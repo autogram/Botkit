@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable, Type, Union
 from botkit.routing.types import TViewState
 
 # noinspection PyMissingTypeHints
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 GathererSignature = Union[
     Callable[[], Union[Any, Awaitable[TViewState]]],

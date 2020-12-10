@@ -2,18 +2,19 @@ from pprint import pprint
 from haps import Container
 from typing import Any, Optional, TypeVar
 
+from injector import inject
 from pyrogram.parser import Parser
 from pyrogram.types.messages_and_media.message import Str
 
 from botkit.builders.callbackbuilder import CallbackBuilder
 from botkit.persistence.callback_store import ICallbackStore
-from botkit.settings import botkit_settings
 
 TState = TypeVar("TState")
 
 
 class BaseTextBuilder:
-    def __init__(self, callback_builder: CallbackBuilder):  # TODO: make non-optional
+    @inject
+    def __init__(self, callback_builder: CallbackBuilder):
         self.parts = []
         self.callback_builder = callback_builder
 
@@ -32,8 +33,11 @@ class BaseTextBuilder:
         self.parts.append("\n" * count)
         return self
 
+    def as_para(cls):
+        return "\n\n"
+
     def para(self):
-        self.parts.append("\n\n")
+        self.parts.append(self.as_para())
         return self
 
     def _append(self, text: str):

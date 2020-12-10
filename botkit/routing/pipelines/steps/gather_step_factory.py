@@ -9,10 +9,10 @@ from botkit.routing.pipelines.gatherer import (
 )
 from botkit.routing.pipelines.steps._base import StepError
 from botkit.routing.pipelines.steps.helpers.state_generators import update_view_state_if_applicable
-from botkit.routing.update_types.updatetype import UpdateType
+from tgtypes.updatetype import UpdateType
 from botkit.utils.botkit_logging.setup import create_logger
 from botkit.utils.typed_callable import TypedCallable
-from botkit.views.botkit_context import Context
+from botkit.botkit_context import Context
 
 
 class GatherStepError(StepError[GathererSignature]):

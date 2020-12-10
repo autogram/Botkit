@@ -1,6 +1,7 @@
 import traceback
 from asyncio import Event
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncIterator, Generic, Optional, TypeVar, Union, cast
 from uuid import uuid4
 
@@ -40,70 +41,6 @@ class CompanionBotService:
     def __init__(self, user_client: IClient, bot_client: IClient):
         self.user_client = user_client
         self.bot_client = bot_client
-
-    async def one_time_inline_results(
-        self,
-        query: str,
-        results_generator: InlineResultGenerator,
-        reply_to: Union[int, str] = None,
-        silent: bool = False,
-        hide_via: bool = False,
-    ):
-        user_client_id = (await self.user_client.get_me()).id
-        bot_username = (await self.bot_client.get_me()).username
-
-        query_text = "henlo"
-
-        async def answer_inline_query(client: IClient, query: InlineQuery):
-            rendered: RenderedMessage = view._default_renderer()
-
-            result = InlineQueryResultArticle(
-                title="sent via userbot",
-                input_message_content=InputTextMessageContent(
-                    message_text=rendered.text,
-                    parse_mode=rendered.parse_mode,
-                    disable_web_page_preview=rendered.disable_web_page_preview,
-                ),
-                id=query.id,
-                reply_markup=rendered.inline_keyboard_markup,
-                url=None,
-                description=None,
-                thumb_url=None,
-            )
-
-            await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=0)
-
-        inline_id_filter = create(lambda _, __, ilq: ilq.query == query_text, "QueryFilter")
-
-        group = -99
-        dispatcher = self.bot_client.dispatcher
-        if group not in dispatcher.groups:
-            dispatcher.groups[group] = []
-
-        handler = InlineQueryHandler(answer_inline_query, inline_id_filter)
-        dispatcher.groups[group].append(handler)
-
-        try:
-            # Fetch inline results as user
-            bot_results: BotResults = await self.user_client.get_inline_bot_results(
-                bot_username, query_text
-            )
-            if not bot_results:
-                raise RuntimeError("Could not fetch any inline query results from companionbot.")
-
-            # Send result as user
-            return await self.user_client.send_inline_bot_result(
-                chat_id,
-                query_id=bot_results.query_id,
-                result_id=bot_results.results[0].id,
-                disable_notification=silent,
-                reply_to_message_id=reply_to,
-                hide_via=hide_via,
-            )
-        except (AttributeError, TimeoutError):
-            log.error("Bot did not respond.")
-        finally:
-            self.bot_client.remove_handler(handler, group)
 
     async def send_rendered_message_via(
         self,
@@ -270,7 +207,7 @@ class CompanionBotService:
             )
         ):
             await self.user_client.forward_messages(
-                (await self.bot_client.get_me()).id,
+                self.bot_client.own_user_id,
                 from_chat_id=user_message.chat.id,
                 message_ids=[user_message.message_id],
                 disable_notification=True,
@@ -279,7 +216,7 @@ class CompanionBotService:
 
         return recorded_msg._recorded
 
-    async def make_photo_known(self, photo: str) -> Photo:
+    async def make_photo_known(self, photo: Path) -> Photo:
         recorded_msg = RecordedResponseContainer()
         user_id = (await self.user_client.get_me()).id
         bot_id = (await self.bot_client.get_me()).id
@@ -291,10 +228,74 @@ class CompanionBotService:
         async with self.add_handler(
             MessageHandler(record_message, filters=filters.photo & filters.chat(user_id))
         ):
-            await self.user_client.send_photo(bot_id, photo=photo)
+            await self.user_client.send_photo(bot_id, photo=str(photo))
             await recorded_msg.wait()
 
         return recorded_msg._recorded.photo
+
+    async def one_time_inline_results(
+        self,
+        query: str,
+        results_generator: InlineResultGenerator,
+        reply_to: Union[int, str] = None,
+        silent: bool = False,
+        hide_via: bool = False,
+    ):
+        user_client_id = (await self.user_client.get_me()).id
+        bot_username = (await self.bot_client.get_me()).username
+
+        query_text = "henlo"
+
+        async def answer_inline_query(client: IClient, query: InlineQuery):
+            rendered: RenderedMessage = view._default_renderer()
+
+            result = InlineQueryResultArticle(
+                title="sent via userbot",
+                input_message_content=InputTextMessageContent(
+                    message_text=rendered.text,
+                    parse_mode=rendered.parse_mode,
+                    disable_web_page_preview=rendered.disable_web_page_preview,
+                ),
+                id=query.id,
+                reply_markup=rendered.inline_keyboard_markup,
+                url=None,
+                description=None,
+                thumb_url=None,
+            )
+
+            await self.bot_client.answer_inline_query(query.id, results=[result], cache_time=0)
+
+        inline_id_filter = create(lambda _, __, ilq: ilq.query == query_text, "QueryFilter")
+
+        group = -99
+        dispatcher = self.bot_client.dispatcher
+        if group not in dispatcher.groups:
+            dispatcher.groups[group] = []
+
+        handler = InlineQueryHandler(answer_inline_query, inline_id_filter)
+        dispatcher.groups[group].append(handler)
+
+        try:
+            # Fetch inline results as user
+            bot_results: BotResults = await self.user_client.get_inline_bot_results(
+                bot_username, query_text
+            )
+            if not bot_results:
+                raise RuntimeError("Could not fetch any inline query results from companionbot.")
+
+            # Send result as user
+            return await self.user_client.send_inline_bot_result(
+                chat_id,
+                query_id=bot_results.query_id,
+                result_id=bot_results.results[0].id,
+                disable_notification=silent,
+                reply_to_message_id=reply_to,
+                hide_via=hide_via,
+            )
+        except (AttributeError, TimeoutError):
+            log.error("Bot did not respond.")
+        finally:
+            self.bot_client.remove_handler(handler, group)
 
 
 T = TypeVar("T")

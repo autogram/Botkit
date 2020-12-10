@@ -1,12 +1,11 @@
 from typing import Iterable, List
 
-
-
 from haps import Container, Egg, SINGLETON_SCOPE, egg
-from haps.config import Configuration
 
+from botkit.abstractions import IAsyncLoadUnload
 from botkit.core.modules._module import Module
 from botkit.utils.botkit_logging.setup import create_logger
+from injector import Binder, Provider, inject, provider, Module, Injector, multiprovider, singleton
 
 logger = create_logger()
 
@@ -26,19 +25,25 @@ def haps_disambiguate_module_eggs() -> List[Egg]:
     return eggs
 
 
-@Configuration.resolver("modules")
-def resolve_modules() -> List[Module]:
-    return list(discover_modules(Container()))
+def discover_modules(container: Container) -> List[Module]:
+    haps_eggs: Iterable[Egg] = [m for m in container.config if m.base_ is Module]
+
+    for e in haps_eggs:
+        try:
+            with container._lock:
+                scope = container.scopes[SINGLETON_SCOPE]
+                yield scope.get_object(e.egg)
+        except:
+            logger.exception("Could not retrieve object from scope")
 
 
-
-def discover_modules(container: Container) -> Iterable[Module]:
-    eggs: Iterable[Egg] = [m for m in container.config if m.base_ is Module]
+def discover_async_loadable(container: Container) -> Iterable[IAsyncLoadUnload]:
+    eggs: Iterable[Egg] = [m for m in container.config if IAsyncLoadUnload in m.base_.__bases__]
 
     for e in eggs:
         try:
-            scope = container.scopes[SINGLETON_SCOPE]
             with container._lock:
+                scope = container.scopes[SINGLETON_SCOPE]
                 yield scope.get_object(e.egg)
         except:
             logger.exception("Could not retrieve object from scope")
